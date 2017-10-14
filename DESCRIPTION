@@ -1,20 +1,24 @@
 Package: SCclust
 Type: Package
-Title: Clustering of Single Cell Sequencing Copy Number Profiles to Identify Clones
+Title: Clustering of Single Cell Sequencing Copy Number Profiles to Identify
+    Clones
 Date: 2017-10-11
 Version: 0.1.5
 Author: Alex Krasnitz, Jude Kendall, Junyan Song, Lubomir Chorbadjiev
 Maintainer: Lubomir Chorbadjiev <lubomir.chorbadjiev@gmail.com>
-Description: The SCclust package implements feature selection based on breakpoints, permutations for FDRs for
-             Fisher test p-values and identification of the clone structure in single cell copy number profiles.
+Description: The SCclust package implements feature selection based on
+    breakpoints, permutations for FDRs for Fisher test p-values and identification
+    of the clone structure in single cell copy number profiles.
 License: MIT
 LazyData: TRUE
-RoxygenNote: 6.0.1
-Suggests: knitr,
+RoxygenNote: 5.0.1
+Suggests:
+    knitr,
     rmarkdown,
     testthat
 VignetteBuilder: knitr
-Imports: DNAcopy, TBEST
+Imports:
+    DNAcopy,
+    TBEST
 URL: https://github.com/KrasnitzLab/SCclust
 BugReports: https://github.com/KrasnitzLab/SCclust/issues
-
