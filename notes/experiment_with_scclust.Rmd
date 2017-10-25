@@ -1,0 +1,33 @@
+---
+title: "Experiments with SCclust"
+output: html_notebook
+---
+
+```{r}
+library(devtools)
+load_all()
+```
+
+
+```{r}
+gc <- varbin.gc.20k
+bin_mat <- example1.varbin.20k
+```
+
+
+```{r}
+
+bin_mat_normalized <- gc_one(bin_mat,gc)
+bin_mat_segmented <- cbs.segment_one(bin_mat_normalized, alpha = 0.05, nperm = 1000, undo.SD = 1.0, min.width = 5, method = "multiplier", genome = "hg" , graphic = TRUE)
+```
+
+```{r}
+seg.quantal <- bin_mat_segmented$seg.quantal
+```
+```{r}
+
+# res1 <- preprocess_segfile(seg.quantal, gc, ploidies = TRUE)
+# breakpoint_table <- res1$breakpoint_table
+# ploidies_table <- res1$ploidies_table
+
+```

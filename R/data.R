@@ -12,33 +12,33 @@ NULL
 
 
 
-#'@title hg19.varbin.gc.5k
+#'@title varbin.gc.5k
 #'
 #'@description The GC content for each bin (5k bins).
-#'@name hg19.varbin.gc.5k
+#'@name varbin.gc.5k
 #'@docType data
-#'@usage hg19.varbin.gc.5k
+#'@usage varbin.gc.5k
 #'@format A data matirx
 #'@keywords datasets
 NULL
 
 
-#'@title hg19.varbin.gc.20k
+#'@title varbin.gc.20k
 #'
 #'@description The GC content for each bin (20k bins).
-#'@name hg19.varbin.gc.20k
+#'@name varbin.gc.20k
 #'@docType data
-#'@usage hg19.varbin.gc.20k
+#'@usage varbin.gc.20k
 #'@format A data matirx
 #'@keywords datasets
 NULL
 
-#'@title hg19.varbin.gc.50k
+#'@title varbin.gc.50k
 #'
 #'@description The GC content for each bin (50k bins).
-#'@name hg19.varbin.gc.50k
+#'@name varbin.gc.50k
 #'@docType data
-#'@usage hg19.varbin.gc.50k
+#'@usage varbin.gc.50k
 #'@format A data matirx
 #'@keywords datasets
 NULL
