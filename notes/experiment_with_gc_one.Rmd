@@ -1,0 +1,66 @@
+---
+title: "Experiment with single chromosome"
+output: html_notebook
+---
+
+
+```{r}
+library(devtools)
+load_all()
+```
+
+
+
+```{r}
+gc_low = 0.5
+gc_high = 0.6
+gc.content <- c(rep(gc_low, 7),rep(gc_high, 7),rep(gc_low, 7))
+gc <- data.frame(gc.content)
+
+bin_low = 200
+bin_high = 10
+bincount <- c(rep(bin_high, 7), rep(bin_low,7), rep(bin_high, 7))
+bin_mat <- data.frame(bincount)
+
+bin_mat_normalized <- gc_one(bin_mat, gc)
+
+bin_mat_normalized
+```
+```{r}
+a <- bin_mat$bincount + 1
+bin_mat$ratio <- a / mean(a)
+bin_mat
+
+lowratio <- lowess.gc(gc$gc.content, bin_mat$ratio)
+lowratio
+```
+
+```{r}
+a <- bincount + 1
+ratio <- a/mean(a)
+ratio
+
+low <- lowess(gc.content, log(ratio), f=0.05)
+low
+jtkz <- approx(low$x, low$y, gc.content)
+jtkz
+
+```
+```{r}
+x <- c(1:10)
+y <- c(rep(1, 5), rep(2,5))
+low <- lowess(x,y, f=0.5)
+
+plot(x,y, col="#00AA00", ylim=c(-1, 3))
+points(x = low$x, y = low$y, col = "#FF0000")
+```
+
+
+```{r}
+x <- c(1:10)
+y <- c(rep(1, 5), rep(2,5))
+low <- lowess(x,log(y), f=0.5)
+
+plot(x,log(y), col="#00AA00", ylim=c(-1, 3))
+points(x = low$x, y = low$y, col = "#FF0000")
+```

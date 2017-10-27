@@ -10,6 +10,7 @@ gc_one <- function(bin_mat, gc) {
   bin_mat$gc.content <- gc$gc.content
   a <- bin_mat$bincount + 1
   bin_mat$ratio <- a / mean(a)
+
   bin_mat$lowratio <- lowess.gc(bin_mat$gc.content, bin_mat$ratio)
   return(bin_mat)
 }
@@ -30,7 +31,7 @@ gc_one <- function(bin_mat, gc) {
 #'@return The segmented profile for individual cell
 #'@export
 
-cbs.segment_one <- function(bin_mat, alpha, nperm, undo.SD, min.width, 
+cbs.segment_one <- function(bin_mat, alpha, nperm, undo.SD, min.width,
     method = "multiplier", genome = "hg", graphic = TRUE){
 
   set.seed(25)

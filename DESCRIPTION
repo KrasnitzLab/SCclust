@@ -11,7 +11,7 @@ Description: The SCclust package implements feature selection based on
     of the clone structure in single cell copy number profiles.
 License: MIT
 LazyData: TRUE
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 Suggests:
     knitr,
     rmarkdown,
