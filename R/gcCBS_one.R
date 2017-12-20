@@ -16,6 +16,14 @@ gc_one <- function(bin_mat, gc) {
 }
 
 
+chrom_numeric <- function(bin_mat) {
+  bin_mat$chrom.numeric <- substring(bin_mat$chrom, 4)
+  bin_mat$chrom.numeric[which(bin_mat$chrom == "chrX")] <- "23"
+  bin_mat$chrom.numeric[which(bin_mat$chrom == "chrY")] <- "24"
+
+  bin_mat$chrom.numeric <- as.numeric(bin_mat$chrom.numeric)
+  return(bin_mat)
+}
 
 #'Segment the normalzied bin count profile for individual cell for GC content.
 #'
