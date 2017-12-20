@@ -1,0 +1,31 @@
+---
+title: "segementation_comparison"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load `sgains` processed sample `CJA3183` from `nyu003`
+
+```{r}
+filename <- file.path(getwd(), "../..", "sgains/data/example", "nyu003", "nyu003_R50_20k/varbin", "CJA3183varbin.20k.txt")
+CJA3183_sgains <- read.table(filename, header=TRUE)
+
+head(CJA3183_sgains)
+```
+
+## Load original processes sample `CJA3183` from `nyu003`
+
+```{r}
+filename <- file.path(getwd(), "../..", "sgains/data/example", "nyu003", "orig", "CJA3183.hg19.20k.k50.varbin.data.txt")
+CJA3183_orig <- read.table(filename, header=TRUE)
+
+head(CJA3183_orig)
+```
+
+
+```{r}
+
+

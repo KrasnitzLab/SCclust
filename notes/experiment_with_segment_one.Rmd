@@ -1,0 +1,84 @@
+---
+title: "Experiment with segment_one function"
+output: html_notebook
+---
+
+
+```{r}
+library(devtools)
+load_all()
+```
+```{r}
+gc <- varbin.gc.20k
+bin_mat <- example1.varbin.20k
+```
+
+
+```{r}
+gc19 <- gc[gc$bin.chrom == 'chr19',]
+bin_mat19 <- bin_mat[bin_mat$chrom=='chr19',]
+dim(bin_mat19)
+size19 = dim(bin_mat19)[1]
+```
+```{r}
+slot = size19/4
+gc19$gc.content = c(rep(0.45, slot), rep(0.55, slot),rep(0.45, slot), rep(0.55, slot+1))
+bin_mat19$bincount <- c(rep(100, size19))
+bin_mat_normalized19<- gc_one(bin_mat19, gc19)
+bin_mat_segmented19 <- cbs.segment_one(bin_mat_normalized19, alpha = 0.05, nperm = 1000, undo.SD = 1.0, min.width = 5, method = "multiplier", genome = "hg" , graphic = TRUE)
+```
+
+
+```{r}
+slot = size19/4
+gc19$gc.content = c(rep(0.45, slot), rep(0.55, slot),rep(0.45, slot), rep(0.55, slot+1))
+bin_mat19$bincount <- c(rep(50, slot), rep(25, slot),rep(75, slot), rep(1, slot+1))
+bin_mat_normalized19<- gc_one(bin_mat19, gc19)
+bin_mat_segmented19 <- cbs.segment_one(bin_mat_normalized19, alpha = 0.05, nperm = 1000, undo.SD = 1.0, min.width = 5, method = "multiplier", genome = "hg" , graphic = TRUE)
+```
+```{r}
+slot = size19/4
+gc19$gc.content = c(rep(0.45, slot), rep(0.50, slot),rep(0.55, slot), rep(0.60, slot+1))
+bin_mat19$bincount <- c(rep(25, slot), rep(50, slot),rep(75, slot), rep(100, slot+1))
+bin_mat_normalized19<- gc_one(bin_mat19, gc19)
+bin_mat_segmented19 <- cbs.segment_one(bin_mat_normalized19, alpha = 0.05, nperm = 1000, undo.SD = 1.0, min.width = 5, method = "multiplier", genome = "hg" , graphic = TRUE)
+```
+```{r}
+slot = size19/4
+gc19$gc.content = c(rep(0.45, slot), rep(0.50, slot),rep(0.45, slot), rep(0.50, slot+1))
+bin_mat19$bincount <- c(rep(25, slot), rep(50, slot),rep(75, slot), rep(100, slot+1))
+bin_mat_normalized19<- gc_one(bin_mat19, gc19)
+bin_mat_segmented19 <- cbs.segment_one(bin_mat_normalized19, alpha = 0.05, nperm = 1000, undo.SD = 1.0, min.width = 5, method = "multiplier", genome = "hg" , graphic = TRUE)
+```
+```{r}
+head(bin_mat_segmented19)
+```
+```{r}
+tail(bin_mat_segmented19)
+```
+```{r}
+data(cars)
+
+#
+# x,y method
+#
+plot(cars$speed, cars$dist, main="lowess(cars)")
+lines(lowess(cars$speed, cars$dist), col=2)
+lines(lowess(cars$speed, cars$dist, f=.2), col=3)
+lines(lowess(cars$speed, cars$dist, f=.05), col=4)
+legend(5, 120, c(paste("f=", c("2/3", ".2", ".05"))), lty=1, col=2:4)
+```
+```{r}
+
+data(cars)
+plot(cars$speed, cars$dist, main="lowess(cars)")
+lines(lowess.gc(cars$speed, cars$dist), col=2)
+```
+```{r}
+slot = size19/4
+gc19$gc.content = c(rep(0.45, slot), rep(0.50, slot),rep(0.45, slot), rep(0.50, slot+1))
+bin_mat19$bincount <- c(rep(25, slot), rep(50, slot),rep(75, slot), rep(100, slot+1))
+ratio <- (bin_mat19$bincount + 1)/mean(bin_mat19$bincount + 1)
+plot(gc19$gc.content, ratio)
+lines(lowess(gc19$gc.content, ratio), col="red")
+```
