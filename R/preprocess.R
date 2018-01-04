@@ -85,7 +85,7 @@ preprocess_segfile <- function(segfile, gc, eviltwins = NULL, ploidies = TRUE){
 
 
   ## ploidies table
-  #modeofmodes.R
+  # modeofmodes.R
   ploidymod <- apply(a[annotXk[,"chrom"] < 23,], 2, getmode)
   ploidymed <- apply(a[annotXk[,"chrom"] < 23,], 2, median)
   ploidychromod <- apply(a[annotXk[,"chrom"] < 23,], 2, modeofmodes,

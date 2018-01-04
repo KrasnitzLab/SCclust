@@ -1,8 +1,8 @@
-#v and otherlabel are integer vectors of equal length. Find the mode of v for
-#each value of otherlabel and find the mode of modes. If the latter 
-#computation results in ties, find the values nearest tiebreaker (integer)
-#and of those choose the highest if tiebreakerside (character) is "greater" or
-#the lowest.
+# v and otherlabel are integer vectors of equal length. Find the mode of v for
+# each value of otherlabel and find the mode of modes. If the latter
+# computation results in ties, find the values nearest tiebreaker (integer)
+# and of those choose the highest if tiebreakerside (character) is "greater" or
+# the lowest.
 modeofmodes<-function(v,otherlabel,tiebreaker,tiebreakerside){
   countmat<-as.matrix(tapply(X=v,INDEX=list(as.factor(v),as.factor(otherlabel)),
                              FUN=length))
