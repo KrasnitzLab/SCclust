@@ -1,0 +1,158 @@
+#The header that may need editing
+#
+################Start#####################
+#
+#Jude's annotation table
+fullannot<-read.table(
+	"/Volumes/user/kendall/sequences/varbin.gc.content.20k.bowtie.k50.hg19.txt",
+	header=T,as.is=T)
+#Code to compute ploidy
+source("/Volumes/user/krasnitz/prostateSingleCell/Rtools/modeofmodes.R")
+#1 cell ID per pair of duplicate cells
+eviltwins<-c("CJA1593","CJA2772","CJA3438","CJA0951","H1650_D6_bulk.CHC2167","H1650_D6_CD24_bulk.CHC2168","H1650_D6_CD44_bulk.CHC2169")
+#The fat breakpoint will be 2*smear+1 bins wide.
+smear<-1
+#Change to F for "no ends"
+keepboundaries<-F
+#Where the ubers are
+rawdir<-"/Volumes/user/krasnitz/prostateSingleCell/Gleason9.2/newer/"
+savedir<-"/Volumes/user/krasnitz/prostateSingleCell/breakPointPins/Gleason9.2/averageNoEndsNew/"
+#savedir<-"/Volumes/user/krasnitz/prostateSingleCell/breakPointPins/NYU005Gl6.2/averageEnds/"
+prostate<-"GL9.2"
+#Short tables will be here
+datadir<-savedir
+#datadir<-"/Volumes/user/krasnitz/prostateSingleCell/NYU005Gl6.2/new/"
+#This is your segmented uber
+segfile<-"uber.hg19.GL9.2.20k.seg.quantal.R.txt"
+#
+################End#######################
+#
+longint<-read.table(paste(rawdir,segfile,sep=""),header=T,as.is=T)
+fullannot[fullannot[,"bin.chrom"]=="chrX","bin.chrom"]="chr23"
+fullannot[fullannot[,"bin.chrom"]=="chrY","bin.chrom"]="chr24"
+fullannot[,"bin.chrom"]<-as.numeric(substring(fullannot[,"bin.chrom"],first=4,
+	last=nchar(fullannot[,"bin.chrom"])))
+annot20k<-cbind(fullannot[match(4e8*longint[,"chrom"]+longint[,"chrompos"],
+	4e8*fullannot[,"bin.chrom"]+fullannot[,"bin.start"]),
+	c("bin.chrom","bin.start","bin.end"),],longint[,"abspos"])
+dimnames(annot20k)[[2]]<-c("chrom","chromstart","chromend","abstart")
+annot20k<-cbind(annot20k,annot20k[,"chromend"]+
+	annot20k[,"abstart"]-annot20k[,"chromstart"])
+dimnames(annot20k)[[2]][ncol(annot20k)]<-"absend"
+rm(fullannot)
+a<-round(as.matrix(longint[,-(1:3)]))
+b<-a-rbind(matrix(nrow=1,ncol=ncol(a),data=0),a[-nrow(a),])
+bb<-(b!=0)
+bb[match(unique(longint[,"chrom"]),longint[,"chrom"]),]<-T
+segstarts<-row(a)[bb]
+segvals<-a[bb]
+profid<-dimnames(a)[[2]][cumsum(segstarts==1)]
+segends<-c(segstarts[-1]-1,nrow(a))
+segends[segends==0]<-nrow(a)
+segbins<-segends-segstarts+1
+segloc<-cbind(annot20k[segstarts,c("chrom","chromstart","abstart")],
+	annot20k[segends,c("chromend","absend")])
+tshort<-data.frame(I(profid),segloc,segstarts,segends,segbins,segvals)
+rm(profid,segloc,segstarts,segends,segbins,segvals)
+getmode<-function(x)as.numeric(names(which.max(tapply(X=x,INDEX=as.factor(x),
+	FUN=length))))
+ploidymod<-apply(a[annot20k[,"chrom"]<23,],2,getmode)
+ploidymed<-apply(a[annot20k[,"chrom"]<23,],2,median)
+ploidychromod<-apply(a[annot20k[,"chrom"]<23,],2,modeofmodes,
+	otherlabel=annot20k[annot20k[,"chrom"]<23,"chrom"],
+	tiebreaker=2,tiebreakerside="greater")
+homoloss<-colSums(!a[annot20k[,"chrom"]<23,])/
+	sum(annot20k[,"chrom"]<23)
+ploidies<-cbind(ploidymed,ploidymod,ploidychromod,homoloss)
+write.table(ploidies,paste(datadir,prostate,"ploidies.txt",sep=""),col.names=T,row.names=T,
+	sep="\t",quote=F)
+tshort<-cbind(tshort,tshort[,"segvals"]-
+	ploidies[tshort[,"profid"],"ploidychromod"])
+dimnames(tshort)[[2]][ncol(tshort)]<-"cvals"
+rm(ploidychromod,ploidymed,ploidymod,a,longint,homoloss)
+gc()
+write.table(tshort,paste(datadir,prostate,"short20k.txt",sep=""),col.names=T,row.names=F,
+	sep="\t",quote=F)
+tshortGood<-tshort[tshort[,"profid"]%in%dimnames(ploidies)[[1]]
+	[ploidies[,"homoloss"]<0.01],]
+write.table(tshortGood,paste(datadir,prostate,"shortGood20k.txt",sep=""),col.names=T,
+	row.names=F,sep="\t",quote=F)
+tshortOrig<-tshort
+tshort<-tshortGood
+rm(tshortGood)
+containment.indicator<-function(vstart,vend,wstart,wend){
+	lw<-length(wstart)
+	lv<-length(vstart)
+	z<-cbind(c(vend,wend),c(1:lv,rep(0,lw)),c(rep(0,lv),1:lw))
+	z<-z[order(z[,1]),]
+	endbeforeend<-cummax(z[,2])[order(z[,3])][sort(z[,3])!=0]
+	z<-cbind(c(wstart,vstart),c(rep((lv+1),lw),1:lv),c(1:lw,rep(0,lv)))
+	z<-z[order(z[,1]),]
+	startafterstart<-rev(cummin(rev(z[,2])))[order(z[,3])][sort(z[,3])!=0]
+	return(cbind(startafterstart,endbeforeend))
+}
+goodCells<-setdiff(dimnames(ploidies)[[1]],eviltwins)
+tshort<-tshort[tshort[,"profid"]%in%goodCells,]
+dtshort<-cbind(tshort[,c("profid","chrom")],tshort[,"segstarts"]-smear,
+	tshort[,"segstarts"]+smear, sign(tshort[,"cvals"]-c(0,tshort[-nrow(tshort),"cvals"])))
+dimnames(dtshort)[[2]]<-c("profid","chrom","bpstart","bpend","bpsign")
+ustart<-tshort[match(unique(tshort[,"chrom"]),tshort[,"chrom"]),"segstarts"]
+uend<-c((ustart-1)[-1],tshort[nrow(tshort),"segends"])
+if(!keepboundaries){
+	dtshort<-dtshort[(dtshort[,"bpstart"]+smear)>
+	ustart[dtshort[,"chrom"]],]
+	dtshort[dtshort[,"bpstart"]<ustart[dtshort[,"chrom"]],"bpstart"]<-
+	ustart[dtshort[dtshort[,"bpstart"]<ustart[dtshort[,"chrom"]],"chrom"]]
+	dtshort[dtshort[,"bpend"]>uend[dtshort[,"chrom"]],"bpend"]<-
+	uend[dtshort[dtshort[,"bpend"]>uend[dtshort[,"chrom"]],"chrom"]]
+}
+if(keepboundaries){
+	dtshort[(dtshort[,"bpstart"]+smear)==ustart[dtshort[,"chrom"]],"bpsign"]<-
+		2*dtshort[(dtshort[,"bpstart"]+smear)==ustart[dtshort[,"chrom"]],"bpsign"]
+}
+dtshort<-dtshort[dtshort[,"chrom"]<=22,]
+allsigns<-sort(unique(dtshort[,"bpsign"]))
+for(vsign in allsigns){
+	a<-dtshort[dtshort[,"bpsign"]==vsign,]
+	a<-a[order(a[,"bpend"]),]
+	apins<-NULL
+	while(nrow(a)>0){
+		apins<-c(apins,a[1,"bpend"])
+		a<-a[!(a[,"bpstart"]<=apins[length(apins)]&a[,"bpend"]>=apins[length(apins)]),,drop=F]
+	}
+	a<-dtshort[dtshort[,"bpsign"]==vsign,]
+	ci<-containment.indicator(apins,apins,a[order(a[,"bpend"]),"bpstart"],a[order(a[,"bpend"]),
+		"bpend"])
+	a<-cbind(a[order(a[,"bpend"]),],ci)
+	dimnames(a)[[2]][(ncol(a)-1):ncol(a)]<-c("startpin","endpin")
+	apinmat<-matrix(ncol=length(unique(tshort[,"profid"])),nrow=length(apins)+2,data=0,
+		dimnames=list(NULL,unique(tshort[,"profid"])))
+	for(id in unique(a[,"profid"])){
+		apinmat[a[a[,"profid"]==id,"startpin"]+1,id]<-1
+		apinmat[a[a[,"profid"]==id,"endpin"]+2,id]<-apinmat[a[a[,"profid"]==id,"endpin"]+2,id]-1
+	}
+	apinmat<-apply(apinmat,2,cumsum)
+	apinmat<-apinmat[-c(1,nrow(apinmat)),,drop=F]
+	apins<-cbind(apins,rep(vsign,length(apins)))
+	dimnames(apins)[[2]]<-c("bin","sign")
+	if(vsign==min(allsigns)){
+		pinmat<-apinmat
+		pins<-apins
+	}
+	else{
+		pinmat<-rbind(pinmat,apinmat)
+		pins<-rbind(pins,apins)
+	}
+}
+rm(apins,apinmat,vsign,allsigns)
+write.table(pinmat,paste(savedir,prostate,"smear1bpPinMat.txt",sep=""),
+col.names=T,row.names=F,sep="\t",quote=F)
+write.table(pins,paste(savedir,prostate,"smear1bpPins.txt",sep=""),col.names=T,
+row.names=F,sep="\t",quote=F)
+#save.image(paste(savedir,"Rimage",Sys.Date(),".rda",sep=""))
+save.image(paste(savedir,"Rimage.",Sys.Date(),".",
+	strsplit(as.character(Sys.time()),split=" ")[[1]][2],".rda",sep=""))
+#savehistory(paste(savedir,"Rhistory",Sys.Date(),".txt",sep=""))
+#savehistory(paste(savedir,"Rhistory.",Sys.Date(),".",
+#	strsplit(as.character(Sys.time()),split=" ")[[1]][2],".txt",sep=""))
+quit(save="no")

@@ -1,0 +1,96 @@
+eviltwins<-c("CJA1593","CJA2772","CJA3438","CJA0951")
+#edit the next 4 lines as needed
+smear<-1
+keepboundaries<-F
+maskcentromeres<-T
+maskmargin<-5e6
+savedir<-"/Volumes/user/krasnitz/prostateSingleCell/breakPointPins/Gleason9.1/averageNoEnds/subClones03/"
+prostate<-"GL9.1.1"
+datadir<-"/Volumes/user/krasnitz/prostateSingleCell/Gleason9.1/new/"
+containment.indicator<-function(vstart,vend,wstart,wend){
+	lw<-length(wstart)
+	lv<-length(vstart)
+	z<-cbind(c(vend,wend),c(1:lv,rep(0,lw)),c(rep(0,lv),1:lw))
+	z<-z[order(z[,1]),]
+	endbeforeend<-cummax(z[,2])[order(z[,3])][sort(z[,3])!=0]
+	z<-cbind(c(wstart,vstart),c(rep((lv+1),lw),1:lv),c(1:lw,rep(0,lv)))
+	z<-z[order(z[,1]),]
+	startafterstart<-rev(cummin(rev(z[,2])))[order(z[,3])][sort(z[,3])!=0]
+	return(cbind(startafterstart,endbeforeend))
+}
+tshort<-read.table(paste(datadir,prostate,"short20k.txt",sep=""),header=T,as.is=T)
+inc<-read.table(paste(datadir,prostate,"incidenceDrop.txt",sep=""),header=T,as.is=T)
+goodCells<-setdiff(dimnames(inc)[[1]],eviltwins)
+rm(inc)
+tshort<-tshort[tshort[,"profid"]%in%goodCells,]
+dtshort<-cbind(tshort[,c("profid","chrom","chromstart")],tshort[,"segstarts"]-smear,
+	tshort[,"segstarts"]+smear, sign(tshort[,"cvals"]-c(0,tshort[-nrow(tshort),"cvals"])))
+dimnames(dtshort)[[2]]<-c("profid","chrom","chromstart","bpstart","bpend","bpsign")
+ustart<-tshort[match(unique(tshort[,"chrom"]),tshort[,"chrom"]),"segstarts"]
+uend<-c((ustart-1)[-1],tshort[nrow(tshort),"segends"])
+if(!keepboundaries){
+	dtshort<-dtshort[(dtshort[,"bpstart"]+smear)>
+	ustart[dtshort[,"chrom"]],]
+	dtshort[dtshort[,"bpstart"]<ustart[dtshort[,"chrom"]],"bpstart"]<-
+	ustart[dtshort[,"chrom"]]
+	dtshort[dtshort[,"bpend"]>uend[dtshort[,"chrom"]],"bpend"]<-
+	uend[dtshort[,"chrom"]]
+}
+if(keepboundaries){
+	dtshort[(dtshort[,"bpstart"]+smear)==ustart[dtshort[,"chrom"]],"bpsign"]<-
+		2*dtshort[(dtshort[,"bpstart"]+smear)==ustart[dtshort[,"chrom"]],"bpsign"]
+}
+dtshort<-dtshort[dtshort[,"chrom"]<=22,]
+if(maskcentromeres){
+	cyto<-read.table("/Volumes/Wigler/user/krasnitz/prostateSingleCell/annot/cytoBandHG19.txt",
+		header=F,sep="\t",as.is=T)
+	cyto<-cyto[!(cyto[,1]%in%c("chrX","chrY")),]
+	cyto[,1]<-as.numeric(substring(cyto[,1],first=4,last=nchar(cyto[,1])))
+	centros<-cyto[cyto[,ncol(cyto)]=="acen",]
+	centros<-cbind(centros[(1:nrow(centros))%%2==1,c(1,2)],centros[(1:nrow(centros))%%2==0,3])
+	centros<-centros[order(centros[,1]),]
+	dimnames(centros)[[2]]<-c("chrom","chromstart","chromend")
+	dtshort<-dtshort[(dtshort[,"chromstart"]<centros[dtshort[,"chrom"],"chromstart"]-maskmargin)|
+		(dtshort[,"chromstart"]>centros[dtshort[,"chrom"],"chromend"]+maskmargin),]
+}
+allsigns<-sort(unique(dtshort[,"bpsign"]))
+for(vsign in allsigns){
+	a<-dtshort[dtshort[,"bpsign"]==vsign,]
+	a<-a[order(a[,"bpend"]),]
+	apins<-NULL
+	while(nrow(a)>0){
+		apins<-c(apins,a[1,"bpend"])
+		a<-a[!(a[,"bpstart"]<=apins[length(apins)]&a[,"bpend"]>=apins[length(apins)]),,drop=F]
+	}
+	a<-dtshort[dtshort[,"bpsign"]==vsign,]
+	ci<-containment.indicator(apins,apins,a[order(a[,"bpend"]),"bpstart"],a[order(a[,"bpend"]),
+		"bpend"])
+	a<-cbind(a[order(a[,"bpend"]),],ci)
+	dimnames(a)[[2]][(ncol(a)-1):ncol(a)]<-c("startpin","endpin")
+	apinmat<-matrix(ncol=length(unique(dtshort[,"profid"])),nrow=length(apins)+2,data=0,
+		dimnames=list(NULL,unique(dtshort[,"profid"])))
+	for(id in unique(a[,"profid"])){
+		apinmat[a[a[,"profid"]==id,"startpin"]+1,id]<-1
+		apinmat[a[a[,"profid"]==id,"endpin"]+2,id]<-apinmat[a[a[,"profid"]==id,"endpin"]+2,id]-1
+	}
+	apinmat<-apply(apinmat,2,cumsum)
+	apinmat<-apinmat[-c(1,nrow(apinmat)),,drop=F]
+	apins<-cbind(apins,rep(vsign,length(apins)))
+	dimnames(apins)[[2]]<-c("bin","sign")
+	if(vsign==min(allsigns)){
+		pinmat<-apinmat
+		pins<-apins
+	}
+	else{
+		pinmat<-rbind(pinmat,apinmat)
+		pins<-rbind(pins,apins)
+	}
+}
+rm(apins,apinmat,vsign,allsigns)
+write.table(pinmat,paste(savedir,prostate,"smear1bpPinMat.txt",sep=""),
+col.names=T,row.names=F,sep="\t",quote=F)
+write.table(pins,paste(savedir,prostate,"smear1bpPins.txt",sep=""),col.names=T,
+row.names=F,sep="\t",quote=F)
+save.image(paste(savedir,"Rimage",Sys.Date(),".rda",sep=""))
+savehistory(paste(savedir,"Rhistory",Sys.Date(),".txt",sep=""))
+quit(save="no")
