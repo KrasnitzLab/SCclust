@@ -1,8 +1,12 @@
 #Please edit the filenames so you can read and save
-source("/Volumes/user/krasnitz/prostateSingleCell/Rtools/hcClimbNew.R")
-require(TBEST)
 hcdir<-"/Volumes/user/krasnitz/prostateSingleCell/breakPointPins/NYU011Gl7.5/averageNoEndsNewer/"
+#hcname<-"GL7.2smear1bpLog10FisherHC"
+#datadir<-"/Volumes/user/krasnitz/prostateSingleCell/Gleason9.2/newer/"
+#goodslicefile<-"GL6.1slices20kGood.txt"
+#shortfile<-"GL6.1short20k.txt"
 prostate<-"nyu011.GL7.5"
+#savedir<-"/Volumes/user/krasnitz/prostateSingleCell/breakPointPins/NYU009B9/averageNoEndsNew/"
+#rdir<-"/Volumes/user/krasnitz/prostateSingleCell/breakPointPins/FisherP/"
 savedir<-hcdir
 rdir<-savedir
 fdrthresh<-(-2)	#FDR criterion for clone nodes
@@ -10,19 +14,18 @@ sharemin<-0.90	#A feature is considered shared if present in sharemin fraction o
 nshare<-3	#Minimal number of shared features in a clone node
 bymax<-T	#Use maximal of mean FDR for the node to find clones?
 lmmax<-0.001 #A parameter in a linear fit to empirical null distribution of Fisher p-values
-climbfromsize<-2
-climbtoshare<-3
-usesoft<-T
 graphic<-F	#To plot or not
 truefile<-paste(rdir,prostate,"trueP.txt",sep="")
 simfile<-paste(rdir,prostate,"simP.txt",sep="")
 source("/Volumes/user/krasnitz/prostateSingleCell/Rtools/TreePy.R")
 cellnames<-
 	dimnames(read.table(paste(hcdir,prostate,"smear1bpPinMat.txt",sep=""),header=T))[[2]]
+#There is another twin filter upstream in the pipeline, but this does not hurt as long as we keep
+#track of the actual cell IDs in the tree.
+eviltwins<-c("CJA1593","CJA2772","CJA3438","CJA0951")	#1 of each known twin pair
 jguide<-read.table("/Volumes/user/krasnitz/prostateSingleCell/annot/joan02.guide111114.txt",
 	header=T,as.is=T,sep="\t",comment.char="",fill=T)
 pinmat<-read.table(paste(hcdir,prostate,"smear1bpPinMat.txt",sep=""),header=T,as.is=T) #Incidence
-pinmat<-pinmat[rowSums(pinmat)<ncol(pinmat),,drop=F]
 log10data<-F	#I.e.,expect to read p-values, not log p-values
 nsim<-500	#The size of a sample from the null
 hcmethod<-"average"
@@ -91,8 +94,7 @@ mfdr<-matrix(ncol=(1+sqrt(1+8*length(vtrue)))/2,nrow=(1+sqrt(1+8*length(vtrue)))
 mfdr[upper.tri(mfdr)]<-logfdrlong/log(10)
 mfdr<-pmin(mfdr,t(mfdr))
 dimnames(mfdr)<-list(cellnames,cellnames)
-newcellnames<-cellnames
-#newcellnames<-setdiff(cellnames,eviltwins)
+newcellnames<-setdiff(cellnames,eviltwins)
 mdist<-mdist[newcellnames,newcellnames]
 mfdr<-mfdr[newcellnames,newcellnames]
 #Grow a tree and add multiple items to the standard hclust object
@@ -159,27 +161,89 @@ hc$shareacross<-shareacross
 hc$sharemin<-sharemin
 hc$nshare<-nshare
 rm(clonenodes,shareacross)
-if(!is.null(hc$clonenodes))hc$softclones<-hcClimb(hc,minsize=climbfromsize,
-	minshare=climbtoshare+hc$shareacross[nrow(hc$merge)])
-cloneleaves<-unique(unlist(hc$leaflist[hc$softclones["hard",]]))
-if(usesoft)cloneleaves<-unique(unlist(hc$leaflist[hc$softclones["soft",]]))
+cloneleaves<-unique(unlist(hc$leaflist[hc$clonenodes]))
 coreid<-jguide[match(newcellnames,jguide[,"seq.unit.id"]),"sector"][cloneleaves]
 hc$coresNclones<-table(coreid,coreid)
 if(graphic){
 	plot(hc,labels=F)
-	abline(h=hc$height[hc$softclones["hard",]],lty=2)
-	abline(h=hc$height[hc$softclones["soft",]],lty=2,col="red")
+	abline(h=hc$height[hc$clonenodes],lty=2)
+}
+hcf<-hclust(as.dist(mfdr),method=hcmethod)
+leaflist<-vector(mode="list",length=nrow(hcf$merge))
+nodesize<-rep(NA,nrow(hcf$merge))
+labellist<-vector(mode="list",length=nrow(hcf$merge))
+sharing<-matrix(ncol=nrow(hcf$merge),nrow=nrow(pinmat))
+complexity<-rep(NA,nrow(hcf$merge))
+for(i in 1:nrow(hcf$merge)){
+	if(hcf$merge[i,1]<0)leaflist[[i]]<-(-hcf$merge[i,1])
+	else leaflist[[i]]<-leaflist[[hcf$merge[i,1]]]
+	if(hcf$merge[i,2]<0)leaflist[[i]]<-c(leaflist[[i]],(-hcf$merge[i,2]))
+	else leaflist[[i]]<-c(leaflist[[i]],leaflist[[hcf$merge[i,2]]])
+	labellist[[i]]<-hcf$labels[leaflist[[i]]]
+	complexity[i]<-mean(colSums(pinmat[,labellist[[i]]]))
+	sharing[,i]<-rowMeans(pinmat[,labellist[[i]]])
+	nodesize[i]<-length(leaflist[[i]])
+}
+hcf$nodesize<-nodesize
+hcf$leaflist<-leaflist
+hcf$labellist<-labellist
+hcf$sharing<-sharing
+hcf$complexity<-complexity
+rm(nodesize,leaflist,labellist,sharing,complexity)
+shareacross<-colSums(hcf$sharing>sharemin)
+compliant<-(hcf$height<fdrthresh&shareacross>nshare)
+leftchild<-(hcf$merge[,1]<0)
+leftchild[hcf$merge[,1]>0]<-compliant[hcf$merge[hcf$merge[,1]>0,1]]
+rightchild<-(hc$merge[,2]<0)
+rightchild[hcf$merge[,2]>0]<-compliant[hcf$merge[hcf$merge[,2]>0,2]]
+newcompliant<-compliant&leftchild&rightchild
+while(!all(newcompliant==compliant)){
+	compliant<-newcompliant
+	leftchild<-(hcf$merge[,1]<0)
+	leftchild[hcf$merge[,1]>0]<-compliant[hcf$merge[hcf$merge[,1]>0,1]]
+	rightchild<-(hcf$merge[,2]<0)
+	rightchild[hcf$merge[,2]>0]<-compliant[hcf$merge[hcf$merge[,2]>0,2]]
+	newcompliant<-compliant&leftchild&rightchild
+}
+clonenodes<-setdiff((1:nrow(hcf$merge))[compliant],c(hcf$merge[compliant,1],
+	hcf$merge[compliant,2]))
+hcf$fdrthresh<-fdrthresh
+hcf$sharemin<-sharemin
+hcf$sharemin<-nshare
+hcf$clonenodes<-clonenodes
+hang<-rep(0,length(hcf$height))
+hang[hcf$merge[hcf$merge[,1]>0,1]]<-
+	hcf$height[hcf$merge[,1]>0]-hcf$height[hcf$merge[hcf$merge[,1]>0,1]]
+hang[hcf$merge[hcf$merge[,2]>0,2]]<-
+	hcf$height[hcf$merge[,2]>0]-hcf$height[hcf$merge[hcf$merge[,2]>0,2]]
+hcf$hang<-hang
+hcf$shareacross<-shareacross
+rm(clonenodes,hang)
+cloneleaves<-unique(unlist(hcf$leaflist[hcf$clonenodes]))
+coreid<-jguide[match(newcellnames,jguide[,"seq.unit.id"]),"sector"][cloneleaves]
+hcf$coresNclones<-table(coreid,coreid)
+if(graphic){
+	plot(hcf,labels=F)
+	abline(h=hcf$height[hcf$clonenodes],lty=2)
 }
 pytableP<-TreePy(data=as.dist(mdist),method="average")
 pytableP<-cbind(pytableP,hc$mergefdr)
 dimnames(pytableP)[[2]][ncol(pytableP)]<-"log10fdr"
+pytableF<-TreePy(data=as.dist(mfdr),method="average")
 hcname<-paste(prostate,"smear1bpLog10FisherHCP",sep="")
 assign(hcname,hc)
 save(list=hcname,file=paste(savedir,hcname,".rda",sep=""))
+hcfname<-paste(prostate,"smear1bpLog10FisherHCF",sep="")
+assign(hcfname,hcf)
+save(list=hcfname,file=paste(savedir,hcfname,".rda",sep=""))
 write.table(mdist,paste(savedir,prostate,"smear1bpLog10FisherP.txt",sep=""),col.names=T,
 	row.names=T,sep="\t",quote=F)
 write.table(mfdr,paste(savedir,prostate,"smear1bpLog10FisherFDR.txt",sep=""),
 	col.names=T,row.names=T,sep="\t",quote=F)
 write.table(pytableP,paste(savedir,prostate,"smear1bpFisherTreePyP.txt", sep=""),col.names=T,
 	row.names=F,sep="\t",quote=F)
+write.table(pytableF,paste(savedir,prostate,"smear1bpFisherTreePyF.txt", sep=""),col.names=T,
+	row.names=F,sep="\t",quote=F)
+#savehistory(paste(savedir,"RhistoryClones.",Sys.Date(),".",
+#  strsplit(as.character(Sys.time()),split=" ")[[1]][2],".txt",sep=""))
 quit(save="no")

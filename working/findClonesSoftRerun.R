@@ -1,17 +1,19 @@
 #Please edit the filenames so you can read and save
+rerun<-T
 source("/Volumes/user/krasnitz/prostateSingleCell/Rtools/hcClimbNew.R")
 require(TBEST)
-hcdir<-"/Volumes/user/krasnitz/prostateSingleCell/breakPointPins/NYU011Gl7.5/averageNoEndsNewer/"
-prostate<-"nyu011.GL7.5"
+hcdir<-"/Volumes/user/krasnitz/prostateSingleCell/breakPointPins/NYU001Gl7/averageNoEndsNewest/"
+prostate<-"nyu001.GL7.1"
+hcname<-paste(prostate,"smear1bpLog10FisherHCP",sep="")
 savedir<-hcdir
 rdir<-savedir
 fdrthresh<-(-2)	#FDR criterion for clone nodes
-sharemin<-0.90	#A feature is considered shared if present in sharemin fraction of leaves in a node
-nshare<-3	#Minimal number of shared features in a clone node
+sharemin<-0.85	#A feature is considered shared if present in sharemin fraction of leaves in a node
+nshare<-4	#Minimal number of shared features in a clone node
 bymax<-T	#Use maximal of mean FDR for the node to find clones?
 lmmax<-0.001 #A parameter in a linear fit to empirical null distribution of Fisher p-values
 climbfromsize<-2
-climbtoshare<-3
+climbtoshare<-4
 usesoft<-T
 graphic<-F	#To plot or not
 truefile<-paste(rdir,prostate,"trueP.txt",sep="")
@@ -23,6 +25,7 @@ jguide<-read.table("/Volumes/user/krasnitz/prostateSingleCell/annot/joan02.guide
 	header=T,as.is=T,sep="\t",comment.char="",fill=T)
 pinmat<-read.table(paste(hcdir,prostate,"smear1bpPinMat.txt",sep=""),header=T,as.is=T) #Incidence
 pinmat<-pinmat[rowSums(pinmat)<ncol(pinmat),,drop=F]
+if(!rerun){
 log10data<-F	#I.e.,expect to read p-values, not log p-values
 nsim<-500	#The size of a sample from the null
 hcmethod<-"average"
@@ -86,7 +89,7 @@ logfdrlong<-logfdr[match(vtrue,usvtrue)]
 mdist<-matrix(ncol=(1+sqrt(1+8*length(vtrue)))/2,nrow=(1+sqrt(1+8*length(vtrue)))/2,data=0)
 mdist[upper.tri(mdist)]<-log10(vtrue)
 mdist<-pmin(mdist,t(mdist))
-dimnames(mdist)<-list(cellnames,cellnames)
+dimnames(mdist)<-list(cellnames,uellnames)
 mfdr<-matrix(ncol=(1+sqrt(1+8*length(vtrue)))/2,nrow=(1+sqrt(1+8*length(vtrue)))/2,data=0)
 mfdr[upper.tri(mfdr)]<-logfdrlong/log(10)
 mfdr<-pmin(mfdr,t(mfdr))
@@ -132,6 +135,14 @@ hc$labellist<-labellist
 hc$sharing<-sharing
 hc$complexity<-complexity
 rm(mergefdr,meanfdr,nodesize,leaflist,labellist,sharing,complexity)
+}
+if(rerun){ 
+	newcellnames<-cellnames
+	load(paste(savedir,hcname,".rda",sep=""))
+	hc<-get(hcname)
+	rm(list=hcname)
+	gc()
+}
 shareacross<-colSums(hc$sharing>sharemin)	#Number of features (approximately) shared across the node
 #A node is considered compliant if FDR is below and its sharing across above threshod for the node
 #and all its descendants
@@ -170,16 +181,17 @@ if(graphic){
 	abline(h=hc$height[hc$softclones["hard",]],lty=2)
 	abline(h=hc$height[hc$softclones["soft",]],lty=2,col="red")
 }
-pytableP<-TreePy(data=as.dist(mdist),method="average")
-pytableP<-cbind(pytableP,hc$mergefdr)
-dimnames(pytableP)[[2]][ncol(pytableP)]<-"log10fdr"
-hcname<-paste(prostate,"smear1bpLog10FisherHCP",sep="")
 assign(hcname,hc)
 save(list=hcname,file=paste(savedir,hcname,".rda",sep=""))
+if(!rerun){
+pytableP<-TreePy(data=as.dist(mdist),method="average")
+#pytableP<-cbind(pytableP,hc$mergefdr)
+dimnames(pytableP)[[2]][ncol(pytableP)]<-"log10fdr"
 write.table(mdist,paste(savedir,prostate,"smear1bpLog10FisherP.txt",sep=""),col.names=T,
 	row.names=T,sep="\t",quote=F)
 write.table(mfdr,paste(savedir,prostate,"smear1bpLog10FisherFDR.txt",sep=""),
 	col.names=T,row.names=T,sep="\t",quote=F)
 write.table(pytableP,paste(savedir,prostate,"smear1bpFisherTreePyP.txt", sep=""),col.names=T,
 	row.names=F,sep="\t",quote=F)
+}
 quit(save="no")

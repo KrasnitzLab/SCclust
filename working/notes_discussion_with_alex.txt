@@ -65,5 +65,8 @@ findClonesSoft.R
 
 cloneDumpNewer.R
 
+experiment with:
+/mnt/wigstore4/user/krasnitz/prostateSingleCell/Gleason6.1/new
+COR002
 
 

@@ -1,12 +1,14 @@
 #Please edit the filenames so you can read and save
-source("/Volumes/user/krasnitz/prostateSingleCell/Rtools/hcClimbNew.R")
+reclimb<-T
+source("/Volumes/user/krasnitz/prostateSingleCell/Rtools/hcClimbNewer.R")
 require(TBEST)
-hcdir<-"/Volumes/user/krasnitz/prostateSingleCell/breakPointPins/NYU011Gl7.5/averageNoEndsNewer/"
-prostate<-"nyu011.GL7.5"
-savedir<-hcdir
+hcdir<-"/Volumes/user/krasnitz/prostateSingleCell/breakPointPins/Gleason9.1/averageNoEndsNewest/"
+prostate<-"GL9.1"
+hcname<-paste(prostate,"smear1bpLog10FisherHCP",sep="")
+savedir<-"/Volumes/user/krasnitz/prostateSingleCell/breakPointPins/Gleason9.1/averageNoEndsNewestReclimb/"
 rdir<-savedir
 fdrthresh<-(-2)	#FDR criterion for clone nodes
-sharemin<-0.90	#A feature is considered shared if present in sharemin fraction of leaves in a node
+sharemin<-0.85	#A feature is considered shared if present in sharemin fraction of leaves in a node
 nshare<-3	#Minimal number of shared features in a clone node
 bymax<-T	#Use maximal of mean FDR for the node to find clones?
 lmmax<-0.001 #A parameter in a linear fit to empirical null distribution of Fisher p-values
@@ -14,13 +16,14 @@ climbfromsize<-2
 climbtoshare<-3
 usesoft<-T
 graphic<-F	#To plot or not
+jguide<-read.table("/Volumes/user/krasnitz/prostateSingleCell/annot/joan02.guide111114.txt",
+	header=T,as.is=T,sep="\t",comment.char="",fill=T)
+if(!reclimb){
 truefile<-paste(rdir,prostate,"trueP.txt",sep="")
 simfile<-paste(rdir,prostate,"simP.txt",sep="")
 source("/Volumes/user/krasnitz/prostateSingleCell/Rtools/TreePy.R")
 cellnames<-
 	dimnames(read.table(paste(hcdir,prostate,"smear1bpPinMat.txt",sep=""),header=T))[[2]]
-jguide<-read.table("/Volumes/user/krasnitz/prostateSingleCell/annot/joan02.guide111114.txt",
-	header=T,as.is=T,sep="\t",comment.char="",fill=T)
 pinmat<-read.table(paste(hcdir,prostate,"smear1bpPinMat.txt",sep=""),header=T,as.is=T) #Incidence
 pinmat<-pinmat[rowSums(pinmat)<ncol(pinmat),,drop=F]
 log10data<-F	#I.e.,expect to read p-values, not log p-values
@@ -86,7 +89,7 @@ logfdrlong<-logfdr[match(vtrue,usvtrue)]
 mdist<-matrix(ncol=(1+sqrt(1+8*length(vtrue)))/2,nrow=(1+sqrt(1+8*length(vtrue)))/2,data=0)
 mdist[upper.tri(mdist)]<-log10(vtrue)
 mdist<-pmin(mdist,t(mdist))
-dimnames(mdist)<-list(cellnames,cellnames)
+dimnames(mdist)<-list(cellnames,uellnames)
 mfdr<-matrix(ncol=(1+sqrt(1+8*length(vtrue)))/2,nrow=(1+sqrt(1+8*length(vtrue)))/2,data=0)
 mfdr[upper.tri(mfdr)]<-logfdrlong/log(10)
 mfdr<-pmin(mfdr,t(mfdr))
@@ -159,8 +162,17 @@ hc$shareacross<-shareacross
 hc$sharemin<-sharemin
 hc$nshare<-nshare
 rm(clonenodes,shareacross)
+}
+if(reclimb){ 
+	load(paste(hcdir,hcname,".rda",sep=""))
+	hc<-get(hcname)
+	rm(list=hcname)
+	newcellnames<-hc$labels
+	gc()
+}
+hcsectors<-jguide[match(hc$labels,jguide[,"seq.unit.id"]),"sector"]
 if(!is.null(hc$clonenodes))hc$softclones<-hcClimb(hc,minsize=climbfromsize,
-	minshare=climbtoshare+hc$shareacross[nrow(hc$merge)])
+	minshare=climbtoshare+hc$shareacross[nrow(hc$merge)],sectors=hcsectors)
 cloneleaves<-unique(unlist(hc$leaflist[hc$softclones["hard",]]))
 if(usesoft)cloneleaves<-unique(unlist(hc$leaflist[hc$softclones["soft",]]))
 coreid<-jguide[match(newcellnames,jguide[,"seq.unit.id"]),"sector"][cloneleaves]
@@ -170,16 +182,17 @@ if(graphic){
 	abline(h=hc$height[hc$softclones["hard",]],lty=2)
 	abline(h=hc$height[hc$softclones["soft",]],lty=2,col="red")
 }
-pytableP<-TreePy(data=as.dist(mdist),method="average")
-pytableP<-cbind(pytableP,hc$mergefdr)
-dimnames(pytableP)[[2]][ncol(pytableP)]<-"log10fdr"
-hcname<-paste(prostate,"smear1bpLog10FisherHCP",sep="")
 assign(hcname,hc)
 save(list=hcname,file=paste(savedir,hcname,".rda",sep=""))
+if(!reclimb){
+pytableP<-TreePy(data=as.dist(mdist),method="average")
+#pytableP<-cbind(pytableP,hc$mergefdr)
+#dimnames(pytableP)[[2]][ncol(pytableP)]<-"log10fdr"
 write.table(mdist,paste(savedir,prostate,"smear1bpLog10FisherP.txt",sep=""),col.names=T,
 	row.names=T,sep="\t",quote=F)
 write.table(mfdr,paste(savedir,prostate,"smear1bpLog10FisherFDR.txt",sep=""),
 	col.names=T,row.names=T,sep="\t",quote=F)
 write.table(pytableP,paste(savedir,prostate,"smear1bpFisherTreePyP.txt", sep=""),col.names=T,
 	row.names=F,sep="\t",quote=F)
+}
 quit(save="no")

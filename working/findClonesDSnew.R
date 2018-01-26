@@ -1,0 +1,143 @@
+#Please edit the filenames so you can read and save
+prostate<-"GL7.2B"
+hcdir<-"/Volumes/user/krasnitz/prostateSingleCell/downsampling/"
+savedir<-rdir<-hcdir
+load(paste(hcdir,prostate,"simdata.rda",sep=""))
+load(paste(hcdir,prostate,"pindata.rda",sep=""))
+fdrthresh<-(-2)
+sharemin<-0.90
+nshare<-3
+bymax<-T
+lmmax<-0.001
+graphic<-F
+nsim<-500
+hcmethod<-"average"
+#clonetable<-matrix(ncol=max(unlist(lapply(simdata,length))),nrow=length(simdata),
+clonetable<-matrix(ncol=1,nrow=length(simdata),dimnames=list(names(simdata),NULL),data=0)
+hcdata<-vector(mode="list",length=length(simdata))
+names(hcdata)<-names(simdata)
+for(ndata in names(simdata)){
+pinmat<-pindata[[ndata]][["pinmat"]]
+cellnames<-dimnames(pinmat)[[2]]
+smsim<-sort(simdata[[ndata]][["simP"]])
+usmsim<-unique(smsim)
+csim<-tapply(match(smsim,usmsim),match(smsim,usmsim),length)
+rm(smsim)
+gc()
+pos<-(1:length(simdata[[ndata]][["trueP"]]))[order(simdata[[ndata]][["trueP"]])]
+svtrue<-sort(simdata[[ndata]][["trueP"]])
+usvtrue<-unique(svtrue)
+ctrue<-tapply(match(svtrue,usvtrue),match(svtrue,usvtrue),length)
+mylm<-lm(log(cumsum(csim[(cumsum(csim)/sum(csim))<lmmax])/sum(csim))~
+	log(usmsim[(cumsum(csim)/sum(csim))<lmmax]))
+if(exists("mylm"))logfdrmod<-
+	mylm$coefficients[2]*log(usvtrue)+mylm$coefficients[1]-log(cumsum(ctrue)/sum(ctrue))
+if(graphic){
+	curve(exp(mylm$coefficients[1]+mylm$coefficients[2]*log(x)),from=min(usvtrue),to=max(usvtrue),
+		log="xy")
+	points(usmsim,cumsum(csim)/sum(csim))
+	points(usvtrue,cumsum(ctrue)/sum(ctrue),col="red")
+}
+#FDR is computed by comparing true to simulated CDF. However, empirical true CDF is only defined 
+#for usvtrue, while empirical simulated CDF only for usmsim. Where possible, find empirical CDF for
+#usvtrue by linear interpolation from the flanking values of usmsim.
+z<-cbind(c(log(usvtrue),log(usmsim)),c(log(cumsum(ctrue)/sum(ctrue)),log(cumsum(csim)/sum(csim))),
+	c(rep(0,length(usvtrue)),rep(1,length(usmsim))))
+z<-z[order(z[,1]),]
+simlow<-cumsum(z[,3])[z[,3]==0]
+x1pos<-match(simlow,cumsum(z[,3]))[simlow>0]
+x2pos<-match(simlow+1,cumsum(z[,3]))[simlow>0]
+x1<-z[x1pos,1]
+x2<-z[x2pos,1]
+y1<-z[x1pos,2]
+y2<-z[x2pos,2]
+logfdrinterp<-rep(0,length(usvtrue))
+logfdrinterp[simlow>0]<-(y2-y1)*log(usvtrue)[simlow>0]/(x2-x1)+(y1*x2-y2*x1)/(x2-x1)-
+	log(cumsum(ctrue)/sum(ctrue))[simlow>0]
+logfdr<-logfdrinterp
+lmu<-max(usmsim[(cumsum(csim)/sum(csim))<lmmax])
+if(is.finite(lmu)&min(usvtrue)<min(usmsim)){
+	logfdr[usvtrue<lmu&usvtrue>min(usmsim)]<-
+		(logfdrmod[usvtrue<lmu&usvtrue>min(usmsim)]*
+		(log(lmu)-log(usvtrue[usvtrue<lmu&usvtrue>min(usmsim)]))-
+		logfdrinterp[usvtrue<lmu&usvtrue>min(usmsim)]*
+		(log(min(usmsim))-log(usvtrue[usvtrue<lmu&usvtrue>min(usmsim)])))/(log(lmu)-log(min(usmsim)))
+	logfdr[usvtrue<min(usmsim)]<-logfdrmod[usvtrue<min(usmsim)]
+}
+logfdr<-cummax(logfdr)
+logfdr[logfdr>0]<-0
+if(graphic)plot(usvtrue,exp(logfdr),log="xy")
+logfdrlong<-logfdr[match(simdata[[ndata]][["trueP"]],usvtrue)]
+mdist<-matrix(ncol=(1+sqrt(1+8*length(simdata[[ndata]][["trueP"]])))/2,
+	nrow=(1+sqrt(1+8*length(simdata[[ndata]][["trueP"]])))/2,data=0)
+mdist[upper.tri(mdist)]<-log10(simdata[[ndata]][["trueP"]])
+mdist<-pmin(mdist,t(mdist))
+dimnames(mdist)<-list(cellnames,cellnames)
+mfdr<-matrix(ncol=(1+sqrt(1+8*length(simdata[[ndata]][["trueP"]])))/2,
+	nrow=(1+sqrt(1+8*length(simdata[[ndata]][["trueP"]])))/2,data=0)
+mfdr[upper.tri(mfdr)]<-logfdrlong/log(10)
+mfdr<-pmin(mfdr,t(mfdr))
+dimnames(mfdr)<-list(cellnames,cellnames)
+hc<-hclust(as.dist(mdist),method=hcmethod)
+leaflist<-vector(mode="list",length=nrow(hc$merge))
+mergefdr<-rep(NA,nrow(hc$merge))
+meanfdr<-rep(NA,nrow(hc$merge))
+nodesize<-rep(NA,nrow(hc$merge))
+labellist<-vector(mode="list",length=nrow(hc$merge))
+sharing<-matrix(ncol=nrow(hc$merge),nrow=nrow(pinmat))
+complexity<-rep(NA,nrow(hc$merge))
+for(i in 1:nrow(hc$merge)){
+	if(hc$merge[i,1]<0)leaflist[[i]]<-(-hc$merge[i,1])
+	else leaflist[[i]]<-leaflist[[hc$merge[i,1]]]
+	if(hc$merge[i,2]<0)leaflist[[i]]<-c(leaflist[[i]],(-hc$merge[i,2]))
+	else leaflist[[i]]<-c(leaflist[[i]],leaflist[[hc$merge[i,2]]])
+	labellist[[i]]<-hc$labels[leaflist[[i]]]
+	complexity[i]<-mean(colSums(pinmat[,labellist[[i]]]))
+	sharing[,i]<-rowMeans(pinmat[,labellist[[i]]])
+	nodesize[i]<-length(leaflist[[i]])
+	mergefdr[i]<-
+		max(mfdr[leaflist[[i]],leaflist[[i]]][upper.tri(mfdr[leaflist[[i]],leaflist[[i]]])])
+	meanfdr[i]<-
+		mean(mfdr[leaflist[[i]],leaflist[[i]]][upper.tri(mfdr[leaflist[[i]],leaflist[[i]]])])
+}
+hc$mergefdr<-mergefdr
+hc$meanfdr<-meanfdr
+hc$nodesize<-nodesize
+hc$leaflist<-leaflist
+hc$labellist<-labellist
+hc$sharing<-sharing
+hc$complexity<-complexity
+rm(mergefdr,meanfdr,nodesize,leaflist,labellist,sharing,complexity)
+shareacross<-colSums(hc$sharing>sharemin)
+if(bymax)compliant<-(hc$mergefdr<fdrthresh&shareacross>nshare)
+if(!bymax)compliant<-(hc$meanfdr<fdrthresh&shareacross>nshare)
+leftchild<-(hc$merge[,1]<0)
+leftchild[hc$merge[,1]>0]<-compliant[hc$merge[hc$merge[,1]>0,1]]
+rightchild<-(hc$merge[,2]<0)
+rightchild[hc$merge[,2]>0]<-compliant[hc$merge[hc$merge[,2]>0,2]]
+newcompliant<-compliant&leftchild&rightchild
+while(!all(newcompliant==compliant)){
+	compliant<-newcompliant
+	leftchild<-(hc$merge[,1]<0)
+	leftchild[hc$merge[,1]>0]<-compliant[hc$merge[hc$merge[,1]>0,1]]
+	rightchild<-(hc$merge[,2]<0)
+	rightchild[hc$merge[,2]>0]<-compliant[hc$merge[hc$merge[,2]>0,2]]
+	newcompliant<-compliant&leftchild&rightchild
+}
+clonenodes<-setdiff((1:nrow(hc$merge))[compliant],c(hc$merge[compliant,1],hc$merge[compliant,2]))
+hc$fdrthresh<-fdrthresh
+hc$clonenodes<-clonenodes
+hc$bymax<-bymax
+hc$shareacross<-shareacross
+hc$sharemin<-sharemin
+hc$nshare<-nshare
+rm(clonenodes,shareacross)
+clonetable[ndata,1]<-sum(hc$nodesize[hc$clonenodes][hc$nodesize[hc$clonenodes]>2])
+hcdata[[ndata]]<-hc
+rm(hc)
+gc()
+}
+write.table(clonetable,paste(hcdir,prostate,"clonetable.txt",sep=""),
+	row.names=T,col.names=F,sep="\t",quote=F)
+save(hcdata,file=paste(hcdir,prostate,"hcdata.rda",sep=""))
+#quit(save="no")
