@@ -23,9 +23,11 @@ keepboundaries<-F
 #Where the ubers are
 #rawdir<-"/Volumes/user/krasnitz/prostateSingleCell/Gleason9.1/newer/"
 #rawdir<-"/Volumes/user/alexande/nyu009/"
-rawdir<-"./nyu003.benign.1.20k/"
-savedir<-"./out/"
-prostate<-"nyu003.benign.1"
+# rawdir<-"./nyu003.benign.1.20k/"
+rawdir <- "./Gleason6.1/"
+savedir <- "./out/Gleason6.1/"
+prostate <- "nyu003.benign.1"
+prostate <- "GL6.1"
 #Short tables will be here
 datadir<-savedir
 #datadir<-"/Volumes/user/krasnitz/prostateSingleCell/NYU005Gl6.2/new/"
@@ -178,11 +180,11 @@ write.table(pinmat,paste(savedir,prostate,"smear1bpPinMat.txt",sep=""),
 col.names=T,row.names=F,sep="\t",quote=F)
 write.table(pins,paste(savedir,prostate,"smear1bpPins.txt",sep=""),col.names=T,
 row.names=F,sep="\t",quote=F)
-#save.image(paste(savedir,"Rimage",Sys.Date(),".rda",sep=""))
-save.image(paste(savedir,"Rimage.",Sys.Date(),".",
-	strsplit(as.character(Sys.time()),split=" ")[[1]][2],".rda",sep=""))
-#savehistory(paste(savedir,"Rhistory",Sys.Date(),".txt",sep=""))
-#savehistory(paste(savedir,"Rhistory.",Sys.Date(),".",
+# save.image(paste(savedir,"Rimage",Sys.Date(),".rda",sep=""))
+# save.image(paste(savedir,"Rimage.",Sys.Date(),".",
+# 	strsplit(as.character(Sys.time()),split=" ")[[1]][2],".rda",sep=""))
+# savehistory(paste(savedir,"Rhistory",Sys.Date(),".txt",sep=""))
+# savehistory(paste(savedir,"Rhistory.",Sys.Date(),".",
 #	strsplit(as.character(Sys.time()),split=" ")[[1]][2],".txt",sep=""))
 # quit(save="no")
 
