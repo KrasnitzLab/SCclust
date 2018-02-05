@@ -1,10 +1,16 @@
 #Please edit the filenames so you can read and save
-source("/Volumes/user/krasnitz/prostateSingleCell/Rtools/hcClimbNew.R")
+source("./hcClimbNew.R")
+source("./TreePy.R")
+
 require(TBEST)
-hcdir<-"/Volumes/user/krasnitz/prostateSingleCell/breakPointPins/NYU011Gl7.5/averageNoEndsNewer/"
-prostate<-"nyu011.GL7.5"
-savedir<-hcdir
-rdir<-savedir
+data_dir <- Sys.getenv("SGAINS_DATA")
+assertthat::assert_that(file.exists(data_dir))
+
+truefile <- file.path(data_dir, "cor002/results", "GL6.1trueP.txt")
+simfile <- file.path(data_dir, "cor002/results", "GL6.1simP.txt")
+assertthat::assert_that(file.exists(simfile))
+assertthat::assert_that(file.exists(truefile))
+
 fdrthresh<-(-2)	#FDR criterion for clone nodes
 sharemin<-0.90	#A feature is considered shared if present in sharemin fraction of leaves in a node
 nshare<-3	#Minimal number of shared features in a clone node
@@ -14,14 +20,13 @@ climbfromsize<-2
 climbtoshare<-3
 usesoft<-T
 graphic<-F	#To plot or not
-truefile<-paste(rdir,prostate,"trueP.txt",sep="")
-simfile<-paste(rdir,prostate,"simP.txt",sep="")
-source("/Volumes/user/krasnitz/prostateSingleCell/Rtools/TreePy.R")
-cellnames<-
-	dimnames(read.table(paste(hcdir,prostate,"smear1bpPinMat.txt",sep=""),header=T))[[2]]
-jguide<-read.table("/Volumes/user/krasnitz/prostateSingleCell/annot/joan02.guide111114.txt",
-	header=T,as.is=T,sep="\t",comment.char="",fill=T)
-pinmat<-read.table(paste(hcdir,prostate,"smear1bpPinMat.txt",sep=""),header=T,as.is=T) #Incidence
+
+pinmatfile <- file.path(data_dir, "cor002/results", "GL6.1smear1bpPinMat.txt")
+assertthat::assert_that(file.exists(simfile))
+
+pinmat <- load_table(pinmatfile)
+cellsnames <- uber_cells(pinmat, skip=0)
+
 pinmat<-pinmat[rowSums(pinmat)<ncol(pinmat),,drop=F]
 log10data<-F	#I.e.,expect to read p-values, not log p-values
 nsim<-500	#The size of a sample from the null
@@ -41,7 +46,7 @@ svtrue<-sort(vtrue)
 usvtrue<-unique(svtrue)
 ctrue<-tapply(match(svtrue,usvtrue),match(svtrue,usvtrue),length)
 #Observed p-values are often far lower than any p-value sampled from the null; to determine FDR in
-#such cases get a power-law fit to the low-p tail of the null CDF and use it to extrapolate to very 
+#such cases get a power-law fit to the low-p tail of the null CDF and use it to extrapolate to very
 #low p-values. Use the actual null CDF to estimate FDR for higher p-values.
 mylm<-lm(log(cumsum(csim[(cumsum(csim)/sum(csim))<lmmax])/sum(csim))~
 	log(usmsim[(cumsum(csim)/sum(csim))<lmmax]))
@@ -53,7 +58,7 @@ if(graphic){
 	points(usmsim,cumsum(csim)/sum(csim))
 	points(usvtrue,cumsum(ctrue)/sum(ctrue),col="red")
 }
-#FDR is computed by comparing true to simulated CDF. However, empirical true CDF is only defined 
+#FDR is computed by comparing true to simulated CDF. However, empirical true CDF is only defined
 #for usvtrue, while empirical simulated CDF only for usmsim. Where possible, find empirical CDF for
 #usvtrue by linear interpolation from the flanking values of usmsim.
 z<-cbind(c(log(usvtrue),log(usmsim)),c(log(cumsum(ctrue)/sum(ctrue)),log(cumsum(csim)/sum(csim))),
@@ -163,8 +168,8 @@ if(!is.null(hc$clonenodes))hc$softclones<-hcClimb(hc,minsize=climbfromsize,
 	minshare=climbtoshare+hc$shareacross[nrow(hc$merge)])
 cloneleaves<-unique(unlist(hc$leaflist[hc$softclones["hard",]]))
 if(usesoft)cloneleaves<-unique(unlist(hc$leaflist[hc$softclones["soft",]]))
-coreid<-jguide[match(newcellnames,jguide[,"seq.unit.id"]),"sector"][cloneleaves]
-hc$coresNclones<-table(coreid,coreid)
+# coreid<-jguide[match(newcellnames,jguide[,"seq.unit.id"]),"sector"][cloneleaves]
+# hc$coresNclones<-table(coreid,coreid)
 if(graphic){
 	plot(hc,labels=F)
 	abline(h=hc$height[hc$softclones["hard",]],lty=2)
@@ -173,13 +178,20 @@ if(graphic){
 pytableP<-TreePy(data=as.dist(mdist),method="average")
 pytableP<-cbind(pytableP,hc$mergefdr)
 dimnames(pytableP)[[2]][ncol(pytableP)]<-"log10fdr"
-hcname<-paste(prostate,"smear1bpLog10FisherHCP",sep="")
+
+output_dir <- "./out/cor002"
+casename <- "GL6.1"
+filenames <- case_filenames(output_dir, casename)
+
+hcname<-paste(casename,"smear1bpLog10FisherHCP",sep="")
 assign(hcname,hc)
-save(list=hcname,file=paste(savedir,hcname,".rda",sep=""))
-write.table(mdist,paste(savedir,prostate,"smear1bpLog10FisherP.txt",sep=""),col.names=T,
-	row.names=T,sep="\t",quote=F)
-write.table(mfdr,paste(savedir,prostate,"smear1bpLog10FisherFDR.txt",sep=""),
-	col.names=T,row.names=T,sep="\t",quote=F)
-write.table(pytableP,paste(savedir,prostate,"smear1bpFisherTreePyP.txt", sep=""),col.names=T,
-	row.names=F,sep="\t",quote=F)
-quit(save="no")
+save(list=hcname,file=file.path(output_dir,paste(hcname,".rda",sep="")))
+
+write.table(mdist,file.path(output_dir, paste(casename,"smear1bpLog10FisherP.txt",sep="")),
+            col.names=T,
+	          row.names=T,sep="\t",quote=F)
+write.table(mfdr,file.path(output_dir, paste(casename,"smear1bpLog10FisherFDR.txt",sep="")),
+	          col.names=T,row.names=T,sep="\t",quote=F)
+write.table(pytableP, file.path(output_dir, paste(casename,"smear1bpFisherTreePyP.txt", sep="")),
+            col.names=T,
+	          row.names=F,sep="\t",quote=F)
