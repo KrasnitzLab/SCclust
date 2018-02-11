@@ -20,7 +20,7 @@ varbin_input_files <- function(input_file_dir, suffix_pattern="") {
 load_table <- function(filename) {
   assertthat::assert_that(file.exists(filename))
 
-  df = read.table(filename, header=T, as.is=T)
+  df <- read.table(filename, header=T, as.is=T)
   return(df)
 }
 

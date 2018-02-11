@@ -15,3 +15,10 @@ augment_bins_sample <- function(bins_df, gc_df) {
 
   return(bins_df)
 }
+
+
+lowess.gc <- function(jtkx, jtky) {
+  jtklow <- lowess(jtkx, log(jtky), f=0.05)
+  jtkz <- approx(jtklow$x, jtklow$y, jtkx)
+  return(exp(log(jtky) - jtkz$y))
+}
