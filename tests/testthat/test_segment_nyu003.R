@@ -17,8 +17,8 @@ test_that("check that CJA3182 is segmented properly", {
   CJA3182_varbin_df <- load_table(file.path(nyu003_varbin_dir, "CJA3182.varbin.20k.txt.gz"))
   expect_equal(nrow(CJA3182_varbin_df), 20000)
 
-  segment_df <- load_table(file.path(nyu003_scgv_dir, "uber.hg19.nyu003.benign.1.20k.seg.quantal.R.seg.txt"))
-  expect_equal(nrow(segment_df), 19943)
+  # segment_df <- load_table(file.path(nyu003_scgv_dir, "uber.hg19.nyu003.benign.1.20k.seg.quantal.R.seg.txt"))
+  # expect_equal(nrow(segment_df), 19943)
 
   input_dir <- "/home/lubo/Work/sgains/data/bowtie-0.12.7/nyu003_R50_B20k_b0.12.7/varbin"
   suffix_pattern <- "\\.varbin.20k.txt$"
