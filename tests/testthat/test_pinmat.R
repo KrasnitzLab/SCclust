@@ -147,3 +147,51 @@ test_that("calc_segments_short works as expected on CJA3182, CJA3183, CJA3204, g
     expect_true(all(t1_df$cvals == t2_df$cvals))
   }
 })
+
+test_that("filter_segments_short works as expected on CJA3182, CJA3183, CJA3204, with CJA3204 as eviltwin",  {
+
+  data_dir <- Sys.getenv("SGAINS_DATA")
+  short_file <- file.path(data_dir, "nyu003/results/nyu003.benign.1short20k.txt.gz")
+  expect_true(file.exists(short_file))
+
+  short_df <- load_table(short_file)
+
+  segment_file <- file.path(data_dir, "nyu003/CJA3182_183_204.uber/CJA3182_183_204.seg.txt.gz")
+  expect_true(file.exists(segment_file))
+  segment_df <- load_table(segment_file)
+
+  gc_df <- load_table(file.path(data_dir, "varbin_orig/varbin.gc.content.20k.bowtie.k50.hg19.txt.gz"))
+  assertthat::assert_that(assertthat::are_equal(nrow(gc_df), 20000))
+  gc_df$bin.chrom <- numeric_chrom(gc_df$bin.chrom)
+
+  gc_df <- gc_df[-badbins.20k$V1, ]
+  augment_df <- augment_gc(gc_df, segment_df)
+
+  result_df <- calc_segments_short(augment_df, segment_df, homoloss=0)
+  filter_segments_short(result_df, eviltwins = c("CJA3204"))
+
+})
+
+test_that("filter_segments_short works as expected on CJA3182, CJA3183, CJA3204, with dropareas",  {
+
+  data_dir <- Sys.getenv("SGAINS_DATA")
+  short_file <- file.path(data_dir, "nyu003/results/nyu003.benign.1short20k.txt.gz")
+  expect_true(file.exists(short_file))
+
+  short_df <- load_table(short_file)
+
+  segment_file <- file.path(data_dir, "nyu003/CJA3182_183_204.uber/CJA3182_183_204.seg.txt.gz")
+  expect_true(file.exists(segment_file))
+  segment_df <- load_table(segment_file)
+
+  gc_df <- load_table(file.path(data_dir, "varbin_orig/varbin.gc.content.20k.bowtie.k50.hg19.txt.gz"))
+  assertthat::assert_that(assertthat::are_equal(nrow(gc_df), 20000))
+  gc_df$bin.chrom <- numeric_chrom(gc_df$bin.chrom)
+
+  gc_df <- gc_df[-badbins.20k$V1, ]
+  augment_df <- augment_gc(gc_df, segment_df)
+
+  result_df <- calc_segments_short(augment_df, segment_df, homoloss=0)
+  filter_segments_short(result_df, dropareas = dropareas)
+
+})

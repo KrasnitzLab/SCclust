@@ -121,6 +121,7 @@ censored<-(tshort[,"chromstart"]>=dropareas[tshort[,"chrom"],"from"])&
 censoredtoo<-(which(censored)+1)[(which(censored)+1)<=nrow(tshort)]
 censored[censoredtoo]<-((tshort[censoredtoo,"chrom"]==tshort[censoredtoo-1,"chrom"])&
 	(tshort[censoredtoo,"profid"]==tshort[censoredtoo-1,"profid"]))|censored[censoredtoo]
+
 dtshort<-cbind(tshort[,c("profid","chrom")],tshort[,"segstarts"]-smear,
 	tshort[,"segstarts"]+smear, sign(tshort[,"cvals"]-c(0,tshort[-nrow(tshort),"cvals"])))
 dimnames(dtshort)[[2]]<-c("profid","chrom","bpstart","bpend","bpsign")

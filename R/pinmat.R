@@ -70,6 +70,24 @@ calc_ploidies <- function(gc_df, segment_df, a=NULL) {
   return(ploidies)
 }
 
-filter_segments_short <- function(short_df, ploidies_df, eviltwins=NULL, dropareas=NULL) {
+filter_segments_short <- function(short_df, eviltwins=NULL, dropareas=NULL) {
+  # print(head(short_df))
+  good_cells <- unique(short_df[,"profid"])
+  print(good_cells)
+  print(dim(short_df))
+  if(!is.null(eviltwins)) {
+    good_cells <- setdiff(good_cells, eviltwins)
+    short_df <- short_df[short_df[, "profid"] %in% good_cells, ]
+  }
+  print(good_cells)
+  print(dim(short_df))
 
+  if(!is.null(dropareas)) {
+    censored <- ((short_df[,"chromstart"]>=dropareas[short_df[,"chrom"],"from"]) &
+                   (short_df[,"chromend"]<=dropareas[short_df[,"chrom"],"to"]))
+    censoredtoo <- (which(censored)+1)[(which(censored)+1)<=nrow(short_df)]
+
+    censored[censoredtoo] <- ((short_df[censoredtoo,"chrom"]==short_df[censoredtoo-1,"chrom"])&
+                                (short_df[censoredtoo,"profid"]==short_df[censoredtoo-1,"profid"])) | censored[censoredtoo]
+  }
 }
