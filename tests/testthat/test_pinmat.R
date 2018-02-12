@@ -20,7 +20,7 @@ test_that("calc_segments_short works as expected on CJA3182 and CJA3183", {
 
   augment_df <- augment_gc(gc_df, segment_df)
 
-  result_df <- calc_segments_short(augment_df, segment_df, good_only=F)
+  result_df <- calc_segments_short(augment_df, segment_df, homoloss=0)
 
   for(cell in c("CJA3182", "CJA3183")) {
     t1_df <- short_df[short_df$profid == cell,]
@@ -87,7 +87,7 @@ test_that("calc_segments_short works as expected on CJA3182, CJA3183, CJA3204, g
 
   augment_df <- augment_gc(gc_df, segment_df)
 
-  result_df <- calc_segments_short(augment_df, segment_df, good_only=F)
+  result_df <- calc_segments_short(augment_df, segment_df, homoloss=0)
 
   for(cell in c("CJA3182", "CJA3183", "CJA3204")) {
     t1_df <- short_df[short_df$profid == cell,]
@@ -127,7 +127,7 @@ test_that("calc_segments_short works as expected on CJA3182, CJA3183, CJA3204, g
 
   augment_df <- augment_gc(gc_df, segment_df)
 
-  result_df <- calc_segments_short(augment_df, segment_df, good_only=T)
+  result_df <- calc_segments_short(augment_df, segment_df)
 
   expect_true(nrow(result_df[result_df$profid == "CJA3204", ]) == 0)
 
