@@ -11,27 +11,27 @@ assertthat::assert_that(file.exists(nyu003_scgv_dir))
 CJA3182_varbin_df <- load_table(file.path(nyu003_varbin_dir, "CJA3182.varbin.20k.txt.gz"))
 assertthat::are_equal(nrow(CJA3182_varbin_df), 20000)
 
-segment_df <- load_table(file.path(nyu003_scgv_dir, "uber.hg19.nyu003.benign.1.20k.seg.quantal.R.seg.txt"))
+segment_df <- load_table(file.path(nyu003_scgv_dir, "uber.hg19.nyu003.benign.1.20k.seg.quantal.R.seg.txt.gz"))
 assertthat::are_equal(nrow(segment_df), 19943)
 
 colnames(segment_df)
 
-CJA3182_segment_df <- segment_df[c("chrom", "chrompos", "abspos", "CJA3182")]
+CJA3182_segment_df <- segment_df[c("chrom", "chrompos", "abspos", "CJA3182", "CJA3183")]
 colnames(CJA3182_segment_df)
 dim(CJA3182_segment_df)
 
-seg_filename <- file.path(data_dir, "nyu003/segmented/CJA3182.seg.txt")
+seg_filename <- file.path(data_dir, "nyu003/CJA3182_3.uber/CJA3182_3.seg.txt")
 write.table(CJA3182_segment_df, file=seg_filename, row.names = F, col.names = T, quote = F, sep="\t")
 
-ratio_df <- load_table(file.path(nyu003_scgv_dir, "uber.hg19.nyu003.benign.1.20k.lowratio.quantal.R.ratio.txt"))
+ratio_df <- load_table(file.path(nyu003_scgv_dir, "uber.hg19.nyu003.benign.1.20k.lowratio.quantal.R.ratio.txt.gz"))
 dim(ratio_df)
 colnames(ratio_df)
 assertthat::are_equal(nrow(ratio_df), 19943)
 
-CJA3182_ratio_df <- ratio_df[c("chrom", "chrompos", "abspos", "CJA3182")]
+CJA3182_ratio_df <- ratio_df[c("chrom", "chrompos", "abspos", "CJA3182", "CJA3183")]
 dim(CJA3182_ratio_df)
 
-ratio_filename <- file.path(data_dir, "nyu003/segmented/CJA3182.ratio.txt")
+ratio_filename <- file.path(data_dir, "nyu003/CJA3182_3.uber/CJA3182_3.ratio.txt")
 write.table(CJA3182_ratio_df, file=ratio_filename, row.names = F, col.names = T, quote = F, sep="\t")
 
 gc_df <- load_table(file.path(data_dir, "varbin_orig/varbin.gc.content.20k.bowtie.k50.hg19.txt.gz"))

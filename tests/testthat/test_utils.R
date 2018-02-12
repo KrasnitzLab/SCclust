@@ -32,6 +32,6 @@ test_that("badbins are constructed", {
   gc <- load_table(gc_file)
 
   result <- calc_badbins(gc, centroareas)
-  print(result)
+  # print(result)
 
 })
