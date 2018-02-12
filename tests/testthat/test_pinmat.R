@@ -33,6 +33,8 @@ test_that("calc_segments_short works as expected on CJA3182 and CJA3183", {
   expect_true(all(t1_df$absend == t2_df$absend))
   expect_true(all(t1_df$segstart == t2_df$segstart))
   expect_true(all(t1_df$segend == t2_df$segend))
+  expect_true(all(t1_df$segvals == t2_df$segvals))
+  expect_true(all(t1_df$cvals == t2_df$cvals))
 
 })
 
