@@ -40,3 +40,21 @@ calc_segments_short <- function(gc_df, segment_df) {
   tshort <- data.frame(I(profid), segloc, segstarts, segends, segbins, segvals)
   return(tshort)
 }
+
+calc_ploidies <- function(gc_df, segment_df) {
+
+  a <- round(as.matrix(segment_df[,-(1:3)]))
+  getmode<-function(x) as.numeric(names(which.max(tapply(X=x,INDEX=as.factor(x), FUN=length))))
+  ploidymod<-apply(a[gc_df[,"chrom"]<23,],2,getmode)
+  ploidymed<-apply(a[gc_df[,"chrom"]<23,],2,median)
+  ploidychromod<-apply(
+    a[gc_df[,"chrom"]<23,], 2, modeofmodes,
+    otherlabel=gc_df[gc_df[,"chrom"]<23,"chrom"],
+    tiebreaker=2,tiebreakerside="greater")
+  homoloss<-colSums(!a[gc_df[,"chrom"]<23,])/
+    sum(gc_df[,"chrom"]<23)
+  ploidies <- cbind(ploidymed, ploidymod, ploidychromod, homoloss)
+  return(ploidies)
+}
+
+
