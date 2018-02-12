@@ -370,4 +370,9 @@ cbs.segment01 <- function(indir, outdir, varbin.gc, varbin.data, sample.name, al
 
 }
 
-cbs.segment01(indir="/mnt/wigstore3/user/alexande/nyu003/hg19.50k/processed", outdir="/mnt/wigstore3/user/alexande/nyu003/hg19.50k/processed.v2", varbin.gc="/mnt/wigclust5/data/safe/kendall/sequences/varbin.gc.content.20k.bowtie.k50.hg19.txt", varbin.data="CJA3182.varbin.20k.txt", sample.name="CJA3182", alt.sample.name="FC64BEMAAXX lane 8 FA014 A1 bc1 NYU_003_5_PBXW0032 2C", alpha=0.05, nperm=1000, undo.SD=1.0, min.width=5)
+cbs.segment01(
+  indir="/mnt/wigstore3/user/alexande/nyu003/hg19.50k/processed",
+  outdir="/mnt/wigstore3/user/alexande/nyu003/hg19.50k/processed.v2",
+  varbin.gc="/mnt/wigclust5/data/safe/kendall/sequences/varbin.gc.content.20k.bowtie.k50.hg19.txt",
+  varbin.data="CJA3182.varbin.20k.txt",
+  sample.name="CJA3182", alt.sample.name="FC64BEMAAXX lane 8 FA014 A1 bc1 NYU_003_5_PBXW0032 2C", alpha=0.05, nperm=1000, undo.SD=1.0, min.width=5)

@@ -151,15 +151,17 @@ sdundo.all <- function (sdShort, ratioData, sd.undo) {
 }
 
 
-cbs.segment01 <- function(indir, outdir, varbin.gc, varbin.data, sample.name, alt.sample.name, alpha, nperm, undo.SD, min.width) {
-	gc <- read.table(varbin.gc, header=T)
+cbs.segment01 <- function(indir, outdir, gc_df, data_df, sample.name, alt.sample.name, alpha, nperm, undo.SD, min.width) {
+	# gc <- read.table(varbin.gc, header=T)
+  gc <- gc_df
 
 	chrom.numeric <- substring(gc$bin.chrom, 4)
 	chrom.numeric[which(gc$bin.chrom == "chrX")] <- "23"
 	chrom.numeric[which(gc$bin.chrom == "chrY")] <- "24"
 	chrom.numeric <- as.numeric(chrom.numeric)
 
-	thisRatio <- read.table(paste(indir, varbin.data, sep="/"), header=F)
+	thisRatio <- data_df
+	# thisRatio <- read.table(paste(indir, varbin.data, sep="/"), header=F)
 	names(thisRatio) <- c("chrom", "chrompos", "abspos", "bincount", "ratio")
 	thisRatio$chrom <- chrom.numeric
 	a <- thisRatio$bincount + 1
@@ -258,48 +260,54 @@ assertthat::assert_that(file.exists(indir))
 varbin_gc_file = file.path(data_dir, "varbin_orig/varbin.gc.content.20k.bowtie.k50.hg19.txt.gz")
 assertthat::assert_that(file.exists(varbin_gc_file))
 
-ratio_data <-cbs.segment01(
-  indir=indir,
-  outdir=outdir,
-  varbin.gc=varbin_gc_file,
-  varbin.data="CJA3182.varbin.20k.txt",
-  sample.name="CJA3182",
-  alt.sample.name="FC64BEMAAXX lane 8 FA014 A1 bc1 NYU_003_5_PBXW0032 2C",
-  alpha=0.05, nperm=1000, undo.SD=1.0, min.width=5)
+gc_df <- load_table(varbin_gc_file)
 
-gc <- load_table(varbin_gc_file)
 varbin_file <- file.path(indir, "CJA3182.varbin.20k.txt")
 assertthat::assert_that(file.exists(varbin_file))
+data_df <- read.table(varbin_file, header=F, as.is=T)
+names(data_df) <- c("chrom", "chrompos", "abspos", "bincount", "ratio")
 
-varbin_data <- read.table(varbin_file, header=F, as.is=T)
-names(varbin_data) <- c("chrom", "chrompos", "abspos", "bincount", "ratio")
-varbin_data$gc.content <- gc$gc.content
 
-out_data <- cbs.segment_1(varbin_data, gc, alpha=0.05, nperm=1000, undo.SD=1.0, min.width = 5)
-head(out_data)
-head(ratio_data)
+nobad_data_df <- data_df[-badbins.20k$V1,]
+nobad_gc_df <- gc_df[-badbins.20k$V1,]
 
-assertthat::assert_that(all(ratio_data$ratio.quantal - out_data$ratio.quantal < 1e-9))
-assertthat::assert_that(all(ratio_data$seg.quantal - out_data$seg.quantal <1e-9))
+res_df <- cbs.segment01(
+  indir=indir,
+  outdir=outdir,
+  gc_df=gc_df,
+  data_df=data_df,
+  sample.name="CJA3182",
+  alt.sample.name="FC64BEMAAXX lane 8 FA014 A1 bc1 NYU_003_5_PBXW0032 2C",
+  alpha=0.05,
+  nperm=1000,
+  undo.SD=1.0,
+  min.width=5)
 
-cytofile<-"./annot/cytoBandHG19.txt"
-centromere<-c("p11","q11")
-chromrange<-1:22
+nobad_res_df <- cbs.segment01(
+  indir=indir,
+  outdir=outdir,
+  gc_df=nobad_gc_df,
+  data_df=nobad_data_df,
+  sample.name="CJA3182",
+  alt.sample.name="FC64BEMAAXX lane 8 FA014 A1 bc1 NYU_003_5_PBXW0032 2C",
+  alpha=0.05,
+  nperm=1000,
+  undo.SD=1.0,
+  min.width=5)
 
-cyto<-read.table(cytofile,header=F,as.is=T)
-cyto[cyto[,1]=="chrX",1]<-"chr23"
-cyto[cyto[,1]=="chrY",1]<-"chr24"
-cyto[,1]<-as.numeric(substring(cyto[,1],first=4,last=nchar(cyto[,1])))
-cyto<-cyto[order(cyto[,1]),]
-centroleft<-cyto[grep(centromere[1],cyto[,4]),]
-centroright<-cyto[grep(centromere[2],cyto[,4]),]
-centroleft<-centroleft[match(unique(centroleft[,1]),centroleft[,1]),]
-centroright<-centroright[nrow(centroright):1,]
-centroright<-centroright[match(unique(centroright[,1]),centroright[,1]),]
-centroright<-centroright[nrow(centroright):1,]
-dropareas<-cbind(centroleft[,c(1,2)],centroright[,3])
-dimnames(dropareas)[[2]]<-c("chrom","from","to")
+uber_dir <- file.path(data_dir, "nyu003/CJA3182.uber")
+ratio_filename <- file.path(uber_dir, "CJA3182.ratio.txt.gz")
+assertthat::assert_that(file.exists(varbin_file))
 
-varbin_data$chrom <- numeric_chrom(varbin_data$chrom)
-head(varbin_data)
-head(dropareas)
+check_df <- load_table(ratio_filename)
+head(nobad_res_df)
+
+assertthat::assert_that(all(abs(check_df$CJA3182 - nobad_res_df$ratio.quantal) < 1e-2))
+
+seg_filename <- file.path(uber_dir, "CJA3182.seg.txt.gz")
+assertthat::assert_that(file.exists(varbin_file))
+
+check_df <- load_table(seg_filename)
+head(nobad_res_df)
+
+assertthat::assert_that(all(abs(check_df$CJA3182 - nobad_res_df$seg.quantal) < 1e0))
