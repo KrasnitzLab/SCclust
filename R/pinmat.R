@@ -15,7 +15,7 @@ augment_gc <- function(gc_df, df) {
   return(augment_df)
 }
 
-calc_segments_short <- function(gc_df, segment_df) {
+calc_segments_short <- function(gc_df, segment_df, good_only=T) {
   assertthat::assert_that(((typeof(gc_df$chrom) == "integer") | (typeof(gc_df$chrom) == "double")))
   assertthat::assert_that(typeof(segment_df$chrom) == "integer")
   assertthat::assert_that(all(colnames(gc_df) == c("chrom", "chromstart", "chromend", "absstart", "absend")))
@@ -40,12 +40,13 @@ calc_segments_short <- function(gc_df, segment_df) {
   tshort <- data.frame(I(profid), segloc, segstarts, segends, segbins, segvals)
 
   ploidies_df <- calc_ploidies(gc_df, segment_df, a)
-  print(dim(tshort))
-  print(dim(ploidies_df))
 
   tshort <- cbind(tshort, tshort[,"segvals"] - ploidies_df[tshort[,"profid"], "ploidychromod"])
   colnames(tshort)[ncol(tshort)] <- "cvals"
 
+  if(good_only) {
+    tshort <- tshort[tshort[,"profid"]%in%dimnames(ploidies_df)[[1]][ploidies_df[,"homoloss"]<0.01],]
+  }
   return(tshort)
 }
 
@@ -69,4 +70,6 @@ calc_ploidies <- function(gc_df, segment_df, a=NULL) {
   return(ploidies)
 }
 
+filter_segments_short <- function(short_df, ploidies_df, eviltwins=NULL, dropareas=NULL) {
 
+}
