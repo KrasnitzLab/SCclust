@@ -38,12 +38,24 @@ calc_segments_short <- function(gc_df, segment_df) {
   segloc <- cbind(gc_df[segstarts,c("chrom","chromstart","absstart")],
                   gc_df[segends,c("chromend","absend")])
   tshort <- data.frame(I(profid), segloc, segstarts, segends, segbins, segvals)
+
+  ploidies_df <- calc_ploidies(gc_df, segment_df, a)
+  print(dim(tshort))
+  print(dim(ploidies_df))
+
+  tshort <- cbind(tshort, tshort[,"segvals"] - ploidies_df[tshort[,"profid"], "ploidychromod"])
+  colnames(tshort)[ncol(tshort)] <- "cvals"
+
   return(tshort)
 }
 
-calc_ploidies <- function(gc_df, segment_df) {
+calc_ploidies <- function(gc_df, segment_df, a=NULL) {
+  if(is.null(a)) {
+    a <- round(as.matrix(segment_df[,-(1:3)]))
+  }
+  assertthat::assert_that(nrow(a) == nrow(segment_df))
+  assertthat::assert_that(ncol(a) + 3 == ncol(segment_df))
 
-  a <- round(as.matrix(segment_df[,-(1:3)]))
   getmode<-function(x) as.numeric(names(which.max(tapply(X=x,INDEX=as.factor(x), FUN=length))))
   ploidymod<-apply(a[gc_df[,"chrom"]<23,],2,getmode)
   ploidymed<-apply(a[gc_df[,"chrom"]<23,],2,median)
