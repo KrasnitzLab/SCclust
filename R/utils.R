@@ -18,7 +18,7 @@ calc_centroareas <- function(cyto) {
 }
 
 calc_badbins <- function(gc, centroareas) {
-  print(head(gc))
+  # print(head(gc))
 
   gc$chrom <- numeric_chrom(gc$bin.chrom)
 
@@ -26,12 +26,12 @@ calc_badbins <- function(gc, centroareas) {
   for(i in centroareas$chrom) {
     from <- centroareas[i,]$from
     to <- centroareas[i, ]$to
-    print(from)
-    print(to)
+    # print(from)
+    # print(to)
 
     df <- gc[gc$chrom == i, ]
     bad_df <- df[df$bin.start >= from && df$bin.end <= to, ]
-    print(bad_df)
+    # print(bad_df)
 
   }
 }
