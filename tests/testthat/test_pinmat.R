@@ -168,8 +168,9 @@ test_that("filter_segments_short works as expected on CJA3182, CJA3183, CJA3204,
   augment_df <- augment_gc(gc_df, segment_df)
 
   result_df <- calc_segments_short(augment_df, segment_df, homoloss=0)
-  filter_segments_short(result_df, eviltwins = c("CJA3204"))
-
+  res_df <- filter_evil_short(result_df, eviltwins = c("CJA3204"))
+  expect_true(!is.null(res_df))
+  expect_false("CJA3204" %in% colnames(res_df))
 })
 
 test_that("filter_segments_short works as expected on CJA3182, CJA3183, CJA3204, with dropareas",  {
@@ -192,6 +193,42 @@ test_that("filter_segments_short works as expected on CJA3182, CJA3183, CJA3204,
   augment_df <- augment_gc(gc_df, segment_df)
 
   result_df <- calc_segments_short(augment_df, segment_df, homoloss=0)
-  filter_segments_short(result_df, dropareas = dropareas)
+  res_df <- filter_dropareas_short(result_df, dropareas = dropareas)
+  expect_true(!is.null(res_df))
+
+})
+
+
+test_that("calc_smear_breakpoints works as expected", {
+
+  data_dir <- Sys.getenv("SGAINS_DATA")
+  short_filename <- file.path(data_dir, "nyu003/results/nyu003.benign.1shortGood20k.txt")
+  expect_true(file.exists(short_filename))
+
+  short_df <- load_table(short_filename)
+
+  censored_df <- calc_censored_index(short_df, dropareas)
+  smear_df <- calc_smear_breakpoints(short_df, censored_df)
+
+  expect_false(is.null(smear_df))
+
+  res <- calc_pinmat(short_df, smear_df)
+  expect_false(is.null(res))
+
+
+  pinmat_df <- res$pinmat
+
+  pinmat_filename <- file.path(data_dir, "nyu003/results/nyu003.benign.1smear1bpPinMat.txt")
+  expect_true(file.exists(pinmat_filename))
+  orig_df <- load_table(pinmat_filename)
+
+  expect_equal(pinmat_df, orig_df)
+
+  pins_filename <- file.path(data_dir, "nyu003/results/nyu003.benign.1smear1bpPins.txt")
+  expect_true(file.exists(pins_filename))
+  orig_df <- load_table(pins_filename)
+
+  pins_df <- res$pins
+  expect_equal(pins_df, orig_df)
 
 })

@@ -116,11 +116,14 @@ containment.indicator<-function(vstart,vend,wstart,wend){
 }
 goodCells<-setdiff(dimnames(ploidies)[[1]],eviltwins)
 tshort<-tshort[tshort[,"profid"]%in%goodCells,]
+
 censored<-(tshort[,"chromstart"]>=dropareas[tshort[,"chrom"],"from"])&
 	(tshort[,"chromend"]<=dropareas[tshort[,"chrom"],"to"])
 censoredtoo<-(which(censored)+1)[(which(censored)+1)<=nrow(tshort)]
 censored[censoredtoo]<-((tshort[censoredtoo,"chrom"]==tshort[censoredtoo-1,"chrom"])&
 	(tshort[censoredtoo,"profid"]==tshort[censoredtoo-1,"profid"]))|censored[censoredtoo]
+
+# tshort <- tshort[!censored,]
 
 dtshort<-cbind(tshort[,c("profid","chrom")],tshort[,"segstarts"]-smear,
 	tshort[,"segstarts"]+smear, sign(tshort[,"cvals"]-c(0,tshort[-nrow(tshort),"cvals"])))
@@ -128,8 +131,7 @@ dimnames(dtshort)[[2]]<-c("profid","chrom","bpstart","bpend","bpsign")
 ustart<-tshort[match(unique(tshort[,"chrom"]),tshort[,"chrom"]),"segstarts"]
 uend<-c((ustart-1)[-1],tshort[nrow(tshort),"segends"])
 if(!keepboundaries){
-	dtshort<-dtshort[((dtshort[,"bpstart"]+smear)>
-	ustart[dtshort[,"chrom"]])&!censored,]
+	dtshort<-dtshort[((dtshort[,"bpstart"]+smear) > ustart[dtshort[,"chrom"]])&!censored,]
 	dtshort[dtshort[,"bpstart"]<ustart[dtshort[,"chrom"]],"bpstart"]<-
 	ustart[dtshort[dtshort[,"bpstart"]<ustart[dtshort[,"chrom"]],"chrom"]]
 	dtshort[dtshort[,"bpend"]>uend[dtshort[,"chrom"]],"bpend"]<-
@@ -151,9 +153,9 @@ for(vsign in allsigns){
 		a<-a[!(a[,"bpstart"]<=apins[length(apins)]&a[,"bpend"]>=apins[length(apins)]),,drop=F]
 	}
 	a<-dtshort[dtshort[,"bpsign"]==vsign,]
-	ci<-containment.indicator(apins,apins,a[order(a[,"bpend"]),"bpstart"],a[order(a[,"bpend"]),
-		"bpend"])
+	ci<-containment.indicator(apins,apins,a[order(a[,"bpend"]),"bpstart"],a[order(a[,"bpend"]),"bpend"])
 	a<-cbind(a[order(a[,"bpend"]),],ci)
+
 	dimnames(a)[[2]][(ncol(a)-1):ncol(a)]<-c("startpin","endpin")
 	apinmat<-matrix(ncol=length(unique(tshort[,"profid"])),nrow=length(apins)+2,data=0,
 		dimnames=list(NULL,unique(tshort[,"profid"])))
