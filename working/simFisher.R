@@ -58,6 +58,7 @@ FisherCombo <- function(p) {
 
 simFisher<-function(m,nsim,nsweep,seedme,distrib=c("vanilla","Rparallel"),njobs=1,
 	combo=c("Fisher","Stouffer")){
+
 	RNGkind("L'Ecuyer-CMRG")
 	set.seed(seedme)
 	distrib<-match.arg(distrib)

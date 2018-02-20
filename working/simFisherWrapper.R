@@ -20,3 +20,4 @@ write(vtrue,file=truefile)
 msim <- simFisher(m,nsim=500,nsweep=200,seedme=123,distrib="Rparallel",njobs=usecores,combo="Fisher")
 write(msim,file=simfile)
 # quit(save="no")
+
