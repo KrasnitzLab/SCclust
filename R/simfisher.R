@@ -64,17 +64,15 @@ sim_fisher<-function(m, nsim, nsweep, seedme, distrib=c("vanilla","Rparallel"), 
   assertthat::assert_that(is.list(m))
   assertthat::assert_that(distrib=="Rparallel")
 
+  ncores <- min(njobs, parallel::detectCores())
+  cl <- parallel::makeCluster(getOption("cl.cores",ncores))
+  parallel::clusterSetRNGStream(cl)
+
   RNGkind("L'Ecuyer-CMRG")
   set.seed(seedme)
 
   distrib<-match.arg(distrib)
   combo<-match.arg(combo)
-
-  if(distrib=="Rparallel"){
-    ncores <- min(njobs, parallel::detectCores())
-    cl <- parallel::makeCluster(getOption("cl.cores",ncores))
-    parallel::clusterSetRNGStream(cl)
-  }
 
   rf<-lapply(m,rowMeans)
   tp<-matrix(ncol=nsim,nrow=ncol(m[[1]])*(ncol(m[[1]])-1)/2)
@@ -83,23 +81,19 @@ sim_fisher<-function(m, nsim, nsweep, seedme, distrib=c("vanilla","Rparallel"), 
   for(i in 1:nsim){
     for(j in 1:length(m)){
       if(nsweep>0){
-        if(distrib=="Rparallel"){
-          m[[j]]<-
-            parallel::parApply(
-              cl=cl, X=m[[j]], MARGIN=2,
-              FUN=metro, p=rf[[j]], sweeps=nsweep)
-        }
+        m[[j]] <- parallel::parApply(
+            cl=cl, X=m[[j]], MARGIN=2,
+            FUN=metro, p=rf[[j]], sweeps=nsweep)
       }
 
       yy<-t(m[[j]])%*%m[[j]]
       ny<-t(1-m[[j]])%*%m[[j]]
       nn<-t(1-m[[j]])%*%(1-m[[j]])
 
-      if(distrib=="Rparallel"){
-        lbi<-1:nrow(yy)
-        lbi[lbi%%2==0]<-nrow(yy)+2-nrow(yy)%%2-lbi[lbi%%2==0]
-        x<-parallel::parSapply(cl,X=lbi,FUN=fast_fisher,yy=yy,ny=ny,nn=nn)[,order(lbi)]
-      }
+      lbi<-1:nrow(yy)
+      lbi[lbi%%2==0]<-nrow(yy)+2-nrow(yy)%%2-lbi[lbi%%2==0]
+      x<-parallel::parSapply(cl,X=lbi,FUN=fast_fisher,yy=yy,ny=ny,nn=nn)[,order(lbi)]
+
       x<-pmin(x,t(x))
       xmat[,j]<-x[upper.tri(x)]
     }
@@ -112,6 +106,13 @@ sim_fisher<-function(m, nsim, nsweep, seedme, distrib=c("vanilla","Rparallel"), 
       Z<-colSums(apply(1-xmat,1,qnorm))/sqrt(ncol(xmat))
       tp[,i]<-1-sapply(Z,pnorm)
     }
+#    simfile <- paste(
+#      "/home/lubo/Work/data-single-cell/simfisher_testing/",
+#      "sim_fisher_test_",
+#      i, "_of_", nsim, "_by_", nsweep,
+#      "_simP.txt",sep="")
+#    print(simfile)
+#    write(tp,file=simfile)
   }
   parallel::stopCluster(cl)
   return(tp)
