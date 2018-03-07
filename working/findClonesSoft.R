@@ -1,4 +1,7 @@
-#Please edit the filenames so you can read and save
+library(devtools)
+devtools::load_all()
+
+# Please edit the filenames so you can read and save
 source("./hcClimbNew.R")
 source("./TreePy.R")
 
@@ -25,7 +28,7 @@ pinmatfile <- file.path(data_dir, "cor002/results", "GL6.1smear1bpPinMat.txt")
 assertthat::assert_that(file.exists(simfile))
 
 pinmat <- load_table(pinmatfile)
-cellsnames <- uber_cells(pinmat, skip=0)
+cellnames <- uber_cells(pinmat, skip=0)
 
 pinmat<-pinmat[rowSums(pinmat)<ncol(pinmat),,drop=F]
 log10data<-F	#I.e.,expect to read p-values, not log p-values
@@ -49,12 +52,12 @@ ctrue<-tapply(match(svtrue,usvtrue),match(svtrue,usvtrue),length)
 #such cases get a power-law fit to the low-p tail of the null CDF and use it to extrapolate to very
 #low p-values. Use the actual null CDF to estimate FDR for higher p-values.
 mylm<-lm(log(cumsum(csim[(cumsum(csim)/sum(csim))<lmmax])/sum(csim))~
-	log(usmsim[(cumsum(csim)/sum(csim))<lmmax]))
+	            log(usmsim[(cumsum(csim)/sum(csim))<lmmax]))
 if(exists("mylm"))logfdrmod<-
-	mylm$coefficients[2]*log(usvtrue)+mylm$coefficients[1]-log(cumsum(ctrue)/sum(ctrue))
+	        mylm$coefficients[2]*log(usvtrue)+mylm$coefficients[1]-log(cumsum(ctrue)/sum(ctrue))
 if(graphic){
 	curve(exp(mylm$coefficients[1]+mylm$coefficients[2]*log(x)),from=min(usvtrue),to=max(usvtrue),
-		log="xy")
+		    log="xy")
 	points(usmsim,cumsum(csim)/sum(csim))
 	points(usvtrue,cumsum(ctrue)/sum(ctrue),col="red")
 }
@@ -62,7 +65,7 @@ if(graphic){
 #for usvtrue, while empirical simulated CDF only for usmsim. Where possible, find empirical CDF for
 #usvtrue by linear interpolation from the flanking values of usmsim.
 z<-cbind(c(log(usvtrue),log(usmsim)),c(log(cumsum(ctrue)/sum(ctrue)),log(cumsum(csim)/sum(csim))),
-	c(rep(0,length(usvtrue)),rep(1,length(usmsim))))
+	    c(rep(0,length(usvtrue)),rep(1,length(usmsim))))
 z<-z[order(z[,1]),]
 simlow<-cumsum(z[,3])[z[,3]==0]
 x1pos<-match(simlow,cumsum(z[,3]))[simlow>0]
@@ -73,16 +76,17 @@ y1<-z[x1pos,2]
 y2<-z[x2pos,2]
 logfdrinterp<-rep(0,length(usvtrue))
 logfdrinterp[simlow>0]<-(y2-y1)*log(usvtrue)[simlow>0]/(x2-x1)+(y1*x2-y2*x1)/(x2-x1)-
-	log(cumsum(ctrue)/sum(ctrue))[simlow>0]
+	    log(cumsum(ctrue)/sum(ctrue))[simlow>0]
 logfdr<-logfdrinterp
 lmu<-max(usmsim[(cumsum(csim)/sum(csim))<lmmax])
 if(is.finite(lmu)&min(usvtrue)<min(usmsim)){
-	logfdr[usvtrue<lmu&usvtrue>min(usmsim)]<-
-		(logfdrmod[usvtrue<lmu&usvtrue>min(usmsim)]*
-		(log(lmu)-log(usvtrue[usvtrue<lmu&usvtrue>min(usmsim)]))-
-		logfdrinterp[usvtrue<lmu&usvtrue>min(usmsim)]*
-		(log(min(usmsim))-log(usvtrue[usvtrue<lmu&usvtrue>min(usmsim)])))/(log(lmu)-log(min(usmsim)))
-	logfdr[usvtrue<min(usmsim)]<-logfdrmod[usvtrue<min(usmsim)]
+    logfdr[usvtrue<lmu&usvtrue>min(usmsim)]<-
+                (logfdrmod[usvtrue<lmu&usvtrue>min(usmsim)]*
+                        (log(lmu)-log(usvtrue[usvtrue<lmu&usvtrue>min(usmsim)]))-
+                        logfdrinterp[usvtrue<lmu&usvtrue>min(usmsim)]*
+                        (log(min(usmsim))-
+                            log(usvtrue[usvtrue<lmu&usvtrue>min(usmsim)])))/(log(lmu)-log(min(usmsim)))
+    logfdr[usvtrue<min(usmsim)]<-logfdrmod[usvtrue<min(usmsim)]
 }
 logfdr<-cummax(logfdr)
 logfdr[logfdr>0]<-0
@@ -91,7 +95,12 @@ logfdrlong<-logfdr[match(vtrue,usvtrue)]
 mdist<-matrix(ncol=(1+sqrt(1+8*length(vtrue)))/2,nrow=(1+sqrt(1+8*length(vtrue)))/2,data=0)
 mdist[upper.tri(mdist)]<-log10(vtrue)
 mdist<-pmin(mdist,t(mdist))
+
+print(dim(mdist))
+print(dim(cellnames))
+
 dimnames(mdist)<-list(cellnames,cellnames)
+
 mfdr<-matrix(ncol=(1+sqrt(1+8*length(vtrue)))/2,nrow=(1+sqrt(1+8*length(vtrue)))/2,data=0)
 mfdr[upper.tri(mfdr)]<-logfdrlong/log(10)
 mfdr<-pmin(mfdr,t(mfdr))
@@ -116,18 +125,26 @@ labellist<-vector(mode="list",length=nrow(hc$merge))
 sharing<-matrix(ncol=nrow(hc$merge),nrow=nrow(pinmat))
 complexity<-rep(NA,nrow(hc$merge)) #Mean number of features per leaf in a node
 for(i in 1:nrow(hc$merge)){
-	if(hc$merge[i,1]<0)leaflist[[i]]<-(-hc$merge[i,1])
-	else leaflist[[i]]<-leaflist[[hc$merge[i,1]]]
-	if(hc$merge[i,2]<0)leaflist[[i]]<-c(leaflist[[i]],(-hc$merge[i,2]))
-	else leaflist[[i]]<-c(leaflist[[i]],leaflist[[hc$merge[i,2]]])
-	labellist[[i]]<-hc$labels[leaflist[[i]]]
-	complexity[i]<-mean(colSums(pinmat[,labellist[[i]]]))
-	sharing[,i]<-rowMeans(pinmat[,labellist[[i]]])
-	nodesize[i]<-length(leaflist[[i]])
-	mergefdr[i]<-
-		max(mfdr[leaflist[[i]],leaflist[[i]]][upper.tri(mfdr[leaflist[[i]],leaflist[[i]]])])
-	meanfdr[i]<-
-		mean(mfdr[leaflist[[i]],leaflist[[i]]][upper.tri(mfdr[leaflist[[i]],leaflist[[i]]])])
+	if(hc$merge[i,1]<0){
+        leaflist[[i]]<-(-hc$merge[i,1])
+    } else {
+        leaflist[[i]]<-leaflist[[hc$merge[i,1]]]
+    }
+    if(hc$merge[i,2]<0){
+        leaflist[[i]]<-c(leaflist[[i]],(-hc$merge[i,2]))
+    } else {
+        leaflist[[i]]<-c(leaflist[[i]],leaflist[[hc$merge[i,2]]])
+    }
+    labellist[[i]]<-hc$labels[leaflist[[i]]]
+    complexity[i]<-mean(colSums(pinmat[,labellist[[i]]]))
+    sharing[,i]<-rowMeans(pinmat[,labellist[[i]]])
+    nodesize[i]<-length(leaflist[[i]])
+    mergefdr[i]<-
+        max(mfdr[leaflist[[i]],leaflist[[i]]][
+                        upper.tri(mfdr[leaflist[[i]],leaflist[[i]]])])
+    meanfdr[i]<-
+        mean(mfdr[leaflist[[i]],leaflist[[i]]][
+                        upper.tri(mfdr[leaflist[[i]],leaflist[[i]]])])
 }
 hc$mergefdr<-mergefdr
 hc$meanfdr<-meanfdr
@@ -165,7 +182,7 @@ hc$sharemin<-sharemin
 hc$nshare<-nshare
 rm(clonenodes,shareacross)
 if(!is.null(hc$clonenodes))hc$softclones<-hcClimb(hc,minsize=climbfromsize,
-	minshare=climbtoshare+hc$shareacross[nrow(hc$merge)])
+	        minshare=climbtoshare+hc$shareacross[nrow(hc$merge)])
 cloneleaves<-unique(unlist(hc$leaflist[hc$softclones["hard",]]))
 if(usesoft)cloneleaves<-unique(unlist(hc$leaflist[hc$softclones["soft",]]))
 # coreid<-jguide[match(newcellnames,jguide[,"seq.unit.id"]),"sector"][cloneleaves]
@@ -188,10 +205,10 @@ assign(hcname,hc)
 save(list=hcname,file=file.path(output_dir,paste(hcname,".rda",sep="")))
 
 write.table(mdist,file.path(output_dir, paste(casename,"smear1bpLog10FisherP.txt",sep="")),
-            col.names=T,
-	          row.names=T,sep="\t",quote=F)
+        col.names=T,
+	    row.names=T,sep="\t",quote=F)
 write.table(mfdr,file.path(output_dir, paste(casename,"smear1bpLog10FisherFDR.txt",sep="")),
-	          col.names=T,row.names=T,sep="\t",quote=F)
+	    col.names=T,row.names=T,sep="\t",quote=F)
 write.table(pytableP, file.path(output_dir, paste(casename,"smear1bpFisherTreePyP.txt", sep="")),
-            col.names=T,
-	          row.names=F,sep="\t",quote=F)
+        col.names=T,
+	    row.names=F,sep="\t",quote=F)
