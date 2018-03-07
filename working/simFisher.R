@@ -1,6 +1,6 @@
-#kXk matrices yy, ny, t(ny) and nn contain matrix elements [1,1], [2,1], [1,2] and [2,2] of 
+#kXk matrices yy, ny, t(ny) and nn contain matrix elements [1,1], [2,1], [1,2] and [2,2] of
 #the 2X2 contingency tables for all possible combinations of k variables. For a variable i
-#return its Fisher exact p-values with variables j>=i. 
+#return its Fisher exact p-values with variables j>=i.
 fastFisher<-function(i,yy,ny,nn){
 	ftp<-rep(1,nrow(yy))
 	for(j in i:nrow(yy))ftp[j]<-fisher.test(matrix(nrow=2,ncol=2,
@@ -35,7 +35,7 @@ metro<-function(x,p,sweeps){
   return(x)
 }
 
-#Stouffer and Fisher combos come courtesy of Wikipedia: 
+#Stouffer and Fisher combos come courtesy of Wikipedia:
 #http://en.wikipedia.org/wiki/Fisher's_method . I only changed the function names.
 StoufferCombo <- function(p, w) { # p is a vector of p-values
   if (missing(w)) {
@@ -44,12 +44,12 @@ StoufferCombo <- function(p, w) { # p is a vector of p-values
     if (length(w) != length(p))
       stop("Length of p and w must equal!")
   }
-  Zi <- qnorm(1-p) 
+  Zi <- qnorm(1-p)
   Z  <- sum(w*Zi)/sqrt(sum(w^2))
   p.val <- 1-pnorm(Z)
   return(c(Z = Z, p.value = p.val))
 }
- 
+
 FisherCombo <- function(p) {
   Xsq <- -2*sum(log(p))
   p.val <- pchisq(Xsq, df = 2*length(p),lower.tail=FALSE)
@@ -57,7 +57,7 @@ FisherCombo <- function(p) {
 }
 
 simFisher<-function(m,nsim,nsweep,seedme,distrib=c("vanilla","Rparallel"),njobs=1,
-	combo=c("Fisher","Stouffer")){
+	combo=c("Fisher","Stouffer"), savedir=NULL){
 
 	RNGkind("L'Ecuyer-CMRG")
 	set.seed(seedme)
@@ -89,10 +89,10 @@ simFisher<-function(m,nsim,nsweep,seedme,distrib=c("vanilla","Rparallel"),njobs=
 				x<-parallel::parSapply(cl,X=lbi,FUN=fastFisher,yy=yy,ny=ny,nn=nn)[,order(lbi)]
 			}
 			x<-pmin(x,t(x))
-			xmat[,j]<-x[upper.tri(x)]	
+			xmat[,j]<-x[upper.tri(x)]
 		}
 		if(length(m)==1)tp[,i]<-xmat[,1]
-		else{ 
+		else{
 			if(combo=="Fisher"){
   			Xsq <- -2*rowSums(log(xmat))
 				tp[,i]<-sapply(Xsq,pchisq,df=2*ncol(xmat),lower.tail=FALSE)
@@ -102,7 +102,16 @@ simFisher<-function(m,nsim,nsweep,seedme,distrib=c("vanilla","Rparallel"),njobs=
   			tp[,i]<-1-sapply(Z,pnorm)
 			}
 		}
-	}	
+		if(!is.null(savedir)) {
+      simfile <- paste(
+        savedir,
+        "sim_fisher_test_",
+        i, "_of_", nsim, "_by_", nsweep,
+        "_simP.txt",sep="")
+      print(simfile)
+      write(tp,file=simfile)
+		}
+	}
 	parallel::stopCluster(cl)
 	#dump results
 	return(tp)

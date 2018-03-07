@@ -179,7 +179,7 @@ pytableP<-TreePy(data=as.dist(mdist),method="average")
 pytableP<-cbind(pytableP,hc$mergefdr)
 dimnames(pytableP)[[2]][ncol(pytableP)]<-"log10fdr"
 
-output_dir <- "./out/cor002"
+output_dir <- "./out/cor002.1"
 casename <- "GL6.1"
 filenames <- case_filenames(output_dir, casename)
 
