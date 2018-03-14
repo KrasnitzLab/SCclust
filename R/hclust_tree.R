@@ -20,10 +20,10 @@ hclust_tree <- function(pinmat, mat_fdr, mat_dist, hc_method = "average"){
   hc <- hclust(as.dist(mat_dist), method = hc_method)
 
   #Leaf indices for each node, in the order of the original labels
-  leafID_list <- vector(mode = "list", length = nrow(hc$merge))
+  leaflist <- vector(mode = "list", length = nrow(hc$merge))
 
   #Leaf lables for the node
-  leaflabel_list <- vector(mode = "list",length = nrow(hc$merge))
+  labellist <- vector(mode = "list",length = nrow(hc$merge))
 
   #Maximal pairwise FDR anywhere in the node
   maxfdr <- rep(NA, nrow(hc$merge))
@@ -45,26 +45,27 @@ hclust_tree <- function(pinmat, mat_fdr, mat_dist, hc_method = "average"){
   for(i in 1:nrow(hc$merge)){
 
     if(hc$merge[i, 1] < 0){
-      leafID_list[[i]] <- (-hc$merge[i,1])}
+      leaflist[[i]] <- (-hc$merge[i,1])}
     else{
-      leafID_list[[i]] <- leafID_list[[hc$merge[i,1]]]}
+      leaflist[[i]] <- leaflist[[hc$merge[i,1]]]}
 
     if(hc$merge[i, 2] < 0){
-      leafID_list[[i]] <- c(leafID_list[[i]], (-hc$merge[i,2]))}
+      leaflist[[i]] <- c(leaflist[[i]], (-hc$merge[i,2]))}
     else{
-      leafID_list[[i]] <- c(leafID_list[[i]], leafID_list[[hc$merge[i,2]]])}
+      leaflist[[i]] <- c(leaflist[[i]], leaflist[[hc$merge[i,2]]])}
 
-    leaflabel_list[[i]] <- hc$labels[leafID_list[[i]]]
+    labellist[[i]] <- hc$labels[leaflist[[i]]]
 
-    nodesize[i] <- length(leafID_list[[i]])
+    nodesize[i] <- length(leaflist[[i]])
 
-    maxfdr[i]<- max(mat_fdr[leafID_list[[i]], leafID_list[[i]]][upper.tri(mat_fdr[leafID_list[[i]], leafID_list[[i]]])])
+    maxfdr[i]<- max(mat_fdr[leaflist[[i]], leaflist[[i]]][upper.tri(mat_fdr[leaflist[[i]], leaflist[[i]]])])
 
-    meanfdr[i]<- mean(mat_fdr[leafID_list[[i]], leafID_list[[i]]][upper.tri(mat_fdr[leafID_list[[i]], leafID_list[[i]]])])
+    meanfdr[i]<- mean(mat_fdr[leaflist[[i]], 
+            leaflist[[i]]][upper.tri(mat_fdr[leaflist[[i]], leaflist[[i]]])])
 
-    complexity[i] <- mean(colSums(pinmat[,leaflabel_list[[i]]]))
+    complexity[i] <- mean(colSums(pinmat[,labellist[[i]]]))
 
-    sharing[,i] <- rowMeans(pinmat[,leaflabel_list[[i]]])
+    sharing[,i] <- rowMeans(pinmat[,labellist[[i]]])
   }
 
 
@@ -72,8 +73,8 @@ hclust_tree <- function(pinmat, mat_fdr, mat_dist, hc_method = "average"){
   hc$maxfdr <- maxfdr
   hc$meanfdr <- meanfdr
   hc$nodesize <- nodesize
-  hc$leaflist <- leafID_list
-  hc$labellist <- leaflabel_list
+  hc$leaflist <- leaflist
+  hc$labellist <- labellist
   hc$sharing <- sharing
   hc$complexity <- complexity
 
