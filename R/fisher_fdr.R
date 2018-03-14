@@ -81,14 +81,14 @@ fisher_fdr <- function(
           lmfit$coefficients[1] - log(cumsum(true_count)/sum(true_count))
   
   if(is.finite(lmu) & min(true_unique) < min(sim_unique)){
-    
-    logfdr[true_unique < lmu & true_unique > min(sim_unique)]<-
-              (logfdr_lmfit[true_unique < lmu & true_unique > min(sim_unique)]*
-                   (log(lmu) - log(true_unique[true_unique < lmu & true_unique > min(sim_unique)])) -
-                   logfdr[true_unique < lmu & true_unique > min(sim_unique)]*(log(min(sim_unique)) -
-            log(true_unique[true_unique < lmu & true_unique > min(sim_unique)])))/(log(lmu) - log(min(sim_unique)))
-    
-    logfdr[true_unique < min(sim_unique)] <- logfdr_lmfit[true_unique < min(sim_unique)]
+    interp_index <- true_unique < lmu & true_unique > min(sim_unique)
+    logfdr[interp_index]<-
+        (logfdr_lmfit[interp_index] * (log(lmu) - log(true_unique[interp_index])) -
+          logfdr[interp_index]*(log(min(sim_unique)) -
+            log(true_unique[interp_index])))/(log(lmu) - log(min(sim_unique)))
+
+    nointerp_index <- true_unique < min(sim_unique)
+    logfdr[nointerp_index] <- logfdr_lmfit[nointerp_index]
   }
   
   logfdr <- cummax(logfdr)
