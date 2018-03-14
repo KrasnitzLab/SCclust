@@ -25,8 +25,8 @@ load_table <- function(filename) {
 }
 
 uber_cells <- function(df, skip=3) {
-  cell <- colnames(df)[c((skip+1):ncol(df))]
-  return(data.frame(cell))
+  cells <- colnames(df)[c((skip+1):ncol(df))]
+  return(data.frame(cells))
 }
 
 cells_filename <- function(output_dir, casename) {
