@@ -13,8 +13,11 @@
 
 
 fisher_fdr <- function(
-        true_pv, sim_pv, cell_names, lm_max = 0.001){
+    true_pv, sim_pv, cell_names, lm_max = 0.001){
 
+  assertthat::assert_that(length(cell_names) == (1 + sqrt(1 + 8*length(true_pv)))/2)
+      
+      
   # Sort the true and the null data and get counts for each unique 
   # fisher pv value
   sim_sort <- sort(sim_pv)
@@ -94,20 +97,34 @@ fisher_fdr <- function(
   logfdr <- cummax(logfdr)
   logfdr[logfdr > 0] <- 0
   
-  logfdr_all <- logfdr[match(true_pv, true_unique)]  
+  logfdr_all <- logfdr[match(true_pv, true_unique)]
+#  size <- length(cell_names)
+#  mat_fdr <- matrix(ncol = size, nrow = size, data = 0)
+#  mat_fdr[upper.tri(mat_fdr)] <- logfdr_all
+#  mat_fdr <- pmin(mat_fdr,t(mat_fdr))
+#    
+#  colnames(mat_fdr) = rownames(mat_fdr) <- cell_names
+  mat_fdr <- cell2cell_matrix(logfdr_all/log(10), cell_names)  # ??log(10)
   
-  mat_fdr <- matrix(ncol = (1 + sqrt(1 + 8*length(true_pv)))/2,
-      nrow = (1 + sqrt(1 + 8*length(true_pv)))/2,data = 0)
-  mat_fdr[upper.tri(mat_fdr)] <- logfdr_all/log(10)     # ??log(10)
-  mat_fdr <- pmin(mat_fdr,t(mat_fdr))
-    
-  colnames(mat_fdr) = rownames(mat_fdr) <- cell_names
-  
-  mat_dist <- matrix(ncol = (1 + sqrt(1 + 8*length(true_pv)))/2,
-      nrow = (1 + sqrt(1 + 8*length(true_pv)))/2,data = 0)
-  mat_dist[upper.tri(mat_dist)] <- log10(true_pv)
-  mat_dist <- pmin(mat_dist,t(mat_dist))
-  colnames(mat_dist) = rownames(mat_dist) <- cell_names
+#  mat_dist <- matrix(ncol = size, nrow = size, data = 0)
+#  mat_dist[upper.tri(mat_dist)] <- log10(true_pv)
+#  mat_dist <- pmin(mat_dist, t(mat_dist))
+#  colnames(mat_dist) = rownames(mat_dist) <- cell_names
 
+  mat_dist <- cell2cell_matrix(log10(true_pv), cell_names)
+  
   return(list(mat_fdr = mat_fdr, mat_dist = mat_dist))
+}
+
+
+cell2cell_matrix <- function(data, cell_names) {
+  size <- length(cell_names)
+  assertthat::assert_that(length(cell_names) == (1 + sqrt(1 + 8*length(data)))/2)
+  
+  res <- matrix(ncol = size, nrow = size, data = 0)
+  res[upper.tri(res)] <- data
+  res <- pmin(res,t(res))
+  
+  colnames(res) = rownames(res) <- cell_names
+  return(res)
 }
