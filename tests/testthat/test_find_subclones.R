@@ -20,6 +20,12 @@ test_that("check find_subclones works as expected", {
   print(substring(hcp_filename,first=1,last=nchar(hcp_filename)-4))
   
   HCP <- GL6.1smear1bpLog10FisherHCP
+  # print(ls(HCP))
+  
+  expect_true(!is.null(HCP$softclones))
+  expect_true(!is.null(HCP$leaflist))
+  expect_true(!is.null(HCP$labellist))
+  expect_true(!is.null(HCP$labels))
   
   
   pinmat_filename <- file.path(
