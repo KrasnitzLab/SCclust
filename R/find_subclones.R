@@ -19,13 +19,13 @@
 #'@export
 
 
-find_subclones_calc <- function(
+find_subclones <- function(
     hc, pinmat, pins, min_node_size = -6, sim_round = 500, lm_max = 0.001, 
     hc_method = "average", base_share = 3, fdr_thresh = -2, share_min = 0.90, 
-    bymax = TRUE, climb_from_size = 2, climb_to_share = 3, clonedef = 'soft'){
+    bymax = TRUE, climb_from_size = 2, climb_to_share = 3, clonetype = 'soft'){
 
-  bigclones<- unique(hc$softclones[clonedef,])[
-      hc$nodesize[unique(hc$softclones[clonedef,])] >= min_node_size]
+  bigclones<- unique(hc$softclones[clonetype,])[
+      hc$nodesize[unique(hc$softclones[clonetype,])] >= min_node_size]
   
   sub_hc_clone <- list()
 
@@ -62,46 +62,74 @@ find_subclones_calc <- function(
 
   }
 
-  return(sub_hc_clone)
-}
-
-
-find_subclones <- function(
-    hc, pinmat, pins, min_node_size = -6, sim_round = 500, lm_max = 0.001, 
-    hc_method = "average", base_share = 3, fdr_thresh = -2, share_min = 0.90, 
-    bymax = TRUE, climb_from_size = 2, climb_to_share = 3, clonedef = 'soft',
-    clonetype="soft", subcloneTooBig=0.8) {
-
-  clonetable<-data.frame(hc$labels,rep(0,length(hc$labels)),
-      rep(0,length(hc$labels)),stringsAsFactors=F)
+  clonetable <- data.frame(hc$labels, rep(0, length(hc$labels)),
+      rep(0, length(hc$labels)), stringsAsFactors = F)
+  colnames(clonetable) <- c("ID", "clone", "subclone")
   
-  dimnames(clonetable)[[2]]<-c("ID","clone","subclone")
-  for(nodes in unique(hc$softclones[clonetype,])) {
-    clonetable[hc$leaflist[[nodes]],"clone"]<-nodes
+  ##clones
+  for (nodes in unique(hc$softclones[clonetype,])){
+    clonetable[hc$leaflist[[nodes]], "clone"] <- nodes
   }
   
-  sub_hc_clones <- find_subclones_calc(
-      hc, pinmat, pins, min_node_size, sim_round, lm_max, 
-      hc_method, base_share, fdr_thresh, share_min, 
-      bymax, climb_from_size, climb_to_share, clonedef)
-  
-  for(hc_clone in sub_hc_clones) {
-    print(head(hc_clone))
-
-    clunique<-unique(hc_clone$softclones[clonetype,])
-    
-    if(length(clunique)>1) {
+  ##subclones
+  for (subhc in sub_hc_clone){
+    clunique <- unique(subhc$softclones[clonetype,])
+    if (length(clunique) > 1){
       for(nodes in clunique){
-        clonetable[match(hc_clone$labellist[[nodes]],clonetable[,1]),"subclone"]<-nodes
+        clonetable[
+            match(subhc$leaflabel_list[[nodes]], clonetable[,1]), 
+            "subclone"] <- nodes
       }
-    } else if(length(clunique)==1) {
-      if(hc_clone$nodesize[clunique]<(subcloneTooBig*max(hc_clone$nodesize)))
-        clonetable[match(hc_clone$labellist[[clunique]],clonetable[,1]),"subclone"]<-
-            clunique
+    }
+    
+    if(length(clunique) == 1){
+      if(subhc$nodesize[clunique] < (subcloneTooBig * max(subhc$nodesize))){
+        clonetable[
+            match(subhc$leaflabel_list[[clunique]], clonetable[,1]), 
+            "subclone"] <- clunique}
     }
   }
+  
   return(clonetable)
 }
+
+
+#find_subclones <- function(
+#    hc, pinmat, pins, min_node_size = -6, sim_round = 500, lm_max = 0.001, 
+#    hc_method = "average", base_share = 3, fdr_thresh = -2, share_min = 0.90, 
+#    bymax = TRUE, climb_from_size = 2, climb_to_share = 3, clonedef = 'soft',
+#    clonetype="soft", subcloneTooBig=0.8) {
+#
+#  clonetable<-data.frame(hc$labels,rep(0,length(hc$labels)),
+#      rep(0,length(hc$labels)),stringsAsFactors=F)
+#  
+#  dimnames(clonetable)[[2]]<-c("ID","clone","subclone")
+#  for(nodes in unique(hc$softclones[clonetype,])) {
+#    clonetable[hc$leaflist[[nodes]],"clone"]<-nodes
+#  }
+#  
+#  sub_hc_clones <- find_subclones_calc(
+#      hc, pinmat, pins, min_node_size, sim_round, lm_max, 
+#      hc_method, base_share, fdr_thresh, share_min, 
+#      bymax, climb_from_size, climb_to_share, clonedef)
+#  
+#  for(hc_clone in sub_hc_clones) {
+#    print(head(hc_clone))
+#
+#    clunique<-unique(hc_clone$softclones[clonetype,])
+#    
+#    if(length(clunique)>1) {
+#      for(nodes in clunique){
+#        clonetable[match(hc_clone$labellist[[nodes]],clonetable[,1]),"subclone"]<-nodes
+#      }
+#    } else if(length(clunique)==1) {
+#      if(hc_clone$nodesize[clunique]<(subcloneTooBig*max(hc_clone$nodesize)))
+#        clonetable[match(hc_clone$labellist[[clunique]],clonetable[,1]),"subclone"]<-
+#            clunique
+#    }
+#  }
+#  return(clonetable)
+#}
 
 
 
