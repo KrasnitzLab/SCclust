@@ -7,8 +7,7 @@
 #'@param cell_names A character vector. The names of cells.
 #'@param lm_max Numeric value. Default: 0.001. The threshold parameter 
 #'          for the linear fit.
-#'@return A list containing the matrix of the FDR values (mat_fdr) and 
-#'          distance matrix based on Fisher's test p-values (mat_dist).
+#'@return A list containing the matrix of the FDR values (mat_fdr)
 #'@export
 
 
@@ -98,22 +97,9 @@ fisher_fdr <- function(
   logfdr[logfdr > 0] <- 0
   
   logfdr_all <- logfdr[match(true_pv, true_unique)]
-#  size <- length(cell_names)
-#  mat_fdr <- matrix(ncol = size, nrow = size, data = 0)
-#  mat_fdr[upper.tri(mat_fdr)] <- logfdr_all
-#  mat_fdr <- pmin(mat_fdr,t(mat_fdr))
-#    
-#  colnames(mat_fdr) = rownames(mat_fdr) <- cell_names
   mat_fdr <- cell2cell_matrix(logfdr_all/log(10), cell_names)  # ??log(10)
-  
-#  mat_dist <- matrix(ncol = size, nrow = size, data = 0)
-#  mat_dist[upper.tri(mat_dist)] <- log10(true_pv)
-#  mat_dist <- pmin(mat_dist, t(mat_dist))
-#  colnames(mat_dist) = rownames(mat_dist) <- cell_names
-
-  mat_dist <- cell2cell_matrix(log10(true_pv), cell_names)
-  
-  return(list(mat_fdr = mat_fdr, mat_dist = mat_dist))
+    
+  return(mat_fdr)
 }
 
 
@@ -127,4 +113,14 @@ cell2cell_matrix <- function(data, cell_names) {
   
   colnames(res) = rownames(res) <- cell_names
   return(res)
+}
+
+
+#'@param true_pv The Fisher's test p-values for the observation.
+#'@param cell_names A character vector. The names of cells.
+#'@return distance matrix based on Fisher's test p-values (mat_dist).
+#'@export
+
+fisher_dist <- function(true_pv, cell_names) {
+  return(cell2cell_matrix(log10(true_pv), cell_names))
 }
