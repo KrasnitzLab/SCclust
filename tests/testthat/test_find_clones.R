@@ -25,7 +25,7 @@ test_that("check find_clones works as expected", {
   pinmat <- load_table(pinmat_filename)
   hc <- hclust_tree(pinmat, fdr, dist)
   
-  hc <- find_clone(hc)
+  hc <- find_clones(hc)
 
   hcp_filename <- file.path(
         data_dir,

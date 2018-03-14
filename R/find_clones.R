@@ -14,7 +14,7 @@
 
 
 
-find_clone <- function(hc, fdr_thresh = -2, share_min = 0.90, n_share = 3, bymax = TRUE,
+find_clones <- function(hc, fdr_thresh = -2, share_min = 0.90, n_share = 3, bymax = TRUE,
                        climb_from_size = 2, climb_to_share = 3){
 
   # fdr_thresh: FDR criterion for clone nodes
