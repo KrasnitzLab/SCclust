@@ -34,8 +34,8 @@ test_that("check find_subclones works as expected", {
   
   subclones <- find_subclones(HCP, pinmat, pins)
   
-  print(subclones)
-  print(length(subclones))
+  # print(subclones)
+  # print(length(subclones))
   
   
   subclones_filename <- file.path(
@@ -46,8 +46,8 @@ test_that("check find_subclones works as expected", {
   
   subclones_bench <- load_table(subclones_filename)
   
-  print(subclones)
-  print(subclones_bench)
+  # print(subclones)
+  # print(subclones_bench)
   
   expect_equal(subclones$ID, subclones_bench$ID)
   expect_equal(subclones$clone, subclones_bench$clone)
