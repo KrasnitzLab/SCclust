@@ -15,7 +15,7 @@
 
 
 find_clone <- function(hc, fdr_thresh = -2, share_min = 0.90, n_share = 3, bymax = TRUE,
-                       climb_from_size = 2, climb_to_share = 3, graphic = TRUE){
+                       climb_from_size = 2, climb_to_share = 3){
 
   # fdr_thresh: FDR criterion for clone nodes
   # share_min: A feature is considered shared if present in share_min fraction of leaves in a node
@@ -67,21 +67,24 @@ find_clone <- function(hc, fdr_thresh = -2, share_min = 0.90, n_share = 3, bymax
   #Clone nodes are maximum compliant nodes
   clone_nodes <- setdiff((1:nrow(hc$merge))[node_compliant],
                          c(hc$merge[node_compliant, 1], hc$merge[node_compliant, 2]))
-  hc$fdr_thresh <- fdr_thresh
-  hc$clone_nodes <- clone_nodes
+  hc$fdrthresh <- fdr_thresh
+  hc$clonenodes <- clone_nodes
   hc$bymax <- bymax
   hc$count_pins_share <- count_pins_share
-  hc$share_min <- share_min
-  hc$n_share <- n_share
+  hc$sharemin <- share_min
+  hc$nshare <- n_share
 
-  if(!is.null(hc$clone_nodes)){
-    hc$softclones <- hcClimb(hc, minsize = climb_from_size, minshare = climb_to_share + hc$count_pins_share[nrow(hc$merge)])}
-
-  if(graphic){
-    plot(hc, labels = FALSE)
-    abline(h = hc$height[hc$softclones["hard",]], lty = 2)
-    abline(h = hc$height[hc$softclones["soft",]], lty = 2, col = "red")
+  if(!is.null(hc$clonenodes)){
+    hc$softclones <- hc_climb(
+        hc, minsize = climb_from_size, 
+        minshare = climb_to_share + hc$count_pins_share[nrow(hc$merge)])
   }
+
+#  if(graphic){
+#    plot(hc, labels = FALSE)
+#    abline(h = hc$height[hc$softclones["hard",]], lty = 2)
+#    abline(h = hc$height[hc$softclones["soft",]], lty = 2, col = "red")
+#  }
 
   return(hc)
 

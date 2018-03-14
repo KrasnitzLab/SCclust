@@ -182,7 +182,8 @@ hc$shareacross<-shareacross
 hc$sharemin<-sharemin
 hc$nshare<-nshare
 rm(clonenodes,shareacross)
-if(!is.null(hc$clonenodes))hc$softclones<-hcClimb(hc,minsize=climbfromsize,
+if(!is.null(hc$clonenodes))
+  hc$softclones<-hcClimb(hc,minsize=climbfromsize,
 	        minshare=climbtoshare+hc$shareacross[nrow(hc$merge)])
 cloneleaves<-unique(unlist(hc$leaflist[hc$softclones["hard",]]))
 if(usesoft)cloneleaves<-unique(unlist(hc$leaflist[hc$softclones["soft",]]))

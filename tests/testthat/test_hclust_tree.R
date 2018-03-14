@@ -1,4 +1,3 @@
-# TODO: Add comment
 # 
 # Author: lubo
 ###############################################################################
@@ -24,8 +23,6 @@ test_that("check hclust_tree works as expected", {
   fdr <- load_table(fdr_filename)
 
   pinmat <- load_table(pinmat_filename)
-  cellnames <- uber_cells(pinmat, skip=0)[,1]
-
 
   hc <- hclust_tree(pinmat, fdr, dist)
   
