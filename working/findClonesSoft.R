@@ -98,6 +98,7 @@ mdist<-pmin(mdist,t(mdist))
 
 print(dim(mdist))
 print(dim(cellnames))
+cellnames <- cellnames[,1]
 
 dimnames(mdist)<-list(cellnames,cellnames)
 
@@ -196,9 +197,13 @@ pytableP<-TreePy(data=as.dist(mdist),method="average")
 pytableP<-cbind(pytableP,hc$mergefdr)
 dimnames(pytableP)[[2]][ncol(pytableP)]<-"log10fdr"
 
-output_dir <- "./out/cor002.1"
+output_dir <- "./out/cor002.2"
 casename <- "GL6.1"
 filenames <- case_filenames(output_dir, casename)
+
+# write.table(hc, file.path(output_dir, "hc.txt"),
+#    col.names=T, row.names=T, sep="\t", quote=F)
+
 
 hcname<-paste(casename,"smear1bpLog10FisherHCP",sep="")
 assign(hcname,hc)
