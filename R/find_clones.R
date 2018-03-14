@@ -18,7 +18,8 @@ find_clone <- function(hc, fdr_thresh = -2, share_min = 0.90, n_share = 3, bymax
                        climb_from_size = 2, climb_to_share = 3){
 
   # fdr_thresh: FDR criterion for clone nodes
-  # share_min: A feature is considered shared if present in share_min fraction of leaves in a node
+  # share_min: A feature is considered shared if present in share_min fraction 
+  #            of leaves in a node
   # n_share: Minimal number of shared features in a clone node
   # bymax: TRUE, Use maximal of mean FDR for the node to find clones?
   # climb_from_size
@@ -26,21 +27,21 @@ find_clone <- function(hc, fdr_thresh = -2, share_min = 0.90, n_share = 3, bymax
 
 
 
-  ## Number of features (approximately) shared across the node
-  #leaves of the node together with the shared features form a bicluster
+  # Number of features (approximately) shared across the node
+  # leaves of the node together with the shared features form a bicluster
   count_pins_share <- colSums(hc$sharing > share_min)
 
 
 
-  ## A node is considered compliant if FDR is below and its sharing across above threshod for the node
-  #and all its descendants
+  # A node is considered compliant if FDR is below and its sharing across above 
+  # threshod for the node and all its descendants
   if(bymax){
-    node_compliant <- (hc$maxfdr < fdr_thresh & (count_pins_share - count_pins_share[nrow(hc$merge)]) > n_share)}
-
-  if(!bymax){
-    node_compliant <- (hc$meanfdr < fdr_thresh & (count_pins_share - count_pins_share[nrow(hc$merge)]) > n_share)}
-
-
+    node_compliant <- (hc$maxfdr < fdr_thresh & 
+          (count_pins_share - count_pins_share[nrow(hc$merge)]) > n_share)
+  } else {
+    node_compliant <- (hc$meanfdr < fdr_thresh & 
+          (count_pins_share - count_pins_share[nrow(hc$merge)]) > n_share)
+  }
 
 
   leftchild <- (hc$merge[,1] < 0)
@@ -80,12 +81,5 @@ find_clone <- function(hc, fdr_thresh = -2, share_min = 0.90, n_share = 3, bymax
         minshare = climb_to_share + hc$count_pins_share[nrow(hc$merge)])
   }
 
-#  if(graphic){
-#    plot(hc, labels = FALSE)
-#    abline(h = hc$height[hc$softclones["hard",]], lty = 2)
-#    abline(h = hc$height[hc$softclones["soft",]], lty = 2, col = "red")
-#  }
-
   return(hc)
-
 }

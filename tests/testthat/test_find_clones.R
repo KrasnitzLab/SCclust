@@ -49,11 +49,6 @@ test_that("check find_clones works as expected", {
   expect_equal(hc$clonenodes, HCP$clonenodes)
   expect_equal(hc$softclones, HCP$softclones)
 
-  print(hc$softclones)
-  print(HCP$softclones) 
-  
-  print(hc$clonenodes)
-  print(HCP$clonenodes)
 })
 
 
