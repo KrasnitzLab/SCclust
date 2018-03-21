@@ -1,7 +1,9 @@
 #'GC normalization.
 #'
-#'Normalize the bin count file to adjust for nonuniformity results from variation in GC content across the genome.
-#'@param bin_mat The bin count files of cells. For example, one bin count file for a cell is CJA1023.varbin.20k.txt
+#'Normalize the bin count file to adjust for nonuniformity results from 
+#'variation in GC content across the genome.
+#'@param bin_mat The bin count files of cells. For example, one bin count file 
+#' for a cell is CJA1023.varbin.20k.txt
 #'@param gc The GC content table.
 #'@return The normalized bin count table based on GC content.
 #'@export
@@ -12,16 +14,6 @@ gc_one <- function(bin_mat, gc) {
   bin_mat$ratio <- a / mean(a)
 
   bin_mat$lowratio <- lowess.gc(bin_mat$gc.content, bin_mat$ratio)
-  return(bin_mat)
-}
-
-
-chrom_numeric <- function(bin_mat) {
-  bin_mat$chrom.numeric <- substring(bin_mat$chrom, 4)
-  bin_mat$chrom.numeric[which(bin_mat$chrom == "chrX")] <- "23"
-  bin_mat$chrom.numeric[which(bin_mat$chrom == "chrY")] <- "24"
-
-  bin_mat$chrom.numeric <- as.numeric(bin_mat$chrom.numeric)
   return(bin_mat)
 }
 

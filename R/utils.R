@@ -35,3 +35,19 @@ calc_badbins <- function(gc, centroareas) {
 
   }
 }
+
+
+chrom_numeric <- function(bin_mat) {
+  if(is.numeric(bin_mat$chrom)) {
+    chrom.numeric <- bin_mat$chrom
+    return(chrom.numeric)
+  } else {
+    chrom.numeric <- substring(bin_mat$chrom, 4)
+    chrom.numeric[which(bin_mat$chrom == "chrX")] <- "23"
+    chrom.numeric[which(bin_mat$chrom == "chrY")] <- "24"
+    
+    chrom.numeric <- as.numeric(chrom.numeric)
+    return(chrom.numeric)
+  }
+}
+
