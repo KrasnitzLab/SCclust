@@ -18,7 +18,7 @@ get_test_sim_filename <- function(dirname, count, nsim, nsweep) {
 #
 #  sim_dirname <- file.path(
 #      "/home/lubo/Work/SCclust/working/out_many/",
-#      "Gleason6.1")
+#      "nyu003")
 #  
 #  sim_filename <- get_test_sim_filename(sim_dirname, 1, 500, 200)
 #  expect_true(file.exists(sim_filename))
@@ -29,7 +29,7 @@ get_test_sim_filename <- function(dirname, count, nsim, nsweep) {
 #  print(length(sim1))
 #  l0 = length(sim1)
 #
-#  for(i in 2:2) {
+#  for(i in 2:5) {
 #    sim_filename <- get_test_sim_filename(sim_dirname, i, 500, 200)
 #    expect_true(file.exists(sim_filename))
 #    sim2 <- scan(sim_filename)
@@ -50,9 +50,9 @@ test_that("simfisher convergence experiments full", {
   data_dir <- Sys.getenv("SGAINS_DATA")
   
   true_filename <- file.path(
-      data_dir, "gleason6.1/results/GL6.1trueP.txt")
+      data_dir, "nyu003/results/nyu003.benign.1trueP.txt")
   pinmat_filename <- file.path(
-      data_dir, "gleason6.1/results/GL6.1smear1bpPinMat.txt")
+      data_dir, "nyu003/results/nyu003.benign.1smear1bpPinMat.txt")
   
   expect_true(file.exists(true_filename))
   expect_true(file.exists(pinmat_filename))
@@ -63,7 +63,7 @@ test_that("simfisher convergence experiments full", {
 
   sim_dirname <- file.path(
           "/home/lubo/Work/SCclust/working/out_many/",
-          "Gleason6.1")
+          "nyu003")
   
   sim_filename <- get_test_sim_filename(sim_dirname, 1, 500, 200)
   expect_true(file.exists(sim_filename))
@@ -73,9 +73,9 @@ test_that("simfisher convergence experiments full", {
 
   mfdr1 <- fisher_fdr(true_mat, sim, cellnames)
   
-  outfile <- file("gl6_convergence.txt", "w")
+  outfile <- file("nyu003_convergence.txt", "w")
   writeLines("iteration,diff", con=outfile, sep='\n')
-  for(i in 2:100) {
+  for(i in 2:500) {
       sim_filename <- get_test_sim_filename(sim_dirname, i, 500, 200)
       sim <- scan(sim_filename)
       sim <- sim[!is.na(sim)]
@@ -87,7 +87,7 @@ test_that("simfisher convergence experiments full", {
       print(line)
       writeLines(line, con=outfile, sep='\n')
 
-      mfdr1 <- mfdr1
+      mfdr1 <- mfdr2
   }
   close(outfile)
 })
