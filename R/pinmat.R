@@ -16,8 +16,8 @@ augment_gc <- function(gc_df, df) {
 }
 
 calc_segments_short <- function(gc_df, segment_df, homoloss=0.01) {
-  assertthat::assert_that(((typeof(gc_df$chrom) == "integer") | (typeof(gc_df$chrom) == "double")))
-  assertthat::assert_that(typeof(segment_df$chrom) == "integer")
+  assertthat::assert_that(is.numeric(gc_df$chrom))
+  assertthat::assert_that(is.numeric(segment_df$chrom))
   assertthat::assert_that(all(colnames(gc_df) == c("chrom", "chromstart", "chromend", "absstart", "absend")))
   assertthat::assert_that(nrow(gc_df) == nrow(segment_df))
 

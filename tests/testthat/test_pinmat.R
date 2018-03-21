@@ -14,7 +14,7 @@ test_that("calc_segments_short works as expected on CJA3182 and CJA3183", {
 
   gc_df <- load_table(file.path(data_dir, "varbin_orig/varbin.gc.content.20k.bowtie.k50.hg19.txt.gz"))
   assertthat::assert_that(assertthat::are_equal(nrow(gc_df), 20000))
-  gc_df$bin.chrom <- numeric_chrom(gc_df$bin.chrom)
+  gc_df$bin.chrom <- chrom_numeric(gc_df$bin.chrom)
 
   gc_df <- gc_df[-badbins.20k$V1, ]
 
@@ -53,7 +53,7 @@ test_that("calc_ploidies works as expected on CJA3182 and CJA3183", {
 
   gc_df <- load_table(file.path(data_dir, "varbin_orig/varbin.gc.content.20k.bowtie.k50.hg19.txt.gz"))
   assertthat::assert_that(assertthat::are_equal(nrow(gc_df), 20000))
-  gc_df$bin.chrom <- numeric_chrom(gc_df$bin.chrom)
+  gc_df$bin.chrom <- chrom_numeric(gc_df$bin.chrom)
 
   gc_df <- gc_df[-badbins.20k$V1, ]
   augment_df <- augment_gc(gc_df, segment_df)
@@ -81,7 +81,7 @@ test_that("calc_segments_short works as expected on CJA3182, CJA3183, CJA3204, g
 
   gc_df <- load_table(file.path(data_dir, "varbin_orig/varbin.gc.content.20k.bowtie.k50.hg19.txt.gz"))
   assertthat::assert_that(assertthat::are_equal(nrow(gc_df), 20000))
-  gc_df$bin.chrom <- numeric_chrom(gc_df$bin.chrom)
+  gc_df$bin.chrom <- chrom_numeric(gc_df$bin.chrom)
 
   gc_df <- gc_df[-badbins.20k$V1, ]
 
@@ -121,7 +121,7 @@ test_that("calc_segments_short works as expected on CJA3182, CJA3183, CJA3204, g
 
   gc_df <- load_table(file.path(data_dir, "varbin_orig/varbin.gc.content.20k.bowtie.k50.hg19.txt.gz"))
   assertthat::assert_that(assertthat::are_equal(nrow(gc_df), 20000))
-  gc_df$bin.chrom <- numeric_chrom(gc_df$bin.chrom)
+  gc_df$bin.chrom <- chrom_numeric(gc_df$bin.chrom)
 
   gc_df <- gc_df[-badbins.20k$V1, ]
 
@@ -162,7 +162,7 @@ test_that("filter_segments_short works as expected on CJA3182, CJA3183, CJA3204,
 
   gc_df <- load_table(file.path(data_dir, "varbin_orig/varbin.gc.content.20k.bowtie.k50.hg19.txt.gz"))
   assertthat::assert_that(assertthat::are_equal(nrow(gc_df), 20000))
-  gc_df$bin.chrom <- numeric_chrom(gc_df$bin.chrom)
+  gc_df$bin.chrom <- chrom_numeric(gc_df$bin.chrom)
 
   gc_df <- gc_df[-badbins.20k$V1, ]
   augment_df <- augment_gc(gc_df, segment_df)
@@ -187,7 +187,7 @@ test_that("filter_segments_short works as expected on CJA3182, CJA3183, CJA3204,
 
   gc_df <- load_table(file.path(data_dir, "varbin_orig/varbin.gc.content.20k.bowtie.k50.hg19.txt.gz"))
   assertthat::assert_that(assertthat::are_equal(nrow(gc_df), 20000))
-  gc_df$bin.chrom <- numeric_chrom(gc_df$bin.chrom)
+  gc_df$bin.chrom <- chrom_numeric(gc_df$bin.chrom)
 
   gc_df <- gc_df[-badbins.20k$V1, ]
   augment_df <- augment_gc(gc_df, segment_df)
