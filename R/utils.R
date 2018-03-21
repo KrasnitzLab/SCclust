@@ -2,7 +2,7 @@
 
 calc_centroareas <- function(cyto) {
   centromere<-c("p11","q11")
-  cyto[,1]<-numeric_chrom(cyto[,1])
+  cyto[,1]<-chrom_numeric(cyto[,1])
   cyto<-cyto[order(cyto[,1]),]
 
   centroleft<-cyto[grep(centromere[1],cyto[,4]),]
@@ -20,7 +20,7 @@ calc_centroareas <- function(cyto) {
 calc_badbins <- function(gc, centroareas) {
   # print(head(gc))
 
-  gc$chrom <- numeric_chrom(gc$bin.chrom)
+  gc$chrom <- chrom_numeric(gc$bin.chrom)
 
 
   for(i in centroareas$chrom) {
@@ -37,14 +37,14 @@ calc_badbins <- function(gc, centroareas) {
 }
 
 
-chrom_numeric <- function(bin_mat) {
-  if(is.numeric(bin_mat$chrom)) {
-    chrom.numeric <- bin_mat$chrom
+chrom_numeric <- function(chrom) {
+  if(is.numeric(chrom)) {
+    chrom.numeric <- chrom
     return(chrom.numeric)
   } else {
-    chrom.numeric <- substring(bin_mat$chrom, 4)
-    chrom.numeric[which(bin_mat$chrom == "chrX")] <- "23"
-    chrom.numeric[which(bin_mat$chrom == "chrY")] <- "24"
+    chrom.numeric <- substring(chrom, 4)
+    chrom.numeric[which(chrom == "chrX")] <- "23"
+    chrom.numeric[which(chrom == "chrY")] <- "24"
     
     chrom.numeric <- as.numeric(chrom.numeric)
     return(chrom.numeric)
