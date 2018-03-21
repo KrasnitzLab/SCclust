@@ -171,6 +171,7 @@ test_that("filter_segments_short works as expected on CJA3182, CJA3183, CJA3204,
   res_df <- filter_evil_short(result_df, eviltwins = c("CJA3204"))
   expect_true(!is.null(res_df))
   expect_false("CJA3204" %in% colnames(res_df))
+  gc(res_df)
 })
 
 test_that("filter_segments_short works as expected on CJA3182, CJA3183, CJA3204, with dropareas",  {
@@ -195,7 +196,7 @@ test_that("filter_segments_short works as expected on CJA3182, CJA3183, CJA3204,
   result_df <- calc_segments_short(augment_df, segment_df, homoloss=0)
   res_df <- filter_dropareas_short(result_df, dropareas = dropareas)
   expect_true(!is.null(res_df))
-
+  gc(res_df)
 })
 
 
