@@ -51,6 +51,6 @@ test_that("simfisher_wrapper works as expected", {
   sim_res <- sort(sim_res)
   sim_mat <- sort(sim_mat)
 
-  expect_equal(sim_mat, sim_res, tolerance=1e-2)
+  expect_equal(sim_mat, sim_res, tolerance=1e-1)
 
 })
