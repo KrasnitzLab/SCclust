@@ -3,7 +3,7 @@ library(testthat)
 
 devtools::load_all()
 
-testthat::test_file("tests/testthat/test_segment_nyu003.R")
+#testthat::test_file("tests/testthat/test_segment_nyu003.R")
 
 
 #testthat::test_file("tests/testthat/test_fisher_fdr.R")
@@ -12,4 +12,4 @@ testthat::test_file("tests/testthat/test_segment_nyu003.R")
 #testthat::test_file("tests/testthat/test_find_subclones.R")
 
 
-# testthat::test_dir("tests/")
+testthat::test_dir("tests/")
