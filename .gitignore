@@ -6,3 +6,4 @@ man
 *.html
 .settings
 .project
+out_many
