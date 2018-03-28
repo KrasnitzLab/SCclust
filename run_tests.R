@@ -3,7 +3,7 @@ library(testthat)
 
 devtools::load_all()
 
-testthat::test_file("tests/testthat/test_pinmat_pipeline.R")
+testthat::test_file("tests/testthat/test_pipeline.R")
 
 
 #testthat::test_file("tests/testthat/test_fisher_fdr.R")
