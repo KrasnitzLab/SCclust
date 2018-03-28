@@ -96,31 +96,6 @@ filter_dropareas_short <- function(short_df, dropareas = NULL) {
   return(short_df)
 }
 
-filter_evil_short <- function(short_df, eviltwins=NULL) {
-  good_cells <- unique(short_df[,"profid"])
-  if(!is.null(eviltwins)) {
-    good_cells <- setdiff(good_cells, eviltwins)
-    short_df <- short_df[short_df[, "profid"] %in% good_cells, ]
-  }
-  return(short_df)
-}
-
-filter_good_short <- function(short_df, good_cells) {
-  short_df <- short_df[short_df[, "profid"] %in% good_cells, ]
-  return(short_df)
-}
-
-filter_good_columns <- function(df, good_cells, skip=0) {
-  cols <- colnames(df) %in% good_cells
-  cols[1:skip] <- TRUE
-  return(df[, cols])
-}
-
-filter_evil_columns <- function(df, evil_cells, skip=0) {
-  cols <- ! colnames(df) %in% evil_cells
-  cols[1:skip] <- TRUE
-  return(df[, cols])
-}
 
 calc_smear_breakpoints <- function(
     short_df, censored, smear=1, keepboundaries=F, chromrange=1:22) {
