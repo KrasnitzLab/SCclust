@@ -83,7 +83,8 @@ calc_censored_index <- function(short_df, dropareas) {
 
   censored[censoredtoo] <-
     ((short_df[censoredtoo, "chrom"] == short_df[censoredtoo - 1, "chrom"]) &
-       (short_df[censoredtoo, "profid"] == short_df[censoredtoo - 1, "profid"])) | censored[censoredtoo]
+       (short_df[censoredtoo, "profid"] == short_df[censoredtoo - 1, "profid"])) | 
+     censored[censoredtoo]
   return(censored)
 }
 
@@ -96,7 +97,6 @@ filter_dropareas_short <- function(short_df, dropareas = NULL) {
 }
 
 filter_evil_short <- function(short_df, eviltwins=NULL) {
-  # print(head(short_df))
   good_cells <- unique(short_df[,"profid"])
   if(!is.null(eviltwins)) {
     good_cells <- setdiff(good_cells, eviltwins)
@@ -108,6 +108,18 @@ filter_evil_short <- function(short_df, eviltwins=NULL) {
 filter_good_short <- function(short_df, good_cells) {
   short_df <- short_df[short_df[, "profid"] %in% good_cells, ]
   return(short_df)
+}
+
+filter_good_columns <- function(df, good_cells, skip=0) {
+  cols <- colnames(df) %in% good_cells
+  cols[1:skip] <- TRUE
+  return(df[, cols])
+}
+
+filter_evil_columns <- function(df, evil_cells, skip=0) {
+  cols <- ! colnames(df) %in% evil_cells
+  cols[1:skip] <- TRUE
+  return(df[, cols])
 }
 
 calc_smear_breakpoints <- function(
@@ -206,3 +218,14 @@ calc_pinmat_short <- function(short_df, smear_df) {
   return(res)
 }
 
+
+calc_pinmat <- function(gc_df, segment_df, homoloss=0.0, dropareas=NULL) {
+
+  augment_df <- augment_gc(gc_df, segment_df)
+  short_df <- calc_segments_short(augment_df, segment_df, homoloss=homoloss)
+  
+  censored_index <- calc_censored_index(short_df, dropareas)
+  smear_df <- calc_smear_breakpoints(short_df, censored_index)
+  
+  return(calc_pinmat_short(short_df, smear_df))
+}
