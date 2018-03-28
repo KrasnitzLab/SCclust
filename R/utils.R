@@ -51,3 +51,14 @@ chrom_numeric <- function(chrom) {
   }
 }
 
+tree_py <- function(mdist, method, metric='euclidean'){
+  hc<-hclust(as.dist(mdist), method)
+  
+  res <- cbind(hc$merge, hc$height)
+  d <- res[, 1:2]
+  d[res[,1:2]<0]<- -d[res[,1:2]<0]-1
+  d[res[,1:2]>0]<- d[res[,1:2]>0]+nrow(res)
+  res[,1:2]<-d
+  dimnames(res)[[2]]<-c("index1","index2","height")
+  return(res)
+}
