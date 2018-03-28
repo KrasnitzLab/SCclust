@@ -89,3 +89,33 @@ tree_py <- function(mdist, method, metric='euclidean'){
   colnames(res)<-c("index1","index2","height", "clustersize")
   return(res)
 }
+
+
+filter_evil_short <- function(short_df, eviltwins=NULL) {
+  good_cells <- unique(short_df[,"profid"])
+  if(!is.null(eviltwins)) {
+    good_cells <- setdiff(good_cells, eviltwins)
+    short_df <- short_df[short_df[, "profid"] %in% good_cells, ]
+  }
+  return(short_df)
+}
+
+
+filter_good_short <- function(short_df, good_cells) {
+  short_df <- short_df[short_df[, "profid"] %in% good_cells, ]
+  return(short_df)
+}
+
+
+filter_good_columns <- function(df, good_cells, skip=0) {
+  cols <- colnames(df) %in% good_cells
+  cols[1:skip] <- TRUE
+  return(df[, cols])
+}
+
+
+filter_evil_columns <- function(df, evil_cells, skip=0) {
+  cols <- ! colnames(df) %in% evil_cells
+  cols[1:skip] <- TRUE
+  return(df[, cols])
+}
