@@ -213,7 +213,7 @@ test_that("calc_smear_breakpoints works as expected", {
 
   expect_false(is.null(smear_df))
 
-  res <- calc_pinmat(short_df, smear_df)
+  res <- calc_pinmat_short(short_df, smear_df)
   expect_false(is.null(res))
 
 

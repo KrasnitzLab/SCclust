@@ -15,6 +15,7 @@ devtools::load_all()
 #testthat::test_dir("tests/")
 
 to_run <- c(
+    "tests/testthat/test_pinmat_pipeline.R",
     "tests/testthat/test_tree.R",
     'tests/testthat/test_segment_nyu003.R',
     'tests/testthat/test_chrom_numeric.R',

@@ -41,11 +41,13 @@ calc_segments_short <- function(gc_df, segment_df, homoloss=0.01) {
 
   ploidies_df <- calc_ploidies(gc_df, segment_df, a)
 
-  tshort <- cbind(tshort, tshort[,"segvals"] - ploidies_df[tshort[,"profid"], "ploidychromod"])
+  tshort <- cbind(tshort, tshort[,"segvals"] - 
+          ploidies_df[tshort[,"profid"], "ploidychromod"])
   colnames(tshort)[ncol(tshort)] <- "cvals"
 
   if(homoloss > 0) {
-    tshort <- tshort[tshort[,"profid"]%in%dimnames(ploidies_df)[[1]][ploidies_df[,"homoloss"] <= homoloss],]
+    tshort <- tshort[tshort[,"profid"]%in%dimnames(ploidies_df)[[1]][
+            ploidies_df[,"homoloss"] <= homoloss],]
   }
   return(tshort)
 }
@@ -57,7 +59,8 @@ calc_ploidies <- function(gc_df, segment_df, a=NULL) {
   assertthat::assert_that(nrow(a) == nrow(segment_df))
   assertthat::assert_that(ncol(a) + 3 == ncol(segment_df))
 
-  getmode<-function(x) as.numeric(names(which.max(tapply(X=x,INDEX=as.factor(x), FUN=length))))
+  getmode<-function(x) as.numeric(
+        names(which.max(tapply(X=x,INDEX=as.factor(x), FUN=length))))
   ploidymod<-apply(a[gc_df[,"chrom"]<23,],2,getmode)
   ploidymed<-apply(a[gc_df[,"chrom"]<23,],2,median)
   ploidychromod<-apply(
@@ -102,7 +105,14 @@ filter_evil_short <- function(short_df, eviltwins=NULL) {
   return(short_df)
 }
 
-calc_smear_breakpoints <- function(short_df, censored, smear=1, keepboundaries=F, chromrange=1:22) {
+filter_good_short <- function(short_df, good_cells) {
+  short_df <- short_df[short_df[, "profid"] %in% good_cells, ]
+  return(short_df)
+}
+
+calc_smear_breakpoints <- function(
+    short_df, censored, smear=1, keepboundaries=F, chromrange=1:22) {
+
   dtshort<-cbind(
     short_df[,c("profid","chrom")],
     short_df[,"segstarts"]-smear,
@@ -141,7 +151,7 @@ containment.indicator <- function(vstart, vend, wstart, wend){
   return(cbind(startafterstart,endbeforeend))
 }
 
-calc_pinmat <- function(short_df, smear_df) {
+calc_pinmat_short <- function(short_df, smear_df) {
   allsigns<-sort(unique(smear_df[,"bpsign"]))
   for(vsign in allsigns){
     a<-smear_df[smear_df[,"bpsign"]==vsign,]
@@ -149,18 +159,28 @@ calc_pinmat <- function(short_df, smear_df) {
     apins<-NULL
     while(nrow(a)>0){
       apins<-c(apins,a[1,"bpend"])
-      a<-a[!(a[,"bpstart"]<=apins[length(apins)]&a[,"bpend"]>=apins[length(apins)]),,drop=F]
+      a<-a[!(a[,"bpstart"]<=apins[length(apins)] & 
+                a[,"bpend"]>=apins[length(apins)]),,drop=F]
     }
     a<-smear_df[smear_df[,"bpsign"]==vsign,]
-    ci<-containment.indicator(apins,apins,a[order(a[,"bpend"]),"bpstart"],a[order(a[,"bpend"]),"bpend"])
+    ci<-containment.indicator(
+        apins,
+        apins,
+        a[order(a[,"bpend"]),"bpstart"],
+        a[order(a[,"bpend"]),"bpend"])
     a<-cbind(a[order(a[,"bpend"]),],ci)
 
     dimnames(a)[[2]][(ncol(a)-1):ncol(a)]<-c("startpin","endpin")
-    apinmat<-matrix(ncol=length(unique(short_df[,"profid"])),nrow=length(apins)+2,data=0,
-                    dimnames=list(NULL,unique(short_df[,"profid"])))
+    apinmat<-matrix(
+        ncol=length(unique(short_df[,"profid"])),
+        nrow=length(apins)+2,
+        data=0,
+        dimnames=list(NULL,unique(short_df[,"profid"])))
+
     for(id in unique(a[,"profid"])){
       apinmat[a[a[,"profid"]==id,"startpin"]+1,id]<-1
-      apinmat[a[a[,"profid"]==id,"endpin"]+2,id]<-apinmat[a[a[,"profid"]==id,"endpin"]+2,id]-1
+      apinmat[a[a[,"profid"]==id,"endpin"]+2,id] <- 
+          apinmat[a[a[,"profid"]==id,"endpin"]+2,id]-1
     }
     apinmat<-apply(apinmat,2,cumsum)
     apinmat<-apinmat[-c(1,nrow(apinmat)),,drop=F]

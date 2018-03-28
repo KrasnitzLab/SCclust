@@ -154,9 +154,6 @@ sdundo_all <- function (sdShort, ratioData, sd.undo) {
 }
 
 
-
-
-
 remove_segment <- function( rsShort, rsSegnum, ratioData, sd.undo ) {
   
   ############################################
@@ -181,14 +178,18 @@ remove_segment <- function( rsShort, rsSegnum, ratioData, sd.undo ) {
         if (rsShort[leftIndex, "chrom"] != rsShort[rsSegnum, "chrom"]) {
           appendLeft <- FALSE
         } else {
-          if (abs(rsShort[leftIndex, "seg.mean"] - rsShort[rsSegnum, "seg.mean"]) < abs(rsShort[rightIndex, "seg.mean"] - rsShort[rsSegnum, "seg.mean"])) {
+          if (abs(rsShort[leftIndex, "seg.mean"] - rsShort[rsSegnum, "seg.mean"]) < 
+              abs(rsShort[rightIndex, "seg.mean"] - rsShort[rsSegnum, "seg.mean"])) {
             appendLeft <- TRUE
             checkSdundo <- TRUE
           } else {
             appendLeft <- FALSE
             checkSdundo <- TRUE
-          }}}
-    }}
+          }
+        }
+      }
+    }
+  }
   
   appendIndex <- 99999999
   if (appendLeft) {
@@ -197,7 +198,8 @@ remove_segment <- function( rsShort, rsSegnum, ratioData, sd.undo ) {
     appendIndex <- rsSegnum + 1
   }
   
-  ## in the short table(each row is one segment),append the short segment to its left/right segment.
+  ## in the short table(each row is one segment), append the short segment 
+  ## to its left/right segment.
   
   ############################################
   ## make the new short table after appending the short segment.
@@ -214,17 +216,19 @@ remove_segment <- function( rsShort, rsSegnum, ratioData, sd.undo ) {
     tempShort[appendIndex, "seg.start"] <- tempShort[rsSegnum, "seg.start"]
   }
   
-  tempShort[appendIndex, "num.mark"] <- tempShort[appendIndex, "num.mark"] + tempShort[rsSegnum, "num.mark"]
+  tempShort[appendIndex, "num.mark"] <- tempShort[appendIndex, "num.mark"] + 
+      tempShort[rsSegnum, "num.mark"]
   ## updating seg mean
-  tempShort[appendIndex, "seg.mean"] <- mean(log(ratioData$lowratio[tempShort[appendIndex, "seg.start"]:tempShort[appendIndex, "seg.end"]], base=2))
+  tempShort[appendIndex, "seg.mean"] <- mean(
+      log(ratioData$lowratio[
+              tempShort[appendIndex, "seg.start"]:tempShort[appendIndex, "seg.end"]], 
+          base=2))
   
   # cat("append", tempShort[appendIndex, "chrom"], tempShort[appendIndex, "loc.start"], tempShort[appendIndex, "loc.end"],
   #     tempShort[appendIndex, "num.mark"], tempShort[appendIndex, "seg.mean"], tempShort[appendIndex, "seg.start"], tempShort[appendIndex, "seg.end"], "\n")
   
   tempShort <- tempShort[-rsSegnum, ]
   tempShort$segnum <- seq(1:nrow(tempShort))
-  
-  
   
   if (checkSdundo) {
     thisSd <- -1
@@ -258,9 +262,13 @@ remove_segment <- function( rsShort, rsSegnum, ratioData, sd.undo ) {
       ##  remove changepoint (combine)
       tempShort[leftIndex, "loc.end"] <- tempShort[rightIndex, "loc.end"]
       tempShort[leftIndex, "seg.end"] <- tempShort[rightIndex, "seg.end"]
-      tempShort[leftIndex, "num.mark"] <- tempShort[leftIndex, "num.mark"] + tempShort[rightIndex, "num.mark"]
+      tempShort[leftIndex, "num.mark"] <- tempShort[leftIndex, "num.mark"] + 
+          tempShort[rightIndex, "num.mark"]
       ## updating seg mean
-      tempShort[leftIndex, "seg.mean"] <- mean(log(ratioData$lowratio[tempShort[leftIndex, "seg.start"]:tempShort[rightIndex, "seg.end"]], base=2))
+      tempShort[leftIndex, "seg.mean"] <- mean(
+          log(ratioData$lowratio[
+                  tempShort[leftIndex, "seg.start"]:tempShort[rightIndex, "seg.end"]], 
+              base=2))
       tempShort <- tempShort[-rightIndex, ]
       tempShort$segnum <- seq(1:nrow(tempShort))
     }
