@@ -24,6 +24,12 @@ load_table <- function(filename) {
   return(df)
 }
 
+
+save_table <- function(filename, df) {
+  print(paste("writing table: ", filename))
+  write.table(df, filename, col.names=T, row.names=F, sep="\t", quote=F)
+}
+
 uber_cells <- function(df, skip=3) {
   cells <- colnames(df)[c((skip+1):ncol(df))]
   return(data.frame(cells))
