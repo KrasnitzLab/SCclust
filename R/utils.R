@@ -51,14 +51,41 @@ chrom_numeric <- function(chrom) {
   }
 }
 
+
+tree_clustersize <- function(indextable) {
+  clustersize<-rep(NA,nrow(indextable))
+
+  csleft<-rep(NA,nrow(indextable))
+  csleft[indextable[,"index1"]<0]<-1
+
+  csright<-rep(NA,nrow(indextable))
+  csright[indextable[,"index2"]<0]<-1
+
+  while(is.na(sum(clustersize))){
+    clustersize<-csleft+csright
+    csleft[indextable[,"index1"]>0]<-
+        clustersize[indextable[indextable[,"index1"]>0,"index1"]]
+    csright[indextable[,"index2"]>0]<-
+        clustersize[indextable[indextable[,"index2"]>0,"index2"]]
+  }  
+
+  return(clustersize)
+}
+
+
 tree_py <- function(mdist, method, metric='euclidean'){
   hc<-hclust(as.dist(mdist), method)
   
   res <- cbind(hc$merge, hc$height)
+  colnames(res) <- c("index1", "index2", "height")
+  clustersize <- tree_clustersize(res)
+  
   d <- res[, 1:2]
   d[res[,1:2]<0]<- -d[res[,1:2]<0]-1
   d[res[,1:2]>0]<- d[res[,1:2]>0]+nrow(res)
   res[,1:2]<-d
-  dimnames(res)[[2]]<-c("index1","index2","height")
+
+  res <- cbind(res, clustersize)
+  colnames(res)<-c("index1","index2","height", "clustersize")
   return(res)
 }
