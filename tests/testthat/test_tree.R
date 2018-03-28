@@ -30,5 +30,6 @@ test_that("check tree_py works as expected", {
   expect_equal(res[, 'index1'], tree[, 'index1'])
   expect_equal(res[, 'index2'], tree[, 'index2'])
   expect_equal(res[, 'height'], tree[, 'height'])
+  expect_equal(res[, 'clustersize'], tree[, 'clustersize'])
   
 })
