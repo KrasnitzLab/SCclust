@@ -10,14 +10,12 @@ test_that("experimental pipeline works as expected for GL6.1", {
   data_dir <- Sys.getenv("SGAINS_DATA")    
   cells_filename <- file.path(
       data_dir,
-      "gleason6.1/goodcells23.txt")
+      "gleason6.1/goodcells45.txt")
   expect_true(file.exists(cells_filename))
   cells <- read.table(cells_filename, header=F, as.is=T)
   cells <- cells[, 1]
   print(cells)
   print(length(cells))
-  out_dir <- "tmp"
-  filenames <- case_filenames(out_dir, "sub_GL6_1")
   
   gc_filename <- file.path(
       data_dir, 
@@ -35,10 +33,8 @@ test_that("experimental pipeline works as expected for GL6.1", {
   
   segment_df <- load_table(seg_filename)
   segment_df <- filter_good_columns(segment_df, cells, skip=3)
-  expect_equal(ncol(segment_df), length(cells)+3)
+  # expect_equal(ncol(segment_df), length(cells)+3)
   expect_equal(nrow(segment_df), 19943)
-  print("writing seg...")
-  save_table(filenames$seg, segment_df)
   
   
   rat_filename <- file.path(
@@ -48,38 +44,54 @@ test_that("experimental pipeline works as expected for GL6.1", {
   
   ratio_df <- load_table(rat_filename)
   ratio_df <- filter_good_columns(ratio_df, cells, skip=3)
-  expect_equal(ncol(ratio_df), length(cells)+3)
+  # expect_equal(ncol(ratio_df), length(cells)+3)
   expect_equal(nrow(ratio_df), 19943)
-  print("writing ratio...")
-  save_table(filenames$ratio, ratio_df)
   print(Sys.time())
 
   cell <- uber_cells(segment_df, skip=3)[,1]
-  save_table(filenames$cells, data.frame(cell))
-  
+  cells <- cell
   
   pins <- calc_pinmat(gc_df, segment_df, dropareas=dropareas)
   pinmat_df <- pins$pinmat
   pins_df <- pins$pins
-  save_table(filenames$featuremat, pinmat_df)
-  save_table(filenames$features, pins_df)
   
   print(Sys.time())
-  fisher <- sim_fisher_wrapper(pinmat_df, pins_df, njobs=30, nsim=5, nsweep=10)
-  true_pv <- fisher$true
-  sim_pv <- fisher$sim
-  print(Sys.time())
-  
-  mfdr <- fisher_fdr(true_pv, sim_pv, cells)
-  mdist <- fisher_dist(true_pv, cells)
-  
-  hc <- hclust_tree(pinmat_df, mfdr, mdist)
-  
-  tree_df <- tree_py(mdist, method='average')
-  save_table(filenames$tree, tree_df)
+  for(nsim in c(10,20,30,40,50,100,200,300)) {
+    print(paste("nsim=",nsim))
+    print(Sys.time())
 
-  hc <- find_clones(hc)
-  subclones <- find_subclones(hc, pinmat_df, pins_df)
-  save_table(filenames$clone, subclones)
-
+    fisher <- sim_fisher_wrapper(
+        pinmat_df, pins_df, njobs=30, nsim=nsim, nsweep=10)
+    true_pv <- fisher$true
+    sim_pv <- fisher$sim
+    print(Sys.time())
+    
+    mfdr <- fisher_fdr(true_pv, sim_pv, cells)
+    mdist <- fisher_dist(true_pv, cells)
+    
+    hc <- hclust_tree(pinmat_df, mfdr, mdist)
+    
+    tree_df <- tree_py(mdist, method='average')
+  
+    hc <- find_clones(hc)
+    subclones <- find_subclones(hc, pinmat_df, pins_df)
+  
+    
+    out_dir <- file.path(
+        data_dir,
+        "gleason6.1/gc45_2nd", 
+        paste("subGL_",nsim,sep=""))
+    if(!file.exists(out_dir)) {
+      dir.create(out_dir)
+    }
+    filenames <- case_filenames(out_dir, "sub_GL6_1")
+  
+    save_table(filenames$cells, data.frame(cell))
+    save_table(filenames$seg, segment_df)
+    save_table(filenames$ratio, ratio_df)
+    save_table(filenames$featuremat, pinmat_df)
+    save_table(filenames$features, pins_df)
+    save_table(filenames$tree, tree_df)
+    save_table(filenames$clone, subclones)
+  }
 })
