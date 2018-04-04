@@ -73,7 +73,7 @@ test_that("experimental pipeline works as expected for GL7.2", {
       "gleason7.2/out_many")
   
   
-  for(nsim in c(50, 100, 250, 500)) {
+  for(nsim in c(25, 50, 75)) {
     print(paste("nsim=",nsim))
     print(Sys.time())
 
@@ -90,7 +90,7 @@ test_that("experimental pipeline works as expected for GL7.2", {
     hc <- hclust_tree(pinmat_df, mfdr, mdist)
     tree_df <- tree_py(mdist, method='average')
     hc <- find_clones(hc)
-    subclones <- find_subclones(hc, pinmat_df, pins_df, sim_round=nsim)
+    subclones <- find_subclones(hc, pinmat_df, pins_df, sim_round=nsim, lm_max=0.01)
     
     out_dir <- file.path(
         data_dir,
