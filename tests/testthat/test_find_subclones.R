@@ -38,7 +38,7 @@ test_that("check find_subclones works as expected", {
   expect_true(file.exists(pins_filename))
   pins <- load_table(pins_filename)
   
-  subclones <- find_subclones(HCP, pinmat, pins)
+  subclones <- find_subclones(HCP, pinmat, pins, sim_round=400)
   
   # print(subclones)
   # print(length(subclones))
