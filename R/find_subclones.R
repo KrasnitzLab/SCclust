@@ -47,14 +47,18 @@ find_subclones <- function(
 
       n_share <- base_share + sum(rowSums(clonemat) > (share_min * ncol(clonemat)))
       cellnames <- colnames(clonemat)
-      
+      print(paste("subclone number of cells: ", length(cellnames)))
       res <- sim_fisher_wrapper(clonemat, clonepins, nsim=sim_round)
-      vtrue <- res$true
-      msim <- res$sim
+      true_pv <- res$true
+      assertthat::assert_that(all(!is.null(true_pv)))
+      
+      sim_pv <- res$sim
+      sim_pv <- sim_pv[!is.na(sim_pv)]
+      assertthat::assert_that(all(!is.null(sim_pv)))
 
-      mfdr <- fisher_fdr(vtrue, msim, cellnames, lm_max = lm_max)
+      mfdr <- fisher_fdr(true_pv, sim_pv, cellnames, lm_max = lm_max)
 
-      mdist <- fisher_dist(vtrue, cellnames)
+      mdist <- fisher_dist(true_pv, cellnames)
 
       subhc <- hclust_tree(clonemat, mfdr, mdist, hc_method = hc_method)
       subhc_clone <- find_clones(
@@ -91,18 +95,18 @@ construct_clonetable <- function(hc, sub_hc_clone, clonetype){
     assertthat::assert_that(!is.null(subhc$nodesize))
     
     clunique <- unique(subhc$softclones[clonetype,])
+    print(clunique)
+
     if (length(clunique) > 1){
       for(nodes in clunique){
         clonetable[
-            match(subhc$leaflist[[nodes]], clonetable[,1]), 
+            match(subhc$labels[[nodes]], clonetable[,1]), 
             "subclone"] <- nodes
       }
-    }
-    
-    if(length(clunique) == 1){
+    } else if(length(clunique) == 1){
       if(subhc$nodesize[clunique] < (subcloneTooBig * max(subhc$nodesize))){
         clonetable[
-            match(subhc$leaflist[[clunique]], clonetable[,1]), 
+            match(subhc$labels[[clunique]], clonetable[,1]), 
             "subclone"] <- clunique}
     }
   }

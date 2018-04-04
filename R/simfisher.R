@@ -118,8 +118,13 @@ sim_fisher<-function(m, nsim, nsweep, seedme, distrib=c("vanilla","Rparallel"), 
   return(tp)
 }
 
-sim_fisher_wrapper <- function(pinmat_df, pins_df, njobs=10, nsim=500, nsweep=200, seedme=123) {
+sim_fisher_wrapper <- function(pinmat_df, pins_df, njobs=NULL, nsim=500, nsweep=200, seedme=123) {
   require(parallel)
+
+  if(is.null(njobs)) {
+    njobs <- parallel::detectCores()-4
+  }
+  print(paste("sim_fisher_wrapper: njobjs=", njobs))
 
   m<-vector(mode="list",length=length(unique(pins_df[,"sign"])))
 
