@@ -4,7 +4,7 @@
 #'@param hc The hclust objects with clones identified.
 #'@param pinmat The pinmat.
 #'@param pins The pins.
-#'@param min_node_size An integer. Default: 6. The minimum node size for a subclone.
+#'@param minnodesize An integer. Default: 6. The minimum node size for a subclone.
 #'@param nsim The number of permutation simulations for subclone identification. Default: 500.
 #'@param lmmax Numeric value. Default: 0.001. The threshold parameter for the linear fit to identify subclones.
 #'@param hcmethod Default: average
@@ -20,7 +20,7 @@
 
 find_subclones <- function(
     hc, pinmat, pins, 
-    min_node_size = -6, nsim = 500, lmmax = 0.001, 
+    nmin = -6, nsim = 500, lmmax = 0.001, 
     hcmethod = "average", baseshare = 3, 
     fdrthresh = -2, sharemin = 0.85, 
     bymax = TRUE, climbfromsize = 2, climbtoshare = 3, clonetype = 'soft'){
@@ -32,7 +32,7 @@ find_subclones <- function(
   
   
   bigclones<- unique(hc$softclones[clonetype,])[
-      hc$nodesize[unique(hc$softclones[clonetype,])] >= min_node_size]
+      hc$nodesize[unique(hc$softclones[clonetype,])] >= nmin]
   
   subhc_clones <- list()
 
