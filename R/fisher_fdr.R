@@ -5,14 +5,14 @@
 #'@param true_pv The Fisher's test p-values for the observation.
 #'@param sim_pv The Fisher's test p-values for the permutations.
 #'@param cell_names A character vector. The names of cells.
-#'@param lm_max Numeric value. Default: 0.001. The threshold parameter 
+#'@param lmmax Numeric value. Default: 0.001. The threshold parameter 
 #'          for the linear fit.
 #'@return A list containing the matrix of the FDR values (mat_fdr)
 #'@export
 
 
 fisher_fdr <- function(
-    true_pv, sim_pv, cell_names, lm_max = 0.001){
+    true_pv, sim_pv, cell_names, lmmax = 0.001){
 
   assertthat::assert_that(length(cell_names) == (1 + sqrt(1 + 8*length(true_pv)))/2)
       
@@ -34,12 +34,12 @@ fisher_fdr <- function(
   # linear fit to the tail of empirical null distribution of Fisher p-values
   ##############################################################################
   
-  # lm_max -- A parameter in a linear fit
+  # lmmax -- A parameter in a linear fit
   # Observed p-values are often far lower than any p-value sampled from the null; 
   # to determine FDR in such cases get a power-law fit to the low-p tail of the 
   # null CDF and use it to extrapolate to very low p-values. Use the actual 
   # null CDF to estimate FDR for higher p-values.
-  lowp_index <- (cumsum(sim_count)/sum(sim_count)) < lm_max
+  lowp_index <- (cumsum(sim_count)/sum(sim_count)) < lmmax
   lmfit <- lm(
           log(cumsum(
                 sim_count[lowp_index])/sum(sim_count))~

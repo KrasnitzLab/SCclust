@@ -9,7 +9,7 @@ savedir<-"/Volumes/user/krasnitz/prostateSingleCell/breakPointPins/Gleason9.1/av
 rdir<-savedir
 fdrthresh<-(-2)	#FDR criterion for clone nodes
 sharemin<-0.85	#A feature is considered shared if present in sharemin fraction of leaves in a node
-nshare<-3	#Minimal number of shared features in a clone node
+nshare<- 3	#Minimal number of shared features in a clone node
 bymax<-T	#Use maximal of mean FDR for the node to find clones?
 lmmax<-0.001 #A parameter in a linear fit to empirical null distribution of Fisher p-values
 climbfromsize<-2
