@@ -109,6 +109,7 @@ test_that("check find_subclones works as expected GL7.2", {
     
     # print(subclones)
     # print(subclones_bench)
+    save_table("temp.txt", subclones)
     
     expect_equal(subclones$ID, subclones_bench$ID)
     expect_equal(subclones$clone, subclones_bench$clone)

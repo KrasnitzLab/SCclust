@@ -13,34 +13,25 @@
 
 hclust_tree <- function(pinmat, mat_fdr, mat_dist, hcmethod = "average"){
 
-  pinmat <- pinmat[rowSums(pinmat)<ncol(pinmat),,drop = F]
+  # pinmat <- pinmat[rowSums(pinmat)<ncol(pinmat),,drop = F]
 
-  ## Grow a tree and add multiple items to the standard hclust object
-  ####################################################################
+  # Grow a tree and add multiple items to the standard hclust object
   hc <- hclust(as.dist(mat_dist), method = hcmethod)
 
-  #Leaf indices for each node, in the order of the original labels
+  # Leaf indices for each node, in the order of the original labels
   leaflist <- vector(mode = "list", length = nrow(hc$merge))
-
-  #Leaf lables for the node
+  # Leaf lables for the node
   labellist <- vector(mode = "list",length = nrow(hc$merge))
-
-  #Maximal pairwise FDR anywhere in the node
+  # Maximal pairwise FDR anywhere in the node
   mergefdr <- rep(NA, nrow(hc$merge))
-
-  #Mean FDR for the node
+  # Mean FDR for the node
   meanfdr<-rep(NA, nrow(hc$merge))
-
-  #Number of leaves in the node
+  # Number of leaves in the node
   nodesize <- rep(NA, nrow(hc$merge))
-
-  #For each node and each feature(pin) determine the fraction of leaves in the node with the feature
+  # For each node and each feature(pin) determine the fraction of leaves in the node with the feature
   sharing <- matrix(NA, nrow = nrow(pinmat), ncol = nrow(hc$merge))
-
-  #Mean number of features per leaf in a node
+  # Mean number of features per leaf in a node
   complexity <- rep(NA, nrow(hc$merge))
-
-  #compute the items defined above
 
   for(i in 1:nrow(hc$merge)){
 
@@ -55,17 +46,13 @@ hclust_tree <- function(pinmat, mat_fdr, mat_dist, hcmethod = "average"){
       leaflist[[i]] <- c(leaflist[[i]], leaflist[[hc$merge[i,2]]])}
 
     labellist[[i]] <- hc$labels[leaflist[[i]]]
-
+    complexity[i] <- mean(colSums(pinmat[,labellist[[i]]]))
+    sharing[,i] <- rowMeans(pinmat[,labellist[[i]]])
     nodesize[i] <- length(leaflist[[i]])
-
-    mergefdr[i]<- max(mat_fdr[leaflist[[i]], leaflist[[i]]][upper.tri(mat_fdr[leaflist[[i]], leaflist[[i]]])])
-
+    mergefdr[i]<- max(mat_fdr[leaflist[[i]], 
+            leaflist[[i]]][upper.tri(mat_fdr[leaflist[[i]], leaflist[[i]]])])
     meanfdr[i]<- mean(mat_fdr[leaflist[[i]], 
             leaflist[[i]]][upper.tri(mat_fdr[leaflist[[i]], leaflist[[i]]])])
-
-    complexity[i] <- mean(colSums(pinmat[,labellist[[i]]]))
-
-    sharing[,i] <- rowMeans(pinmat[,labellist[[i]]])
   }
 
   hc$mergefdr <- mergefdr
@@ -77,8 +64,7 @@ hclust_tree <- function(pinmat, mat_fdr, mat_dist, hcmethod = "average"){
   hc$complexity <- complexity
 
 
-  # return the hclust object which have new features added & distance matrix 
-  # based on log10(fisherPV)
+  # return the hclust object which have new features added
   return(hc)
 
 }

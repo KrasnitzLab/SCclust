@@ -15,7 +15,7 @@
 
 find_clones <- function(hc, fdrthresh = -2, 
     sharemin = 0.85, nshare = 3, bymax = T,
-                       climbfromsize = 2, climbtoshare = 3){
+    climbfromsize = 2, climbtoshare = 3){
 
   # fdrthresh: FDR criterion for clone nodes
   # share_min: A feature is considered shared if present in share_min fraction 
