@@ -90,7 +90,7 @@ test_that("experimental pipeline works as expected for GL7.2", {
     hc <- hclust_tree(pinmat_df, mfdr, mdist)
     tree_df <- tree_py(mdist, method='average')
     hc <- find_clones(hc)
-    subclones <- find_subclones(hc, pinmat_df, pins_df, sim_round=nsim, lmmax=0.01)
+    subclones <- find_subclones(hc, pinmat_df, pins_df, nsim=nsim, lmmax=0.001)
     
     out_dir <- file.path(
         data_dir,

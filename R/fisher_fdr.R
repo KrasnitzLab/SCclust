@@ -11,7 +11,7 @@
 #'@export
 
 
-fisher_fdr <- function(
+fisher_fdr_old <- function(
     true_pv, sim_pv, cell_names, lmmax = 0.001){
 
   assertthat::assert_that(length(cell_names) == (1 + sqrt(1 + 8*length(true_pv)))/2)

@@ -74,7 +74,7 @@ test_that("experimental viewer pipeline works as expected for GL6.2", {
     tree_df <- tree_py(mdist, method='average')
   
     hc <- find_clones(hc)
-    subclones <- find_subclones(hc, pinmat_df, pins_df)
+    subclones <- find_subclones(hc, pinmat_df, pins_df, nsim=nsim)
   
     
     out_dir <- file.path(
