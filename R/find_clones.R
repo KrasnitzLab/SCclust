@@ -35,14 +35,19 @@ find_clones <- function(hc, fdrthresh = -2,
 
   # A node is considered compliant if FDR is below and its sharing across above 
   # threshod for the node and all its descendants
-  if(bymax){
-    node_compliant <- (hc$maxfdr < fdrthresh & 
-          (count_pins_share - count_pins_share[nrow(hc$merge)]) > nshare)
-  } else {
-    node_compliant <- (hc$meanfdr < fdrthresh & 
-          (count_pins_share - count_pins_share[nrow(hc$merge)]) > nshare)
-  }
+#  if(bymax){
+#    node_compliant <- (hc$maxfdr < fdrthresh & 
+#          (count_pins_share - count_pins_share[nrow(hc$merge)]) > nshare)
+#  } else {
+#    node_compliant <- (hc$meanfdr < fdrthresh & 
+#          (count_pins_share - count_pins_share[nrow(hc$merge)]) > nshare)
+#  }
 
+  if (bymax) { 
+    node_compliant <- (hc$mergefdr < fdrthresh & count_pins_share > nshare)
+  } else { 
+    node_compliant <- (hc$meanfdr < fdrthresh & count_pins_share > nshare)
+  }
 
   leftchild <- (hc$merge[,1] < 0)
   leftchild[hc$merge[,1] > 0] <- node_compliant[hc$merge[hc$merge[,1] > 0, 1]]

@@ -26,7 +26,7 @@ hclust_tree <- function(pinmat, mat_fdr, mat_dist, hcmethod = "average"){
   labellist <- vector(mode = "list",length = nrow(hc$merge))
 
   #Maximal pairwise FDR anywhere in the node
-  maxfdr <- rep(NA, nrow(hc$merge))
+  mergefdr <- rep(NA, nrow(hc$merge))
 
   #Mean FDR for the node
   meanfdr<-rep(NA, nrow(hc$merge))
@@ -58,7 +58,7 @@ hclust_tree <- function(pinmat, mat_fdr, mat_dist, hcmethod = "average"){
 
     nodesize[i] <- length(leaflist[[i]])
 
-    maxfdr[i]<- max(mat_fdr[leaflist[[i]], leaflist[[i]]][upper.tri(mat_fdr[leaflist[[i]], leaflist[[i]]])])
+    mergefdr[i]<- max(mat_fdr[leaflist[[i]], leaflist[[i]]][upper.tri(mat_fdr[leaflist[[i]], leaflist[[i]]])])
 
     meanfdr[i]<- mean(mat_fdr[leaflist[[i]], 
             leaflist[[i]]][upper.tri(mat_fdr[leaflist[[i]], leaflist[[i]]])])
@@ -68,9 +68,7 @@ hclust_tree <- function(pinmat, mat_fdr, mat_dist, hcmethod = "average"){
     sharing[,i] <- rowMeans(pinmat[,labellist[[i]]])
   }
 
-
-
-  hc$maxfdr <- maxfdr
+  hc$mergefdr <- mergefdr
   hc$meanfdr <- meanfdr
   hc$nodesize <- nodesize
   hc$leaflist <- leaflist
