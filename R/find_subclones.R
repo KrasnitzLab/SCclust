@@ -61,7 +61,7 @@ find_subclones <- function(
 
       mdist <- fisher_dist(true_pv, cellnames)
 
-      subhc <- hclust_tree(clonemat, mfdr, mdist, hcmethod = hcmethod)
+      subhc <- hclust_tree(pinmat, mfdr, mdist, hcmethod = hcmethod)
       subhc_clone <- find_clones(
           subhc, fdrthresh = fdrthresh, sharemin = sharemin, 
           nshare = n_share, bymax = bymax,
