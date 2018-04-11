@@ -8,6 +8,8 @@ TreePy<-function(data, method, metric="euclidean"){
 		Clustersize<-TBEST:::TreeStat(data.matrix(data),mystat="fldc",method,metric)[,4]
 		hc<-hclust(dist(data.matrix(data),method=metric),method)
 	}
+  print(head(hc$merge))
+  
 	Py<-cbind(hc$merge,hc$height,Clustersize)
 	d<-Py[,1:2]
 	d[Py[,1:2]<0]<- -d[Py[,1:2]<0]-1

@@ -19,7 +19,7 @@ Suggests:
 VignetteBuilder: knitr
 Imports:
     DNAcopy,
-    TBEST,
+    futile.logger,
     tools
 URL: https://github.com/KrasnitzLab/SCclust
 BugReports: https://github.com/KrasnitzLab/SCclust/issues

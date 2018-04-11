@@ -1,6 +1,5 @@
 library(devtools)
 library(testthat)
-library(futile.logger)
 
 devtools::load_all()
 
@@ -9,6 +8,6 @@ devtools::load_all()
 #testthat::test_file("tests/testthat/test_find_clones.R")
 #testthat::test_file("tests/testthat/test_find_subclones.R")
 
-testthat::test_file("tests/testthat/test_simfisher_convergence_nyu003.R")
+testthat::test_file("tests/testthat/experiment_viewer_pipeline_gl72.R")
 
 # testthat::test_dir("tests/")

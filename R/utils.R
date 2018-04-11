@@ -2,7 +2,7 @@
 
 calc_centroareas <- function(cyto) {
   centromere<-c("p11","q11")
-  cyto[,1]<-numeric_chrom(cyto[,1])
+  cyto[,1]<-chrom_numeric(cyto[,1])
   cyto<-cyto[order(cyto[,1]),]
 
   centroleft<-cyto[grep(centromere[1],cyto[,4]),]
@@ -20,7 +20,7 @@ calc_centroareas <- function(cyto) {
 calc_badbins <- function(gc, centroareas) {
   # print(head(gc))
 
-  gc$chrom <- numeric_chrom(gc$bin.chrom)
+  gc$chrom <- chrom_numeric(gc$bin.chrom)
 
 
   for(i in centroareas$chrom) {
@@ -37,17 +37,85 @@ calc_badbins <- function(gc, centroareas) {
 }
 
 
-chrom_numeric <- function(bin_mat) {
-  if(is.numeric(bin_mat$chrom)) {
-    chrom.numeric <- bin_mat$chrom
+chrom_numeric <- function(chrom) {
+  if(is.numeric(chrom)) {
+    chrom.numeric <- chrom
     return(chrom.numeric)
   } else {
-    chrom.numeric <- substring(bin_mat$chrom, 4)
-    chrom.numeric[which(bin_mat$chrom == "chrX")] <- "23"
-    chrom.numeric[which(bin_mat$chrom == "chrY")] <- "24"
+    chrom.numeric <- substring(chrom, 4)
+    chrom.numeric[which(chrom == "chrX")] <- "23"
+    chrom.numeric[which(chrom == "chrY")] <- "24"
     
     chrom.numeric <- as.numeric(chrom.numeric)
     return(chrom.numeric)
   }
 }
 
+
+tree_clustersize <- function(indextable) {
+  clustersize<-rep(NA,nrow(indextable))
+
+  csleft<-rep(NA,nrow(indextable))
+  csleft[indextable[,"index1"]<0]<-1
+
+  csright<-rep(NA,nrow(indextable))
+  csright[indextable[,"index2"]<0]<-1
+
+  while(is.na(sum(clustersize))){
+    clustersize<-csleft+csright
+    csleft[indextable[,"index1"]>0]<-
+        clustersize[indextable[indextable[,"index1"]>0,"index1"]]
+    csright[indextable[,"index2"]>0]<-
+        clustersize[indextable[indextable[,"index2"]>0,"index2"]]
+  }  
+
+  return(clustersize)
+}
+
+
+tree_py <- function(mdist, method, metric='euclidean'){
+  hc<-hclust(as.dist(mdist), method)
+  
+  res <- cbind(hc$merge, hc$height)
+  colnames(res) <- c("index1", "index2", "height")
+  clustersize <- tree_clustersize(res)
+  
+  d <- res[, 1:2]
+  d[res[,1:2]<0]<- -d[res[,1:2]<0]-1
+  d[res[,1:2]>0]<- d[res[,1:2]>0]+nrow(res)
+  res[,1:2]<-d
+
+  res <- cbind(res, clustersize)
+  colnames(res)<-c("index1","index2","height", "clustersize")
+  return(res)
+}
+
+
+filter_evil_short <- function(short_df, eviltwins=NULL) {
+  good_cells <- unique(short_df[,"profid"])
+  if(!is.null(eviltwins)) {
+    good_cells <- setdiff(good_cells, eviltwins)
+    short_df <- short_df[short_df[, "profid"] %in% good_cells, ]
+  }
+  return(short_df)
+}
+
+
+filter_good_short <- function(short_df, good_cells) {
+  short_df <- short_df[short_df[, "profid"] %in% good_cells, ]
+  return(short_df)
+}
+
+
+filter_good_columns <- function(df, good_cells, skip=0) {
+  cols <- colnames(df) %in% good_cells
+  cols[1:skip] <- TRUE
+  return(df[, cols])
+}
+
+
+filter_evil_columns <- function(df, evil_cells, skip=0) {
+  cols <- ! colnames(df) %in% evil_cells
+  cols[1:skip] <- TRUE
+  return(df[, cols])
+}
