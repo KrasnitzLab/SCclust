@@ -29,12 +29,16 @@ prostate<-substring(hcfile,first=1,
 load(hcfile)
 hc<-get(substring(hcfile,first=1,last=nchar(hcfile)-4))
 rm(list=substring(hcfile,first=1,last=nchar(hcfile)-4))
-clonetable<-data.frame(hc$labels,rep(0,length(hc$labels)),
-	rep(0,length(hc$labels)),stringsAsFactors=F)
+clonetable<-data.frame(
+    hc$labels,
+    rep(0,length(hc$labels)),
+    rep(0,length(hc$labels)),stringsAsFactors=F)
 dimnames(clonetable)[[2]]<-c("ID","clone","subclone")
+
 for(nodes in unique(hc$softclones[clonetype,]))
 	clonetable[hc$leaflist[[nodes]],"clone"]<-nodes
 clonedirs<-system("ls|grep cloneP",intern=T)
+
 if(length(clonedirs)>0)for(dirs in clonedirs){
 	setwd(dirs)
 	hcfile<-system("ls|grep smear1bpLog10FisherHCP.rda",intern=T)

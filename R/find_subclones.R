@@ -79,8 +79,11 @@ construct_clonetable <- function(
   assertthat::assert_that(!is.null(hc$labels))
   assertthat::assert_that(!is.null(hc$softclones))
   assertthat::assert_that(!is.null(hc$leaflist))
+  assertthat::assert_that(!is.null(hc$labellist))
   
-  clonetable <- data.frame(hc$labels, rep(0, length(hc$labels)),
+  clonetable <- data.frame(
+      hc$labels, 
+      rep(0, length(hc$labels)),
       rep(0, length(hc$labels)), stringsAsFactors = F)
   colnames(clonetable) <- c("ID", "clone", "subclone")
   
@@ -95,6 +98,7 @@ construct_clonetable <- function(
     assertthat::assert_that(!is.null(subhc$softclones))
     assertthat::assert_that(!is.null(subhc$leaflist))
     assertthat::assert_that(!is.null(subhc$nodesize))
+    assertthat::assert_that(!is.null(subhc$labellist))
     
     clunique <- unique(subhc$softclones[clonetype,])
     print(clunique)
@@ -102,13 +106,13 @@ construct_clonetable <- function(
     if (length(clunique) > 1){
       for(nodes in clunique){
         clonetable[
-            match(subhc$labels[[nodes]], clonetable[,1]), 
+            match(subhc$labellist[[nodes]], clonetable[,1]), 
             "subclone"] <- nodes
       }
     } else if(length(clunique) == 1){
       if(subhc$nodesize[clunique] < (subclone_toobig * max(subhc$nodesize))){
         clonetable[
-            match(subhc$labels[[clunique]], clonetable[,1]), 
+            match(subhc$labellist[[clunique]], clonetable[,1]), 
             "subclone"] <- clunique}
     }
   }
