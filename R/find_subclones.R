@@ -20,10 +20,17 @@
 
 find_subclones <- function(
     hc, pinmat, pins, 
-    nmin = -6, nsim = 500, lmmax = 0.001, 
-    hcmethod = "average", baseshare = 3, 
-    fdrthresh = -2, sharemin = 0.85, 
-    bymax = TRUE, climbfromsize = 2, climbtoshare = 3, clonetype = 'soft'){
+    nmin = -6, 
+    nsim = 500, 
+    lmmax = 0.001, 
+    hcmethod = "average", 
+    baseshare = 3, 
+    fdrthresh = -2, 
+    sharemin = 0.85, 
+    bymax = T, 
+    climbfromsize = 2, 
+    climbtoshare = 3, 
+    clonetype = 'soft'){
 
   assertthat::assert_that(!is.null(hc$softclones))
   assertthat::assert_that(!is.null(hc$leaflist))
@@ -46,9 +53,9 @@ find_subclones <- function(
       clonemat <- clonemat[
           (rowSums(clonemat) > 0)&(rowSums(clonemat) < ncol(clonemat)),,drop = F]
 
-      n_share <- baseshare + sum(rowSums(clonemat) > (sharemin * ncol(clonemat)))
+      nshare <- baseshare + sum(rowSums(clonemat) > (sharemin * ncol(clonemat)))
       cellnames <- colnames(clonemat)
-      print(paste("subclone number of cells: ", length(cellnames)))
+      flog.debug("subclone number of cells: %s", length(cellnames))
       res <- sim_fisher_wrapper(clonemat, clonepins, nsim=nsim)
       true_pv <- res$true
       assertthat::assert_that(all(!is.null(true_pv)))
@@ -62,19 +69,32 @@ find_subclones <- function(
       mdist <- fisher_dist(true_pv, cellnames)
 
       subhc <- hclust_tree(pinmat, mfdr, mdist, hcmethod = hcmethod)
-      subhc_clone <- find_clones(
-          subhc, fdrthresh = fdrthresh, sharemin = sharemin, 
-          nshare = n_share, bymax = bymax,
-          climbfromsize = climbfromsize, climbtoshare = climbtoshare)
-      subhc_clones[[i]] <- subhc_clone
+      flog.debug("fdrthresh=%s; sharemin=%s; nshare=%s; bymax=%s;", 
+          fdrthresh, sharemin, nshare, bymax)
+      flog.debug("climbfromsize=%s; climbtoshare=%s",
+          climbfromsize, climbtoshare)
+      flog.debug("subhc=%s", subhc)
+
+      subhc <- find_clones(
+          subhc)
+      
+#      subhc <- find_clones(
+#          subhc, 
+#          fdrthresh = fdrthresh, 
+#          sharemin = sharemin, 
+#          nshare = nshare, 
+#          bymax = bymax,
+#          climbfromsize = climbfromsize, 
+#          climbtoshare = climbtoshare)
+      subhc_clones[[i]] <- subhc
     }
 
   }
 
-  return(construct_clonetable(hc, subhc_clones, clonetype))
+  return(construct_clonetracks(hc, subhc_clones, clonetype))
 }
 
-construct_clonetable <- function(
+construct_clonetracks<- function(
     hc, subhc_clones, clonetype, subclone_toobig=0.8){
   assertthat::assert_that(!is.null(hc$labels))
   assertthat::assert_that(!is.null(hc$softclones))
@@ -101,7 +121,7 @@ construct_clonetable <- function(
     assertthat::assert_that(!is.null(subhc$labellist))
     
     clunique <- unique(subhc$softclones[clonetype,])
-    print(clunique)
+    flog.debug("clunique=%s", clunique)
 
     if (length(clunique) > 1){
       for(nodes in clunique){

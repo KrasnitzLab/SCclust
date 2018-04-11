@@ -12,10 +12,13 @@
 #'@export
 
 
-
-find_clones <- function(hc, fdrthresh = -2, 
-    sharemin = 0.85, nshare = 3, bymax = T,
-    climbfromsize = 2, climbtoshare = 3){
+find_clones <- function(hc, 
+    fdrthresh = -2, 
+    sharemin = 0.85, 
+    nshare = 3, 
+    bymax = T,
+    climbfromsize = 2, 
+    climbtoshare = 3){
 
   # fdrthresh: FDR criterion for clone nodes
   # share_min: A feature is considered shared if present in share_min fraction 
@@ -48,7 +51,8 @@ find_clones <- function(hc, fdrthresh = -2,
   } else { 
     node_compliant <- (hc$meanfdr < fdrthresh & count_pins_share > nshare)
   }
-
+  flog.debug("node_compliant=%s", node_compliant)
+  
   leftchild <- (hc$merge[,1] < 0)
   leftchild[hc$merge[,1] > 0] <- node_compliant[hc$merge[hc$merge[,1] > 0, 1]]
 
@@ -56,8 +60,9 @@ find_clones <- function(hc, fdrthresh = -2,
   rightchild[hc$merge[,2] > 0] <- node_compliant[hc$merge[hc$merge[,2] > 0, 2]]
 
   new_node_compliant <- node_compliant & leftchild & rightchild
-
-  while(!all(new_node_compliant == node_compliant)){
+  flog.debug("new_node_compliant=%s", new_node_compliant)
+  
+  while(!is.na(new_node_compliant) && !is.na(node_compliant) && !all(new_node_compliant == node_compliant)){
     node_compliant <- new_node_compliant
 
     leftchild <- (hc$merge[,1] < 0)
@@ -67,12 +72,16 @@ find_clones <- function(hc, fdrthresh = -2,
     rightchild[hc$merge[,2] > 0] <- node_compliant[hc$merge[hc$merge[,2] > 0, 2]]
 
     new_node_compliant <- node_compliant & leftchild & rightchild
+    flog.debug("node_compliant=%s; new_node_compliant=%s", 
+        node_compliant, new_node_compliant)
   }
 
 
   #Clone nodes are maximum compliant nodes
   clone_nodes <- setdiff((1:nrow(hc$merge))[node_compliant],
                          c(hc$merge[node_compliant, 1], hc$merge[node_compliant, 2]))
+  flog.debug("clone_nodes=%s", clone_nodes)
+
   hc$fdrthresh <- fdrthresh
   hc$clonenodes <- clone_nodes
   hc$bymax <- bymax

@@ -124,7 +124,7 @@ sim_fisher_wrapper <- function(pinmat_df, pins_df, njobs=NULL, nsim=500, nsweep=
   if(is.null(njobs)) {
     njobs <- parallel::detectCores()-4
   }
-  print(paste("sim_fisher_wrapper: njobjs=", njobs))
+  flog.debug("sim_fisher_wrapper: njobjs=%s", njobs)
 
   m<-vector(mode="list",length=length(unique(pins_df[,"sign"])))
 
