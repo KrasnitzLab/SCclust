@@ -68,24 +68,29 @@ fisher_fdr <- function(
   # (a power-law fit to the low-p tail of the null CDF, use it to extrapolate 
   # to very low p-values)
   lowp_index <- (cumsum(sim_count)/sum(sim_count)) < lmmax
-  lmu <- max(sim_unique[lowp_index])
+  flog.debug("lowp_index=%s; len=%s; sum=%s", 
+      lowp_index, length(lowp_index), sum(lowp_index))
+  # flog.debug("sim_unique[lowp_index]=%s", sim_unique[lowp_index])
   
-  if(is.finite(lmu) & min(true_unique) < min(sim_unique)){
-    lmfit <- lm(log(cumsum(sim_count[lowp_index])/sum(sim_count))~
-            log(sim_unique[lowp_index]))    
-    logfdr_lmfit <-
-        lmfit$coefficients[2]*log(true_unique) + 
-        lmfit$coefficients[1] - log(cumsum(true_count)/sum(true_count))
-    interp_index <- true_unique < lmu & true_unique > min(sim_unique)
-    logfdr[interp_index]<-
-        (logfdr_lmfit[interp_index] * (log(lmu) - log(true_unique[interp_index])) -
-          logfdr[interp_index]*(log(min(sim_unique)) -
-            log(true_unique[interp_index])))/(log(lmu) - log(min(sim_unique)))
+  if(sum(lowp_index) > 1) {
+    lmu <- max(sim_unique[lowp_index])
     
-    nointerp_index <- true_unique < min(sim_unique)
-    logfdr[nointerp_index] <- logfdr_lmfit[nointerp_index]
+    if(is.finite(lmu) & min(true_unique) < min(sim_unique)){
+      lmfit <- lm(log(cumsum(sim_count[lowp_index])/sum(sim_count))~
+              log(sim_unique[lowp_index]))    
+      logfdr_lmfit <-
+          lmfit$coefficients[2]*log(true_unique) + 
+          lmfit$coefficients[1] - log(cumsum(true_count)/sum(true_count))
+      interp_index <- true_unique < lmu & true_unique > min(sim_unique)
+      logfdr[interp_index]<-
+          (logfdr_lmfit[interp_index] * (log(lmu) - log(true_unique[interp_index])) -
+            logfdr[interp_index]*(log(min(sim_unique)) -
+              log(true_unique[interp_index])))/(log(lmu) - log(min(sim_unique)))
+      
+      nointerp_index <- true_unique < min(sim_unique)
+      logfdr[nointerp_index] <- logfdr_lmfit[nointerp_index]
+    }
   }
-  
   logfdr <- cummax(logfdr)
   logfdr[logfdr > 0] <- 0
   

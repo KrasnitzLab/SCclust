@@ -1,5 +1,6 @@
 library(devtools)
 library(testthat)
+library(futile.logger)
 
 devtools::load_all()
 

@@ -1,7 +1,11 @@
 library(devtools)
 library(testthat)
+library(futile.logger)
 
 devtools::load_all()
+
+flog.threshold(DEBUG)
+
 
 # testthat::test_file("tests/testthat/test_find_clones.R")
 testthat::test_file("tests/testthat/test_find_subclones.R")

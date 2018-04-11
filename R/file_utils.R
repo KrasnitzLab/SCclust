@@ -26,7 +26,7 @@ load_table <- function(filename) {
 
 
 save_table <- function(filename, df) {
-  print(paste("writing table: ", filename))
+  flog.debug("writing table: %s", filename)
   write.table(df, filename, col.names=T, row.names=F, sep="\t", quote=F)
 }
 

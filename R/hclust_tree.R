@@ -66,6 +66,5 @@ hclust_tree <- function(pinmat, mat_fdr, mat_dist, hcmethod = "average"){
 
   # return the hclust object which have new features added
   return(hc)
-
 }
 
