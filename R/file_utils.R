@@ -30,6 +30,11 @@ save_table <- function(filename, df) {
   write.table(df, filename, col.names=T, row.names=F, sep="\t", quote=F)
 }
 
+save_mat <- function(filename, mat) {
+  flog.debug("writing matrix: %s", filename)
+  write(mat, file=filename)
+}
+
 uber_cells <- function(df, skip=3) {
   cells <- colnames(df)[c((skip+1):ncol(df))]
   return(data.frame(cells))
@@ -43,15 +48,12 @@ cells_filename <- function(output_dir, casename) {
   return(outname)
 }
 
-ratio_filename <- function(output_dir, casename) {
-
-}
-
 case_filenames <- function(output_dir, casename) {
   suffixes <- list(
     'ratio', 'clone', 'tree', 'seg',
     'featuremat', 'features',
-    'guide', 'genome', 'cells')
+    'guide', 'genome', 'cells',
+    'sim_pv', 'true_pv')
 
   filenames <- lapply(
     suffixes,

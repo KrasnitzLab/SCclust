@@ -113,6 +113,9 @@ sim_fisher<-function(m, nsim, nsweep, seedme, distrib=c("vanilla","Rparallel"), 
 #      "_simP.txt",sep="")
 #    print(simfile)
 #    write(tp,file=simfile)
+    if(i %% 20 == 0) {
+      flog.debug("sim fisher simulations %s out of %s", i, nsim)
+    }
   }
   parallel::stopCluster(cl)
   return(tp)
