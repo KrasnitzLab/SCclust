@@ -3,7 +3,7 @@ Type: Package
 Title: Clustering of Single Cell Sequencing Copy Number Profiles to Identify
     Clones
 Date: 2017-10-11
-Version: 0.1.5
+Version: 0.2.1
 Author: Alex Krasnitz, Jude Kendall, Junyan Song, Lubomir Chorbadjiev
 Maintainer: Lubomir Chorbadjiev <lubomir.chorbadjiev@gmail.com>
 Description: The SCclust package implements feature selection based on
@@ -20,6 +20,8 @@ VignetteBuilder: knitr
 Imports:
     DNAcopy,
     futile.logger,
-    tools
+    tools,
+    parallel,
+    assertthat
 URL: https://github.com/KrasnitzLab/SCclust
 BugReports: https://github.com/KrasnitzLab/SCclust/issues
