@@ -4,15 +4,19 @@
 ###############################################################################
 
 
-library(devtools)
-library(testthat)
+
 library(futile.logger)
-
-devtools::load_all()
-
 flog.threshold(DEBUG)
+
+devtools::load_all(".")
+
 
 options(testthat.output_file = "junit_test_results.xml")
 
-testthat::test_dir("tests/", reporter="junit")
+to_run <- c(
+    'tests/testthat/test_fileutils.R'
+)
 
+for(t in to_run) {
+  testthat::test_file(t, reporter="junit")
+}
