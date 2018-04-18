@@ -7,3 +7,4 @@ man
 .settings
 .project
 out_many
+/junit_test_results.xml
