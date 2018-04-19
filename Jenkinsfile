@@ -31,7 +31,7 @@ pipeline {
               echo $WORKSPACE
               pwd
               
-              Rscript run_tests.R
+              Rscript run_jenkins_tests.R
             '''
         }
     }

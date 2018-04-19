@@ -10,4 +10,6 @@ flog.threshold(DEBUG)
 
 devtools::load_all(".")
 
-testthat::test_dir("tests/testthat")
+
+options(testthat.output_file = "junit_test_results.xml")
+testthat::test_dir("tests/testthat", reporter="junit")
