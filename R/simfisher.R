@@ -66,7 +66,6 @@ sim_fisher<-function(m, nsim, nsweep, seedme, njobs=1,
   assertthat::assert_that(length(m) > 1)
   
   ncores <- min(njobs, parallel::detectCores())
-  ncores <- 1
 
   cl <- parallel::makeCluster(getOption("cl.cores",ncores))
   parallel::clusterSetRNGStream(cl)
