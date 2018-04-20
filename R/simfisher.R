@@ -2,10 +2,11 @@
 # the 2X2 contingency tables for all possible combinations of k variables. For a variable i
 # return its Fisher exact p-values with variables j>=i.
 fast_fisher<-function(i,yy,ny,nn){
-  ftp<-rep(1,nrow(yy))
+  ftp <- rep(1,nrow(yy))
   for(j in i:nrow(yy)) {
-    ftp[j]<-fisher.test(matrix(nrow=2,ncol=2,
-                              data=c(yy[i,j],ny[i,j],ny[j,i],nn[i,j])),alternative="greater")$p.value
+    ftp[j]<-fisher.test(
+        matrix(nrow=2,ncol=2,
+               data=c(yy[i,j],ny[i,j],ny[j,i],nn[i,j])),alternative="greater")$p.value
   }
   return(ftp)
 }
@@ -58,29 +59,32 @@ fisher_combo <- function(p) {
   return(c(Xsq = Xsq, p.value = p.val))
 }
 
-sim_fisher<-function(m, nsim, nsweep, seedme, distrib=c("vanilla","Rparallel"), njobs=1,
+sim_fisher<-function(m, nsim, nsweep, seedme, njobs=1,
                      combo=c("fisher","stouffer")){
 
   assertthat::assert_that(is.list(m))
-  assertthat::assert_that(distrib=="Rparallel")
-
+  assertthat::assert_that(length(m) > 1)
+  
   ncores <- min(njobs, parallel::detectCores())
+  ncores <- 1
+
   cl <- parallel::makeCluster(getOption("cl.cores",ncores))
   parallel::clusterSetRNGStream(cl)
 
   RNGkind("L'Ecuyer-CMRG")
   set.seed(seedme)
 
-  distrib<-match.arg(distrib)
   combo<-match.arg(combo)
 
-  rf<-lapply(m,rowMeans)
-  tp<-matrix(ncol=nsim,nrow=ncol(m[[1]])*(ncol(m[[1]])-1)/2)
-  xmat<-matrix(ncol=length(m),nrow=ncol(m[[1]])*(ncol(m[[1]])-1)/2)
+  rf <- lapply(m,rowMeans)
+  tp <- matrix(ncol=nsim,nrow=ncol(m[[1]])*(ncol(m[[1]])-1)/2)
+  xmat <- matrix(ncol=length(m),nrow=ncol(m[[1]])*(ncol(m[[1]])-1)/2)
 
   for(i in 1:nsim){
     for(j in 1:length(m)){
-      if(nsweep>0){
+      if(nsweep>0 && length(rf[[j]]) > 1){
+#        flog.debug("length of m[[%s]]: %s", j, length(m[[j]]))
+#        flog.debug("length of rf[[%s]]: %s", j, length(rf[[j]]))
         m[[j]] <- parallel::parApply(
             cl=cl, X=m[[j]], MARGIN=2,
             FUN=metro, p=rf[[j]], sweeps=nsweep)
@@ -92,10 +96,21 @@ sim_fisher<-function(m, nsim, nsweep, seedme, distrib=c("vanilla","Rparallel"), 
 
       lbi<-1:nrow(yy)
       lbi[lbi%%2==0]<-nrow(yy)+2-nrow(yy)%%2-lbi[lbi%%2==0]
-      x<-parallel::parSapply(cl,X=lbi,FUN=fast_fisher,yy=yy,ny=ny,nn=nn)[,order(lbi)]
-
-      x<-pmin(x,t(x))
-      xmat[,j]<-x[upper.tri(x)]
+#      flog.debug("lbi=%s; yy=%s,%s; ny=%s,%s; nn=%s,%s", 
+#          length(lbi), 
+#          nrow(yy), ncol(yy), 
+#          nrow(ny), ncol(ny), 
+#          nrow(nn), ncol(nn))
+      assertthat::assert_that(nrow(yy) == ncol(yy))
+      if(ncol(yy) < 2) {
+        flog.warn("sim_fisher skipping fast fisher because ncol(yy)=%s", ncol(yy))
+        next
+      }
+      x <- parallel::parSapply(
+          cl, X=lbi,
+          FUN=fast_fisher,yy=yy,ny=ny,nn=nn)[,order(lbi)]
+      x <- pmin(x,t(x))
+      xmat[,j] <- x[upper.tri(x)]
     }
     if(length(m)==1){
       tp[,i]<-xmat[,1]
@@ -106,13 +121,6 @@ sim_fisher<-function(m, nsim, nsweep, seedme, distrib=c("vanilla","Rparallel"), 
       Z<-colSums(apply(1-xmat,1,qnorm))/sqrt(ncol(xmat))
       tp[,i]<-1-sapply(Z,pnorm)
     }
-#    simfile <- paste(
-#      "/home/lubo/Work/data-single-cell/simfisher_testing/",
-#      "sim_fisher_test_",
-#      i, "_of_", nsim, "_by_", nsweep,
-#      "_simP.txt",sep="")
-#    print(simfile)
-#    write(tp,file=simfile)
     if(i %% 20 == 0) {
       flog.debug("sim fisher simulations %s out of %s", i, nsim)
     }
@@ -135,9 +143,9 @@ sim_fisher_wrapper <- function(pinmat_df, pins_df, njobs=NULL, nsim=500, nsweep=
     m[[i]]<-as.matrix(pinmat_df[pins_df[,"sign"]==unique(pins_df[,"sign"])[i],,drop=F])
   }
   vtrue <- sim_fisher(m, nsim=1, nsweep=0,
-                      seedme=seedme, distrib="Rparallel", njobs=njobs, combo="fisher")
+                      seedme=seedme, njobs=njobs, combo="fisher")
   msim <- sim_fisher(m, nsim=nsim, nsweep=nsweep,
-                     seedme=seedme, distrib="Rparallel", njobs=njobs, combo="fisher")
+                     seedme=seedme, njobs=njobs, combo="fisher")
 
   res <- list(vtrue, msim)
   names(res) <- c("true", "sim")

@@ -76,16 +76,13 @@ find_subclones <- function(
       flog.debug("subhc=%s", subhc)
 
       subhc <- find_clones(
-          subhc)
-      
-#      subhc <- find_clones(
-#          subhc, 
-#          fdrthresh = fdrthresh, 
-#          sharemin = sharemin, 
-#          nshare = nshare, 
-#          bymax = bymax,
-#          climbfromsize = climbfromsize, 
-#          climbtoshare = climbtoshare)
+          subhc, 
+          fdrthresh = fdrthresh, 
+          sharemin = sharemin, 
+          nshare = nshare, 
+          bymax = bymax,
+          climbfromsize = climbfromsize, 
+          climbtoshare = climbtoshare)
       subhc_clones[[i]] <- subhc
     }
 

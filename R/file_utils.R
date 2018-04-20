@@ -17,6 +17,7 @@ varbin_input_files <- function(input_file_dir, suffix_pattern="") {
 
 
 load_table <- function(filename) {
+  flog.debug("loading table: %s", filename)
   assertthat::assert_that(file.exists(filename))
 
   df <- read.table(filename, header=T, as.is=T)
@@ -32,6 +33,11 @@ save_table <- function(filename, df) {
 save_mat <- function(filename, mat) {
   flog.debug("writing matrix: %s", filename)
   write(mat, file=filename)
+}
+
+load_mat <- function(filename) {
+  flog.debug("loading matrix: %s", filename)
+  return(as.matrix(scan(filename)))
 }
 
 uber_cells <- function(df, skip=3) {
