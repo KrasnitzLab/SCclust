@@ -1,10 +1,10 @@
 
 
 augment_gc <- function(gc_df, df) {
-  assertthat::assert_that(all(gc_df$bin.chrom == df$chrom))
+  assertthat::assert_that(all(gc_df$chrom.numeric == df$chrom))
   assertthat::assert_that(all(gc_df$bin.start == df$chrompos))
 
-  augment_df <- cbind(gc_df[,c("bin.chrom", "bin.start", "bin.end")], df[,"abspos"])
+  augment_df <- cbind(gc_df[,c("chrom.numeric", "bin.start", "bin.end")], df[,"abspos"])
   colnames(augment_df) <- c("chrom", "chromstart", "chromend", "absstart")
 
   augment_df <- cbind(
