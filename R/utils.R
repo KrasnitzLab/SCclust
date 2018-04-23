@@ -17,23 +17,26 @@ calc_centroareas <- function(cyto) {
   return(centroareas)
 }
 
-calc_badbins <- function(gc, centroareas) {
-  # print(head(gc))
+calc_centrobins <- function(gc, centroareas) {
 
-  gc$chrom <- chrom_numeric(gc$bin.chrom)
+  assertthat::assert_that(!is.null(gc$chrom.numeric))
 
-
+  badbins <- list()
   for(i in centroareas$chrom) {
     from <- centroareas[i,]$from
     to <- centroareas[i, ]$to
-    # print(from)
-    # print(to)
 
-    df <- gc[gc$chrom == i, ]
-    bad_df <- df[df$bin.start >= from && df$bin.end <= to, ]
-    # print(bad_df)
+    bad_df <- gc[gc$chrom.numeric == i,]
+   
+    bad_df <- bad_df[
+        ((bad_df$bin.start >= from) & (bad_df$bin.start <= to)) | 
+            ((bad_df$bin.end >= from) & (bad_df$bin.end <= to)),]
 
+    flog.debug("chrom: %s; from: %s; to: %s; bins filtered: %s", 
+        i, from, to, nrow(bad_df))
+    badbins <- append(badbins, rownames(bad_df))
   }
+  return(as.numeric(unlist(badbins, recursive=T)))
 }
 
 

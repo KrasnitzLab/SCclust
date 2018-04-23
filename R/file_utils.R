@@ -24,6 +24,12 @@ load_table <- function(filename) {
   return(df)
 }
 
+load_cytobands <- function(filename) {
+  flog.debug("loading cytobands: %s", filename)
+  assertthat::assert_that(file.exists(filename))
+  
+  return(read.table(cyto_file, header=F,as.is=T))
+}
 
 save_table <- function(filename, df) {
   flog.debug("writing table: %s", filename)
