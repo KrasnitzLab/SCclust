@@ -17,28 +17,60 @@ calc_centroareas <- function(cyto) {
   return(centroareas)
 }
 
-calc_centrobins <- function(gc, centroareas) {
+calc_regions2bins <- function(gc_df, regions) {
 
-  assertthat::assert_that(!is.null(gc$chrom.numeric))
+  assertthat::assert_that(!is.null(gc_df$chrom.numeric))
 
-  badbins <- list()
-  for(i in centroareas$chrom) {
-    from <- centroareas[i,]$from
-    to <- centroareas[i, ]$to
+  bins <- list()
+  for(index in seq(nrow(regions))) {
+    region <- regions[index, ]
 
-    bad_df <- gc[gc$chrom.numeric == i,]
+    from <- region$from
+    to <- region$to
+    chrom <- region$chrom
+
+    df <- gc_df[gc_df$chrom.numeric == chrom,]
    
-    bad_df <- bad_df[
-        ((bad_df$bin.start >= from) & (bad_df$bin.start <= to)) | 
-            ((bad_df$bin.end >= from) & (bad_df$bin.end <= to)),]
+    df <- df[
+        ((df$bin.start >= from) & (df$bin.start <= to)) | 
+            ((df$bin.end >= from) & (df$bin.end <= to)),]
 
     flog.debug("chrom: %s; from: %s; to: %s; bins filtered: %s", 
-        i, from, to, nrow(bad_df))
-    badbins <- append(badbins, rownames(bad_df))
+        chrom, from, to, nrow(df))
+    bins <- append(bins, rownames(df))
   }
-  return(as.numeric(unlist(badbins, recursive=T)))
+  return(as.numeric(unlist(bins, recursive=T)))
 }
 
+
+calc_bins2regions <- function(gc_df, bins) {
+  regions <- NULL
+  region <- NULL
+
+  for(bin in bins) {
+    d <- gc_df[bin,]
+    chrom <- d$chrom.numeric
+    from <- d$bin.start
+    to <- d$bin.end
+    
+    if(is.null(region)) {
+      region <- data.frame(chrom, from, to)
+    } else if(region$to == from & region$chrom == chrom) {
+      # extend
+      flog.debug("extending region: %s", region)
+      region$to <- to
+    } else {
+      if(is.null(regions)) {
+        regions <- region
+      } else {
+        regions <- rbind(regions, region)
+      }
+      region <- data.frame(chrom, from, to)
+    }
+  }
+  regions <- rbind(regions, region)
+  return(regions)
+}
 
 chrom_numeric <- function(chrom) {
   if(is.numeric(chrom)) {
