@@ -4,10 +4,6 @@ augment_gc <- function(gc_df, df) {
   assertthat::assert_that(all(gc_df$chrom.numeric == df$chrom))
   assertthat::assert_that(all(gc_df$bin.start == df$chrompos))
 
-  flog.debug("augment_gc: colnames=%s", colnames(df))
-  print(colnames(df))
-  print(head(df))
-
   augment_df <- cbind(gc_df[,c("chrom.numeric", "bin.start", "bin.end")], df[,"abspos"])
   colnames(augment_df) <- c("chrom", "chromstart", "chromend", "absstart")
 
@@ -79,16 +75,9 @@ calc_ploidies <- function(gc_df, segment_df, rounded_df=NULL) {
 }
 
 
-filter_homoloss_segments <- function(gc_df, segment_df, 
-    homoloss=0.01, ploidies_df=NULL) {
-  
-  if(is.null(ploidies_df)) {
-    ploidies_df <- calc_ploidies(gc_df, segment_df)
-  }
-  
+filter_homoloss_segments <- function(df, ploidies_df, homoloss=0.01) {
   good_cells <- rownames(ploidies_df[ploidies_df[,"homoloss"] < homoloss,])
-  
-  return(segment_df[,good_cells])
+  return(cbind(df[,c("chrom", "chrompos", "abspos")], df[, good_cells]))
 }
 
 calc_censored_index <- function(short_df, dropareas) {
