@@ -276,3 +276,63 @@ remove_segment <- function( rsShort, rsSegnum, ratioData, sd.undo ) {
   
   return(tempShort)
 }
+
+
+segment_varbin_files <- function(varbin_files, gc_df, badbins) {
+  processed <- vector("list", nrow(varbin_files))
+  
+  ncells <- nrow(varbin_files)
+  cells <- varbin_files$cells
+  
+# ncells <- 3
+  
+  for(index in seq(1, ncells)) {
+      varbin_file <- varbin_files$paths[index]
+      cell <- varbin_files$cells[index]
+      name <- varbin_files$names[index]
+      
+      flog.debug("processing varbin file: %s (cell: %s)", varbin_file, cell)
+      
+      bin_df <- load_table(varbin_file)
+      bin_df$chrom.numeric <- chrom_numeric(bin_df$chrom)
+      bin_df <- bin_df[-badbins,]
+      
+      bin_df <- cbs_segment_ratio(gc_df, bin_df)
+      bin_df <- cbs_segment_varbin(bin_df)
+    
+      processed[[index]] <- bin_df
+  }
+  
+  uber_seg <- data.frame(
+          chrom=gc_df$chrom.numeric, 
+          chrompos=gc_df$bin.start, 
+          abspos=gc_df$bin.start.abspos)
+  
+  uber_ratio <- data.frame(
+          chrom=gc_df$chrom.numeric, 
+          chrompos=gc_df$bin.start, 
+          abspos=gc_df$bin.start.abspos)
+  
+  for(index in seq(1, ncells)) {
+      bin_df <- processed[[index]]
+      expect_false(is.null(bin_df$chrom))
+      expect_false(is.null(bin_df$chrom.numeric))
+      expect_false(is.null(bin_df$abspos))
+      expect_false(is.null(bin_df$ratio.quantal))
+      expect_false(is.null(bin_df$seg.quantal))
+      
+      expect_equal(uber_seg$chrom, bin_df$chrom.numeric)
+      expect_equal(uber_seg$chrompos, bin_df$chrompos)
+      expect_equal(uber_seg$abspos, bin_df$abspos)
+    
+      expect_equal(uber_ratio$chrom, bin_df$chrom.numeric)
+      expect_equal(uber_ratio$chrompos, bin_df$chrompos)
+      expect_equal(uber_ratio$abspos, bin_df$abspos)
+      
+      cell <- cells[index]
+      uber_seg[[cell]] <- bin_df$seg.quantal
+      uber_ratio[[cell]] <- bin_df$ratio.quantal
+  }
+  
+  return(list(seg=uber_seg,ratio=uber_ratio))
+}

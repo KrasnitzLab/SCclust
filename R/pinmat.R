@@ -4,6 +4,10 @@ augment_gc <- function(gc_df, df) {
   assertthat::assert_that(all(gc_df$chrom.numeric == df$chrom))
   assertthat::assert_that(all(gc_df$bin.start == df$chrompos))
 
+  flog.debug("augment_gc: colnames=%s", colnames(df))
+  print(colnames(df))
+  print(head(df))
+
   augment_df <- cbind(gc_df[,c("chrom.numeric", "bin.start", "bin.end")], df[,"abspos"])
   colnames(augment_df) <- c("chrom", "chromstart", "chromend", "absstart")
 
@@ -18,7 +22,8 @@ augment_gc <- function(gc_df, df) {
 calc_segments_short <- function(gc_df, segment_df, homoloss=0.01) {
   assertthat::assert_that(is.numeric(gc_df$chrom))
   assertthat::assert_that(is.numeric(segment_df$chrom))
-  assertthat::assert_that(all(colnames(gc_df) == c("chrom", "chromstart", "chromend", "absstart", "absend")))
+  assertthat::assert_that(all(colnames(gc_df) == 
+              c("chrom", "chromstart", "chromend", "absstart", "absend")))
   assertthat::assert_that(nrow(gc_df) == nrow(segment_df))
 
   a <- round(as.matrix(segment_df[,-(1:3)]))
@@ -52,25 +57,38 @@ calc_segments_short <- function(gc_df, segment_df, homoloss=0.01) {
   return(tshort)
 }
 
-calc_ploidies <- function(gc_df, segment_df, a=NULL) {
-  if(is.null(a)) {
-    a <- round(as.matrix(segment_df[,-(1:3)]))
+calc_ploidies <- function(gc_df, segment_df, rounded_df=NULL) {
+  if(is.null(rounded_df)) {
+    rounded_df <- round(as.matrix(segment_df[,-(1:3)]))
   }
-  assertthat::assert_that(nrow(a) == nrow(segment_df))
-  assertthat::assert_that(ncol(a) + 3 == ncol(segment_df))
+  assertthat::assert_that(nrow(rounded_df) == nrow(segment_df))
+  assertthat::assert_that(ncol(rounded_df) + 3 == ncol(segment_df))
 
   getmode<-function(x) as.numeric(
         names(which.max(tapply(X=x,INDEX=as.factor(x), FUN=length))))
-  ploidymod<-apply(a[gc_df[,"chrom"]<23,],2,getmode)
-  ploidymed<-apply(a[gc_df[,"chrom"]<23,],2,median)
+  ploidymod<-apply(rounded_df[gc_df[,"chrom"]<23,],2,getmode)
+  ploidymed<-apply(rounded_df[gc_df[,"chrom"]<23,],2,median)
   ploidychromod<-apply(
-    a[gc_df[,"chrom"]<23,], 2, modeofmodes,
-    otherlabel=gc_df[gc_df[,"chrom"]<23,"chrom"],
-    tiebreaker=2,tiebreakerside="greater")
-  homoloss<-colSums(!a[gc_df[,"chrom"]<23,])/
+          rounded_df[gc_df[,"chrom"]<23,], 2, modeofmodes,
+          otherlabel=gc_df[gc_df[,"chrom"]<23,"chrom"],
+          tiebreaker=2, tiebreakerside="greater")
+  homoloss<-colSums(!rounded_df[gc_df[,"chrom"]<23,])/
     sum(gc_df[,"chrom"]<23)
   ploidies <- cbind(ploidymed, ploidymod, ploidychromod, homoloss)
   return(ploidies)
+}
+
+
+filter_homoloss_segments <- function(gc_df, segment_df, 
+    homoloss=0.01, ploidies_df=NULL) {
+  
+  if(is.null(ploidies_df)) {
+    ploidies_df <- calc_ploidies(gc_df, segment_df)
+  }
+  
+  good_cells <- rownames(ploidies_df[ploidies_df[,"homoloss"] < homoloss,])
+  
+  return(segment_df[,good_cells])
 }
 
 calc_censored_index <- function(short_df, dropareas) {
