@@ -48,7 +48,7 @@ load_mat <- function(filename) {
 
 uber_cells <- function(df, skip=3) {
   cells <- colnames(df)[c((skip+1):ncol(df))]
-  return(data.frame(cells))
+  return(data.frame(cells, stringsAsFactors=F))
 }
 
 cells_filename <- function(output_dir, casename) {

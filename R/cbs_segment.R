@@ -278,13 +278,13 @@ remove_segment <- function( rsShort, rsSegnum, ratioData, sd.undo ) {
 }
 
 
-segment_varbin_files <- function(varbin_files, gc_df, badbins) {
+segment_varbin_files <- function(varbin_files, gc_df, badbins=NULL) {
   processed <- vector("list", nrow(varbin_files))
   
   ncells <- nrow(varbin_files)
   cells <- varbin_files$cells
   
-# ncells <- 3
+  # ncells <- 5
   
   for(index in seq(1, ncells)) {
       varbin_file <- varbin_files$paths[index]
@@ -295,8 +295,11 @@ segment_varbin_files <- function(varbin_files, gc_df, badbins) {
       
       bin_df <- load_table(varbin_file)
       bin_df$chrom.numeric <- chrom_numeric(bin_df$chrom)
-      bin_df <- bin_df[-badbins,]
-      
+      if(!is.null(badbins)) {
+        bin_df <- bin_df[-badbins,]
+      }
+      assertthat::assert_that(nrow(bin_df) == nrow(gc_df))
+
       bin_df <- cbs_segment_ratio(gc_df, bin_df)
       bin_df <- cbs_segment_varbin(bin_df)
     
