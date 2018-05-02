@@ -57,6 +57,10 @@ find_subclones <- function(
       cellnames <- colnames(clonemat)
       flog.debug("subclone number of cells: %s", length(cellnames))
       res <- sim_fisher_wrapper(clonemat, clonepins, nsim=nsim)
+      if(is.null(res)) {
+        next
+      }
+
       true_pv <- res$true
       assertthat::assert_that(all(!is.null(true_pv)))
       
@@ -111,6 +115,9 @@ construct_clonetracks<- function(
   
   ##subclones
   for (subhc in subhc_clones){
+    if(is.null(subhc$labels)) {
+      next
+    }
     assertthat::assert_that(!is.null(subhc$labels))
     assertthat::assert_that(!is.null(subhc$softclones))
     assertthat::assert_that(!is.null(subhc$leaflist))

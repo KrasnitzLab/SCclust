@@ -63,7 +63,7 @@ sim_fisher<-function(m, nsim, nsweep, seedme, njobs=1,
                      combo=c("fisher","stouffer")){
 
   assertthat::assert_that(is.list(m))
-  assertthat::assert_that(length(m) > 1)
+  assertthat::assert_that(length(m) >= 1)
   
   ncores <- min(njobs, parallel::detectCores())
 
@@ -80,6 +80,9 @@ sim_fisher<-function(m, nsim, nsweep, seedme, njobs=1,
   xmat <- matrix(ncol=length(m),nrow=ncol(m[[1]])*(ncol(m[[1]])-1)/2)
 
   for(i in 1:nsim){
+    if(length(m)<=1) {
+      next
+    }
     for(j in 1:length(m)){
       if(nsweep>0 && length(rf[[j]]) > 1){
 #        flog.debug("length of m[[%s]]: %s", j, length(m[[j]]))
@@ -136,11 +139,17 @@ sim_fisher_wrapper <- function(pinmat_df, pins_df, njobs=NULL, nsim=500, nsweep=
   }
   flog.debug("sim_fisher_wrapper: njobjs=%s", njobs)
 
-  m<-vector(mode="list",length=length(unique(pins_df[,"sign"])))
-
-  for(i in 1:length(unique(pins_df[,"sign"]))) {
+  len <- length(unique(pins_df[,"sign"]))
+  m<-vector(mode="list",length=len)
+  # flog.debug("m vector build: %s", m)
+  if(len <= 1) {
+    return(NULL)
+  }
+  for(i in 1:len) {
     m[[i]]<-as.matrix(pinmat_df[pins_df[,"sign"]==unique(pins_df[,"sign"])[i],,drop=F])
   }
+  flog.debug("m vector initialized...")
+
   vtrue <- sim_fisher(m, nsim=1, nsweep=0,
                       seedme=seedme, njobs=njobs, combo="fisher")
   msim <- sim_fisher(m, nsim=nsim, nsweep=nsweep,
