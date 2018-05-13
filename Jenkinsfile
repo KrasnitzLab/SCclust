@@ -3,9 +3,6 @@ pipeline {
     label 'dory'
   }
   environment {
-    WD = pwd()
-    DAE_SOURCE_DIR = "$WD/gpf/DAE"
-    
     PATH = "$HOME/anaconda3/envs/sgains3/bin:$HOME/anaconda3/bin:$PATH"
   }
   options { 
@@ -14,9 +11,6 @@ pipeline {
   stages {
     stage ('Start') {
       steps {
-        echo "PATH is: $PATH"
-        echo "WD is: $WD"
-        
         slackSend (
           color: '#FFFF00',
           message: "STARTED: Job '${env.JOB_NAME} " +
