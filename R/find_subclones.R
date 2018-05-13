@@ -1,21 +1,26 @@
-#'Identify subclones in hierarchical tree.
+#' Identify subclones in hierarchical tree.
 #'
-#'Based on hierarchical clustering, identify the hard/soft clones.
-#'@param hc The hclust objects with clones identified.
-#'@param pinmat The pinmat.
-#'@param pins The pins.
-#'@param minnodesize An integer. Default: 6. The minimum node size for a subclone.
-#'@param nsim The number of permutation simulations for subclone identification. Default: 500.
-#'@param lmmax Numeric value. Default: 0.001. The threshold parameter for the linear fit to identify subclones.
-#'@param hcmethod Default: average
-#'@param base_share An integer. Default: 3. A balance parameter for controlling minimal number of shared features in a subclone node.
-#'@param fdr_thresh FDR criterion for subclone nodes. Default: -2.
-#'@param sharemin A feature is considered shared if present in share_min fraction of leaves in a node.Default: 0.90.
-#'@param bymax Logical. If TRUE (Default), use maximal of mean FDR for the node to find subclones.
-#'@param climbfromsize An integer. Default: 2.
-#'@param climbtoshare An integer. Default: 3.
-#'@return A list of hclust objects for clones.
-#'@export
+#' Based on hierarchical clustering, identify the hard/soft clones.
+#' @param hc The hclust objects with clones identified.
+#' @param pinmat The pinmat.
+#' @param pins The pins.
+#' @param minnodesize An integer. Default: 6. The minimum node size for a subclone.
+#' @param nsim The number of permutation simulations for subclone identification. 
+#'        Default: 500.
+#' @param lmmax Numeric value. Default: 0.001. The threshold parameter for the 
+#'        linear fit to identify subclones.
+#' @param hcmethod Default: average
+#' @param baseshare An integer. Default: 3. A balance parameter for controlling 
+#'        minimal number of shared features in a subclone node.
+#' @param fdr_thresh FDR criterion for subclone nodes. Default: -2.
+#' @param sharemin A feature is considered shared if present in sharemin fraction 
+#'        of leaves in a node.Default: 0.85.
+#' @param bymax Logical. If TRUE (Default), use maximal of mean FDR for the node 
+#'        to find subclones.
+#' @param climbfromsize An integer. Default: 2.
+#' @param climbtoshare An integer. Default: 3.
+#' @return A list of hclust objects for clones.
+#' @export
 
 
 find_subclones <- function(
