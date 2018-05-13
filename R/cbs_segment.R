@@ -284,7 +284,7 @@ remove_segment <- function( rsShort, rsSegnum, ratioData, sd.undo ) {
 #' @param varbin_files list of bin count files for all cells produced by 
 #'        'varbin' step of 'sgains' package.
 #' @param gc_df binning scheme used for the analysis.
-#' @param badins list of bins that should be excluded from the analysis.
+#' @param badbins list of bins that should be excluded from the analysis.
 #' @return The list containing seg quantal and ratio quantal matrix for all cells.
 #' @export
 segment_varbin_files <- function(varbin_files, gc_df, badbins=NULL) {

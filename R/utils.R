@@ -1,3 +1,5 @@
+library("futile.logger")
+
 filter_evil_short <- function(short_df, eviltwins=NULL) {
   good_cells <- unique(short_df[,"profid"])
   if(!is.null(eviltwins)) {

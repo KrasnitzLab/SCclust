@@ -1,3 +1,5 @@
+require(futile.logger)
+
 context("file utils work as expected")
 
 

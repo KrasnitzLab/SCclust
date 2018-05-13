@@ -4,7 +4,7 @@
 #' @param hc The hclust objects with clones identified.
 #' @param pinmat The pinmat.
 #' @param pins The pins.
-#' @param minnodesize An integer. Default: 6. The minimum node size for a subclone.
+#' @param nmin An integer. Default: 6. The minimum node size for a subclone.
 #' @param nsim The number of permutation simulations for subclone identification. 
 #'        Default: 500.
 #' @param lmmax Numeric value. Default: 0.001. The threshold parameter for the 
@@ -12,13 +12,14 @@
 #' @param hcmethod Default: average
 #' @param baseshare An integer. Default: 3. A balance parameter for controlling 
 #'        minimal number of shared features in a subclone node.
-#' @param fdr_thresh FDR criterion for subclone nodes. Default: -2.
+#' @param fdrthresh FDR criterion for subclone nodes. Default: -2.
 #' @param sharemin A feature is considered shared if present in sharemin fraction 
 #'        of leaves in a node.Default: 0.85.
 #' @param bymax Logical. If TRUE (Default), use maximal of mean FDR for the node 
 #'        to find subclones.
 #' @param climbfromsize An integer. Default: 2.
 #' @param climbtoshare An integer. Default: 3.
+#' @param clonetype Default: 'soft'.
 #' @return A list of hclust objects for clones.
 #' @export
 find_subclones <- function(

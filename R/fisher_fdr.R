@@ -206,6 +206,8 @@ cell2cell_matrix <- function(data, cell_names) {
 }
 
 
+#' Calculates a distance matrix given Fisher FDR true p-values.
+#' 
 #' @param true_pv The Fisher's test p-values for the observation.
 #' @param cell_names A character vector. The names of cells.
 #' @return distance matrix based on Fisher's test p-values (mat_dist).

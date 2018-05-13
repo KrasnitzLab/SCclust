@@ -2,6 +2,7 @@
 # Author: lubo
 # Created: Mar 28, 2018
 ###############################################################################
+library("futile.logger")
 
 
 #'Integration to 'sGAINS' tool. 
@@ -9,10 +10,12 @@
 #' This function is called by sGAINS tools to perform final step in preparation
 #' of results.
 #'
+#' @param scgv_dir directory where the results of the analysis should be stored
+#' @param case_name name of the case to be used for storing results of the analysis
 #' @param varbin_dir directory where are located results from 'varbin' step of sGAINS
 #' @param varbin_suffix common suffix for files produced from 'varbin' step of sGAINS
-#' @param gc_file file name for binning scheme to use in the analysis
-#' @param cytobands file name where is located the description of cyto bands for
+#' @param bins_boundaries file name for binning scheme to use in the analysis
+#' @param cytoband file name where is located the description of cyto bands for
 #'        the version of genome we are using
 #' @param badbins a file name were the defenition of bad bins for the specified
 #'        binning schema could be found

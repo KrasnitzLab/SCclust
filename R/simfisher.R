@@ -1,3 +1,6 @@
+library("parallel")
+library("futile.logger")
+
 # kXk matrices yy, ny, t(ny) and nn contain matrix elements [1,1], [2,1], [1,2] and [2,2] of
 # the 2X2 contingency tables for all possible combinations of k variables. For a variable i
 # return its Fisher exact p-values with variables j>=i.
@@ -147,8 +150,6 @@ sim_fisher<-function(m, nsim, nsweep, seedme, njobs=1,
 #'@export
 sim_fisher_wrapper <- function(pinmat_df, pins_df, njobs=NULL, 
     nsim=150, nsweep=200, seedme=123) {
-
-  require(parallel)
 
   if(is.null(njobs)) {
     njobs <- parallel::detectCores()-4
