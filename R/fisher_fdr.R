@@ -206,11 +206,10 @@ cell2cell_matrix <- function(data, cell_names) {
 }
 
 
-#'@param true_pv The Fisher's test p-values for the observation.
-#'@param cell_names A character vector. The names of cells.
-#'@return distance matrix based on Fisher's test p-values (mat_dist).
-#'@export
-
+#' @param true_pv The Fisher's test p-values for the observation.
+#' @param cell_names A character vector. The names of cells.
+#' @return distance matrix based on Fisher's test p-values (mat_dist).
+#' @export
 fisher_dist <- function(true_pv, cell_names) {
   return(cell2cell_matrix(log10(true_pv), cell_names))
 }

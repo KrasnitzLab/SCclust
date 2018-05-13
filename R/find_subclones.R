@@ -21,8 +21,6 @@
 #' @param climbtoshare An integer. Default: 3.
 #' @return A list of hclust objects for clones.
 #' @export
-
-
 find_subclones <- function(
     hc, pinmat, pins, 
     nmin = -6, 

@@ -1,3 +1,31 @@
+filter_evil_short <- function(short_df, eviltwins=NULL) {
+  good_cells <- unique(short_df[,"profid"])
+  if(!is.null(eviltwins)) {
+    good_cells <- setdiff(good_cells, eviltwins)
+    short_df <- short_df[short_df[, "profid"] %in% good_cells, ]
+  }
+  return(short_df)
+}
+
+
+filter_good_short <- function(short_df, good_cells) {
+  short_df <- short_df[short_df[, "profid"] %in% good_cells, ]
+  return(short_df)
+}
+
+
+filter_good_columns <- function(df, good_cells, skip=0) {
+  cols <- colnames(df) %in% good_cells
+  cols[1:skip] <- TRUE
+  return(df[, cols])
+}
+
+
+filter_evil_columns <- function(df, evil_cells, skip=0) {
+  cols <- ! colnames(df) %in% evil_cells
+  cols[1:skip] <- TRUE
+  return(df[, cols])
+}
 
 
 calc_centroareas <- function(cyto) {
@@ -108,6 +136,9 @@ tree_clustersize <- function(indextable) {
 }
 
 
+#' Builds HC tree representation based on the distance matrix
+#' computed by \code{fisher_dist}
+#' export
 tree_py <- function(mdist, method, metric='euclidean'){
   hc<-hclust(as.dist(mdist), method)
   
@@ -125,32 +156,20 @@ tree_py <- function(mdist, method, metric='euclidean'){
   return(res)
 }
 
-
-filter_evil_short <- function(short_df, eviltwins=NULL) {
-  good_cells <- unique(short_df[,"profid"])
-  if(!is.null(eviltwins)) {
-    good_cells <- setdiff(good_cells, eviltwins)
-    short_df <- short_df[short_df[, "profid"] %in% good_cells, ]
+hc_climb<-function(hc, minsize, minshare){
+  hard2soft<-matrix(nrow=2,ncol=0,dimnames=list(c("hard","soft"),NULL))
+  for(cnode in hc$clonenodes) {
+    if(hc$nodesize[cnode]>minsize){
+      nodenow<-cnode
+      ancestor<-cnode
+      while(nodenow<nrow(hc$merge)){
+        nodenow<-row(hc$merge)[hc$merge==nodenow]
+        if(hc$count_pins_share[nodenow]>=minshare)ancestor<-nodenow
+      }
+      
+      hard2soft<-cbind(hard2soft,c(cnode,ancestor))
+    }
   }
-  return(short_df)
+  return(hard2soft)
 }
 
-
-filter_good_short <- function(short_df, good_cells) {
-  short_df <- short_df[short_df[, "profid"] %in% good_cells, ]
-  return(short_df)
-}
-
-
-filter_good_columns <- function(df, good_cells, skip=0) {
-  cols <- colnames(df) %in% good_cells
-  cols[1:skip] <- TRUE
-  return(df[, cols])
-}
-
-
-filter_evil_columns <- function(df, evil_cells, skip=0) {
-  cols <- ! colnames(df) %in% evil_cells
-  cols[1:skip] <- TRUE
-  return(df[, cols])
-}

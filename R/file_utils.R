@@ -1,5 +1,9 @@
 
-
+#' Collects all bin count files from given directory
+#' @param input_file_dir directory to scan for bin count files
+#' @param suffix_pattern suffix to select files from input directory
+#' @return data frame with filenames, cell names and file basenames.
+#' @export 
 varbin_input_files <- function(input_file_dir, suffix_pattern="") {
   assertthat::assert_that(file.exists(input_file_dir))
 

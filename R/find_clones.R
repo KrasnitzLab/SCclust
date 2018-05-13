@@ -10,8 +10,6 @@
 #'@param climbtoshare An integer.
 #'@return A hclust object.
 #'@export
-
-
 find_clones <- function(hc, 
     fdrthresh = -2, 
     sharemin = 0.85, 
