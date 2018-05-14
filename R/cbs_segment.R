@@ -2,7 +2,7 @@
 # Author: lubo
 # Created: Mar 21, 2018
 ###############################################################################
-
+library("assertthat")
 
 lowess_gc <- function(jtkx, jtky) {
   jtklow <- lowess(jtkx, log(jtky), f=0.05)
@@ -328,20 +328,12 @@ segment_varbin_files <- function(varbin_files, gc_df, badbins=NULL) {
   
   for(index in seq(1, ncells)) {
       bin_df <- processed[[index]]
-      expect_false(is.null(bin_df$chrom))
-      expect_false(is.null(bin_df$chrom.numeric))
-      expect_false(is.null(bin_df$abspos))
-      expect_false(is.null(bin_df$ratio.quantal))
-      expect_false(is.null(bin_df$seg.quantal))
-      
-      expect_equal(uber_seg$chrom, bin_df$chrom.numeric)
-      expect_equal(uber_seg$chrompos, bin_df$chrompos)
-      expect_equal(uber_seg$abspos, bin_df$abspos)
-    
-      expect_equal(uber_ratio$chrom, bin_df$chrom.numeric)
-      expect_equal(uber_ratio$chrompos, bin_df$chrompos)
-      expect_equal(uber_ratio$abspos, bin_df$abspos)
-      
+      assertthat::assert_that(!is.null(bin_df$chrom))
+      assertthat::assert_that(!is.null(bin_df$chrom.numeric))
+      assertthat::assert_that(!is.null(bin_df$abspos))
+      assertthat::assert_that(!is.null(bin_df$ratio.quantal))
+      assertthat::assert_that(!is.null(bin_df$seg.quantal))
+
       cell <- cells[index]
       uber_seg[[cell]] <- bin_df$seg.quantal
       uber_ratio[[cell]] <- bin_df$ratio.quantal
