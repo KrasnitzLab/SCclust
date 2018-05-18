@@ -5,23 +5,21 @@
 library("futile.logger")
 
 
-#'Integration to 'sGAINS' tool. 
+#'Integration with 'sGAINS' tool. 
 #' 
-#' This function is called by sGAINS tools to perform final step in preparation
-#' of results.
+#' This function is called by sGAINS tools to perform the final step in preparation
+#' of results: phylogenetic analysis of single-cell genomes represented by their copy-number profiles
 #'
 #' @param scgv_dir directory where the results of the analysis should be stored
 #' @param case_name name of the case to be used for storing results of the analysis
-#' @param varbin_dir directory where are located results from 'varbin' step of sGAINS
-#' @param varbin_suffix common suffix for files produced from 'varbin' step of sGAINS
+#' @param varbin_dir directory where output of 'varbin' step of sGAINS(the binning scheme) is located
+#' @param varbin_suffix common suffix for files produced by 'varbin' step of sGAINS
 #' @param bins_boundaries file name for binning scheme to use in the analysis
-#' @param cytoband file name where is located the description of cyto bands for
-#'        the version of genome we are using
-#' @param badbins a file name were the defenition of bad bins for the specified
-#'        binning schema could be found
+#' @param cytoband file name for a cytoband coordinate table for the version of the genome being used
+#' @param badbins a file name for a table of bad bins (bins with outlying read counts) for the specified binning scheme
 #' @param nsim number of simulations to run for calculating simulated FDR distribution
-#' @param sharemin a feature is considered shared if present in sharemin fraction 
-#'        of leaves in a node
+#' @param sharemin a feature is considered 'widely shared' by leaves of a tree node if present in sharemin fraction 
+#'        of leaves
 #' @export
 
 sgains_pipeline <- function(
