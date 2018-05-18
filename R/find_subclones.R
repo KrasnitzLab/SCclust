@@ -1,30 +1,30 @@
-#' Identify subclones in hierarchical tree.
+#' Identify subclones in a clonal branch of a hierarchical tree.
 #'
-#' Based on hierarchical clustering, identify the hard/soft clones.
-#' @param hc The hclust objects with clones identified.
-#' @param pinmat The pinmat.
-#' @param pins The pins.
-#' @param nmin An integer. Default: 6. The minimum node size for a subclone.
+#' Iterate the procedure for clone identification for a subset of cells forming a clone.
+#' @param hc The hclust object with clones identified.
+#' @param pinmat The feature incidence matrix: columns are cells, rows are features, 1 if a feature is present, 0 if not.
+#' @param A two-column matrix, one row per feature, providing the bin number and thepy (sign) of the feature.
+#' @param nmin An integer. Default: 6. The minimal allowed size of a clone to be examined for subclones.
 #' @param nsim The number of permutation simulations for subclone identification. 
 #'        Default: 500.
-#' @param lmmax Numeric value. Default: 0.001. The threshold parameter for the 
-#'        linear fit to identify subclones.
+#' @param lmmax Numeric value. Default: 0.001. The threshold parameter for a 
+#'        linear fit, passed to fisherfdr function.
 #' @param hcmethod Default: average
 #' @param baseshare An integer. Default: 3. A balance parameter for controlling 
 #'        minimal number of shared features in a subclone node.
 #' @param fdrthresh FDR criterion for subclone nodes. Default: -2.
 #' @param sharemin A feature is considered shared if present in sharemin fraction 
 #'        of leaves in a node.Default: 0.85.
-#' @param bymax Logical. If TRUE (Default), use maximal of mean FDR for the node 
-#'        to find subclones.
-#' @param climbfromsize An integer. Default: 2.
-#' @param climbtoshare An integer. Default: 3.
-#' @param clonetype Default: 'soft'.
+#' @param bymax Logical. If TRUE (Default), use maximal pairwise FDR for the node 
+#'        to find subclones, otherwise use mean over all pairs.
+#' @param climbfromsize An integer specifying the minimal size of a hard subclone allowed to be expanded. Default: 2.
+#' @param climbtoshare An integer the minimal number of widely shared features in a soft subclone Default: 3.
+#' @param clonetype. A character string specifying whether hard or soft subclones are to be determined. Default: 'soft'.
 #' @return A list of hclust objects for clones.
 #' @export
 find_subclones <- function(
     hc, pinmat, pins, 
-    nmin = -6, 
+    nmin = 6, 
     nsim = 500, 
     lmmax = 0.001, 
     hcmethod = "average", 
