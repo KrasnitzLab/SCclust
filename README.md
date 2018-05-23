@@ -15,6 +15,6 @@ into your working directory;
 
 * Install the package from downloaded source:
 
-```
-install.packages("SCclust_1.0.0RC3.tar.gz")
-```
+    ```
+    install.packages("SCclust_1.0.0RC3.tar.gz")
+    ```
