@@ -35,11 +35,13 @@ load_cytobands <- function(filename) {
   return(read.table(cyto_file, header=F,as.is=T))
 }
 
+#' @export
 save_table <- function(filename, df) {
   flog.debug("writing table: %s", filename)
   write.table(df, filename, col.names=T, row.names=F, sep="\t", quote=F)
 }
 
+#' @export
 save_mat <- function(filename, mat) {
   flog.debug("writing matrix: %s", filename)
   write(mat, file=filename)
@@ -50,6 +52,7 @@ load_mat <- function(filename) {
   return(as.matrix(scan(filename)))
 }
 
+#' @export
 uber_cells <- function(df, skip=3) {
   cells <- colnames(df)[c((skip+1):ncol(df))]
   return(data.frame(cells, stringsAsFactors=F))
@@ -63,6 +66,10 @@ cells_filename <- function(output_dir, casename) {
   return(outname)
 }
 
+#' Constructs names for various output files based on `output_dir` and
+#' `casename`
+#' 
+#' @export 
 case_filenames <- function(output_dir, casename) {
   suffixes <- list(
     'ratio', 'clone', 'tree', 'seg',

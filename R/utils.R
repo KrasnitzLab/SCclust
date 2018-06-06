@@ -49,6 +49,9 @@ calc_centroareas <- function(cyto) {
   return(centroareas)
 }
 
+#' Converts regions to list of bins from binning scheme. 
+#' 
+#' @export
 calc_regions2bins <- function(gc_df, regions) {
 
   assertthat::assert_that(!is.null(gc_df$chrom.numeric))
@@ -75,6 +78,9 @@ calc_regions2bins <- function(gc_df, regions) {
 }
 
 
+#' Converts list of bins from binning scheme to regions. 
+#' 
+#' @export
 calc_bins2regions <- function(gc_df, bins) {
   regions <- NULL
   region <- NULL
@@ -104,6 +110,10 @@ calc_bins2regions <- function(gc_df, bins) {
   return(regions)
 }
 
+#' Converts chrom name to numeric and adds `chrom.numeric` column to the 
+#' dataframe. 
+#' 
+#' @export
 chrom_numeric <- function(chrom) {
   if(is.numeric(chrom)) {
     chrom.numeric <- chrom
@@ -142,7 +152,8 @@ tree_clustersize <- function(indextable) {
 
 #' Builds HC tree representation based on the distance matrix
 #' computed by \code{fisher_dist}
-#' export
+#' 
+#' @export
 tree_py <- function(mdist, method, metric='euclidean'){
   hc<-hclust(as.dist(mdist), method)
   

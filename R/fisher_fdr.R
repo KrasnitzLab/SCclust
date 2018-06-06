@@ -11,6 +11,8 @@
 #'@export
 fisher_fdr <- function(
     true_pv, sim_pv, cell_names, lmmax = 0.001){
+  flog.debug("cells: %d", length(cell_names))
+  flog.debug("dim(true_pv): %d", length(true_pv))
   
   assertthat::assert_that(length(cell_names) == (1 + sqrt(1 + 8*length(true_pv)))/2)
   
