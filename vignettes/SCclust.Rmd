@@ -130,7 +130,7 @@ flog.threshold(ERROR)
 ```{r, results = "asis"}
 gc_df <- read.csv("T10data/hg19_R50_B20k_bins_boundaries.txt", header = T, sep='\t')
 gc_df$chrom.numeric <- chrom_numeric(gc_df$bin.chrom)
-knitr::kable(head(gc_df))
+pander::pandoc.table(head(gc_df))
 ```
 
 We are using binning scheme with 20000 bins:
