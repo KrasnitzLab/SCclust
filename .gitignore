@@ -2,8 +2,9 @@
 .Rhistory
 .RData
 tmp
-*.html
 .settings
 .project
 out_many
 /junit_test_results.xml
+inst/doc
+vignettes/T10data

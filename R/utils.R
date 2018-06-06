@@ -29,7 +29,9 @@ filter_evil_columns <- function(df, evil_cells, skip=0) {
   return(df[, cols])
 }
 
-
+#' Calculates centromere regions (areas). 
+#' 
+#' @export
 calc_centroareas <- function(cyto) {
   centromere<-c("p11","q11")
   cyto[,1]<-chrom_numeric(cyto[,1])

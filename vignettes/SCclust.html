@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Alex Krasnitz, Jude Kendall, Junyan Song, Lubomir Chorbadjiev" />
+
+<meta name="date" content="2018-06-06" />
+
+<title>SCclust T10 Tutorial</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">SCclust T10 Tutorial</h1>
+<h4 class="author"><em>Alex Krasnitz, Jude Kendall, Junyan Song, Lubomir Chorbadjiev</em></h4>
+<h4 class="date"><em>2018-06-06</em></h4>
+
+
+
+<p>The <em>SCclust</em> package implements feature selection based on breakpoints, permutations for FDRs for Fisher test p-values and identification of the clone structure in single cell copy number profiles.</p>
+<p>In this tutorial we show how to use <em>SCclust</em> package using data, prepared by <em>sgains</em> pipeline as described in <a href="https://github.com/KrasnitzLab/sgains/blob/master/docs/tutorial-navin2011.md">Example usage of sGAINS pipeline</a>. <em>SCclust</em> package is called as the last step in processing data from <em>sgains</em> pipeline. In this tutoral we show how <em>SCclust</em> package could be used independently from <em>sgains</em> pipeline.</p>
+<p>We assume that you have R environment and have <em>SCclust</em> package installed as described in the <code>README.md</code>.</p>
+<div id="data-for-the-t10-case" class="section level2">
+<h2>Data for the T10 case</h2>
+<p>This tutorial is based on data published in:</p>
+<p><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4504184/">Navin N, Kendall J, Troge J, et al. Tumor Evolution Inferred by Single Cell Sequencing. Nature. 2011;472(7341):90-94. doi:10.1038/nature09807.</a></p>
+<p>In particular we will use the data for polygenomic breast tumor T10 case available from SRA.</p>
+<p>Description of samples for T10 could be found in <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4504184/bin/NIHMS706545-supplement-Supplement_Table_1.xls">Supplementary Table 1 | Summary of 100 Single Cells in the Polygenomic Tumor T10</a></p>
+<p>We are going to run <em>SCclust</em> package on prepared by <a href="https://github.com/KrasnitzLab/sgains/blob/master/docs/tutorial-navin2011.md#varbin-step"><code>varbin</code> step</a>. You can go through all the step in <a href="https://github.com/KrasnitzLab/sgains/blob/master/docs/tutorial-navin2011.md"><em>sgains</em> T10 tutorial</a> and prepare this data.</p>
+<p>For the purposes of this tutorial we recomend to donwload already prepared <code>varbin</code> data from <a href="https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0RC3/navin_t10_varbin_data.tar.gz">example data</a>.</p>
+<p>Apart from <code>varbin</code> T10 data you will need the binning scheme used in the analysis, that could be found <a href="https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0RC3/hg19_R50_B20k_bins_boundaries.txt.gz">here</a>.</p>
+<p>Also we will need <code>cytoBand.txt</code> for HG19 that you can download it from UCSC Genome Browser.</p>
+</div>
+<div id="collect-the-neccessary-data" class="section level2">
+<h2>Collect the Neccessary Data</h2>
+<p>Let us create a directory, where to store all the data used in this tutorial:</p>
+<pre><code>mkdir T10data
+cd T10data</code></pre>
+<p>and let us download and extract T10 <code>varbin</code> data:</p>
+<pre><code>wget -c https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0RC3/navin_t10_varbin_data.tar.gz
+tar zxvf navin_t10_varbin_data.tar.gz
+rm navin_t10_varbin_data.tar.gz</code></pre>
+<p>Let us also download and extract the binning scheme used in preparation of <code>varbin</code> data:</p>
+<pre><code>wget -c https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0RC3/hg19_R50_B20k_bins_boundaries.txt.gz
+gunzip hg19_R50_B20k_bins_boundaries.txt.gz</code></pre>
+<p>And finally let us download the <code>cytoBand.txt</code> for Human reference genome <em>hg19</em>:</p>
+<pre><code>wget -c http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/cytoBand.txt.gz
+gunzip cytoBand.txt.gz</code></pre>
+<p>Our data directory should have following structure:</p>
+<pre><code>.
+└── T10data
+    ├── cytoBand.txt
+    ├── hg19_R50_B20k_bins_boundaries.txt
+    └── varbin
+        ├── SRR052047.varbin.20k.txt
+        ├── SRR052148.varbin.20k.txt
+        ├── SRR053437.varbin.20k.txt
+        ...</code></pre>
+</div>
+<div id="explore-the-dowloaded-data" class="section level2">
+<h2>Explore the Dowloaded Data</h2>
+<div id="binning-schema" class="section level3">
+<h3>Binning schema</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">gc_df &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;T10data/hg19_R50_B20k_bins_boundaries.txt&quot;</span>, <span class="dt">header =</span> T, <span class="dt">sep=</span><span class="st">'</span><span class="ch">\t</span><span class="st">'</span>)
+pander<span class="op">::</span><span class="kw">pandoc.table</span>(<span class="kw">head</span>(gc_df))</code></pre></div>
+<table style="width:90%;">
+<caption>Table continues below</caption>
+<colgroup>
+<col width="16%"></col>
+<col width="16%"></col>
+<col width="26%"></col>
+<col width="13%"></col>
+<col width="16%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">bin.chrom</th>
+<th align="center">bin.start</th>
+<th align="center">bin.start.abspos</th>
+<th align="center">bin.end</th>
+<th align="center">bin.length</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">chr1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">859077</td>
+<td align="center">859077</td>
+</tr>
+<tr class="even">
+<td align="center">chr1</td>
+<td align="center">859077</td>
+<td align="center">859077</td>
+<td align="center">999002</td>
+<td align="center">139925</td>
+</tr>
+<tr class="odd">
+<td align="center">chr1</td>
+<td align="center">999002</td>
+<td align="center">999002</td>
+<td align="center">1141973</td>
+<td align="center">142971</td>
+</tr>
+<tr class="even">
+<td align="center">chr1</td>
+<td align="center">1141973</td>
+<td align="center">1141973</td>
+<td align="center">1280121</td>
+<td align="center">138148</td>
+</tr>
+<tr class="odd">
+<td align="center">chr1</td>
+<td align="center">1280121</td>
+<td align="center">1280121</td>
+<td align="center">1435418</td>
+<td align="center">155297</td>
+</tr>
+<tr class="even">
+<td align="center">chr1</td>
+<td align="center">1435418</td>
+<td align="center">1435418</td>
+<td align="center">1603686</td>
+<td align="center">168268</td>
+</tr>
+</tbody>
+</table>
+<table style="width:46%;">
+<colgroup>
+<col width="29%"></col>
+<col width="16%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">mappable.positions</th>
+<th align="center">gc.content</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">131390</td>
+<td align="center">0.4358</td>
+</tr>
+<tr class="even">
+<td align="center">131390</td>
+<td align="center">0.6281</td>
+</tr>
+<tr class="odd">
+<td align="center">131391</td>
+<td align="center">0.6027</td>
+</tr>
+<tr class="even">
+<td align="center">131390</td>
+<td align="center">0.6284</td>
+</tr>
+<tr class="odd">
+<td align="center">131390</td>
+<td align="center">0.5758</td>
+</tr>
+<tr class="even">
+<td align="center">131391</td>
+<td align="center">0.5691</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="cytobands-for-hg19" class="section level3">
+<h3>Cytobands for HG19</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cytobands &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;T10data/cytoBand.txt&quot;</span>, <span class="dt">header =</span> F, <span class="dt">sep=</span><span class="st">'</span><span class="ch">\t</span><span class="st">'</span>)
+pander<span class="op">::</span><span class="kw">pandoc.table</span>(<span class="kw">head</span>(cytobands))</code></pre></div>
+<table style="width:65%;">
+<colgroup>
+<col width="9%"></col>
+<col width="15%"></col>
+<col width="15%"></col>
+<col width="12%"></col>
+<col width="12%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">V1</th>
+<th align="center">V2</th>
+<th align="center">V3</th>
+<th align="center">V4</th>
+<th align="center">V5</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">chr1</td>
+<td align="center">0</td>
+<td align="center">2300000</td>
+<td align="center">p36.33</td>
+<td align="center">gneg</td>
+</tr>
+<tr class="even">
+<td align="center">chr1</td>
+<td align="center">2300000</td>
+<td align="center">5400000</td>
+<td align="center">p36.32</td>
+<td align="center">gpos25</td>
+</tr>
+<tr class="odd">
+<td align="center">chr1</td>
+<td align="center">5400000</td>
+<td align="center">7200000</td>
+<td align="center">p36.31</td>
+<td align="center">gneg</td>
+</tr>
+<tr class="even">
+<td align="center">chr1</td>
+<td align="center">7200000</td>
+<td align="center">9200000</td>
+<td align="center">p36.23</td>
+<td align="center">gpos25</td>
+</tr>
+<tr class="odd">
+<td align="center">chr1</td>
+<td align="center">9200000</td>
+<td align="center">12700000</td>
+<td align="center">p36.22</td>
+<td align="center">gneg</td>
+</tr>
+<tr class="even">
+<td align="center">chr1</td>
+<td align="center">12700000</td>
+<td align="center">16200000</td>
+<td align="center">p36.21</td>
+<td align="center">gpos50</td>
+</tr>
+</tbody>
+</table>
+<p>The main reason we need <code>cytoBand.txt</code> is to get the location of centromeres. Since centromere areas contain a lot of repetitive sequencies they are excluded from analysis when segmenting and clustering samples.</p>
+<p>To find regions where centromeres are located we are using <code>calc_centroareas</code> function:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># centroareas &lt;- calc_centroareas(cytobands)</span>
+<span class="co"># pander::pandoc.table(head(centroareas))</span></code></pre></div>
+</div>
+</div>
+<div id="initial" class="section level2">
+<h2>Initial</h2>
+<p>Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The <code>html_vignette</code> output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The <code>html_vignette</code> format:</p>
+<ul>
+<li>Never uses retina figures</li>
+<li>Has a smaller default figure size</li>
+<li>Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style</li>
+</ul>
+</div>
+<div id="vignette-info" class="section level2">
+<h2>Vignette Info</h2>
+<p>Note the various macros within the <code>vignette</code> section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the <code>title</code> field and the <code>\VignetteIndexEntry</code> to match the title of your vignette.</p>
+</div>
+<div id="styles" class="section level2">
+<h2>Styles</h2>
+<p>The <code>html_vignette</code> template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:</p>
+<pre><code>output: 
+  rmarkdown::html_vignette:
+    css: mystyles.css</code></pre>
+</div>
+<div id="figures" class="section level2">
+<h2>Figures</h2>
+<p>The figure sizes have been customised so that you can easily put two images side-by-side.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>)
+<span class="kw">plot</span>(<span class="dv">10</span><span class="op">:</span><span class="dv">1</span>)</code></pre></div>
+<p><img src="data:image/png;base64,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" /><img src="data:image/png;base64,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" /></p>
+<p>You can enable figure captions by <code>fig_caption: yes</code> in YAML:</p>
+<pre><code>output:
+  rmarkdown::html_vignette:
+    fig_caption: yes</code></pre>
+<p>Then you can use the chunk option <code>fig.cap = &quot;Your figure caption.&quot;</code> in <strong>knitr</strong>.</p>
+</div>
+<div id="more-examples" class="section level2">
+<h2>More Examples</h2>
+<p>You can write math expressions, e.g. <span class="math inline">\(Y = X\beta + \epsilon\)</span>, footnotes<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>, and tables, e.g. using <code>knitr::kable()</code>.</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right">mpg</th>
+<th align="right">cyl</th>
+<th align="right">disp</th>
+<th align="right">hp</th>
+<th align="right">drat</th>
+<th align="right">wt</th>
+<th align="right">qsec</th>
+<th align="right">vs</th>
+<th align="right">am</th>
+<th align="right">gear</th>
+<th align="right">carb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Mazda RX4</td>
+<td align="right">21.0</td>
+<td align="right">6</td>
+<td align="right">160.0</td>
+<td align="right">110</td>
+<td align="right">3.90</td>
+<td align="right">2.620</td>
+<td align="right">16.46</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">4</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td>Mazda RX4 Wag</td>
+<td align="right">21.0</td>
+<td align="right">6</td>
+<td align="right">160.0</td>
+<td align="right">110</td>
+<td align="right">3.90</td>
+<td align="right">2.875</td>
+<td align="right">17.02</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">4</td>
+<td align="right">4</td>
+</tr>
+<tr class="odd">
+<td>Datsun 710</td>
+<td align="right">22.8</td>
+<td align="right">4</td>
+<td align="right">108.0</td>
+<td align="right">93</td>
+<td align="right">3.85</td>
+<td align="right">2.320</td>
+<td align="right">18.61</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">4</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td>Hornet 4 Drive</td>
+<td align="right">21.4</td>
+<td align="right">6</td>
+<td align="right">258.0</td>
+<td align="right">110</td>
+<td align="right">3.08</td>
+<td align="right">3.215</td>
+<td align="right">19.44</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td>Hornet Sportabout</td>
+<td align="right">18.7</td>
+<td align="right">8</td>
+<td align="right">360.0</td>
+<td align="right">175</td>
+<td align="right">3.15</td>
+<td align="right">3.440</td>
+<td align="right">17.02</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td>Valiant</td>
+<td align="right">18.1</td>
+<td align="right">6</td>
+<td align="right">225.0</td>
+<td align="right">105</td>
+<td align="right">2.76</td>
+<td align="right">3.460</td>
+<td align="right">20.22</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td>Duster 360</td>
+<td align="right">14.3</td>
+<td align="right">8</td>
+<td align="right">360.0</td>
+<td align="right">245</td>
+<td align="right">3.21</td>
+<td align="right">3.570</td>
+<td align="right">15.84</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td>Merc 240D</td>
+<td align="right">24.4</td>
+<td align="right">4</td>
+<td align="right">146.7</td>
+<td align="right">62</td>
+<td align="right">3.69</td>
+<td align="right">3.190</td>
+<td align="right">20.00</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">4</td>
+<td align="right">2</td>
+</tr>
+<tr class="odd">
+<td>Merc 230</td>
+<td align="right">22.8</td>
+<td align="right">4</td>
+<td align="right">140.8</td>
+<td align="right">95</td>
+<td align="right">3.92</td>
+<td align="right">3.150</td>
+<td align="right">22.90</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">4</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td>Merc 280</td>
+<td align="right">19.2</td>
+<td align="right">6</td>
+<td align="right">167.6</td>
+<td align="right">123</td>
+<td align="right">3.92</td>
+<td align="right">3.440</td>
+<td align="right">18.30</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">4</td>
+<td align="right">4</td>
+</tr>
+</tbody>
+</table>
+<p>Also a quote using <code>&gt;</code>:</p>
+<blockquote>
+<p>“He who gives up [code] safety for [code] speed deserves neither.” (<a href="https://twitter.com/hadleywickham/status/504368538874703872">via</a>)</p>
+</blockquote>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>A footnote here.<a href="#fnref1">↩</a></p></li>
+</ol>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
