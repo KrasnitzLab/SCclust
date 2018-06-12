@@ -67,7 +67,7 @@ from the UCSC Genome Browser.
 
 ## Collect the Neccessary Data
 
-We first create a directory, where the data used in this tutorial will be stored:
+We first create a directory where the data used in this tutorial will be stored:
 
 ```bash
 mkdir T10data
@@ -129,6 +129,9 @@ flog.threshold(ERROR)
 ### Binning scheme
 
 \todo{Describe the data.}
+The binning scheme is a table describing a partition of the genome into bins to sort the sequence reads into. The bin boundaries 
+are defined such that each bin contains an approximately equal number of uniquely mapping reads. Also tabulated is the GC content of 
+each bin.
 
 ```{r, results = "asis"}
 gc_df <- read.csv("T10data/hg19_R50_B20k_bins_boundaries.txt", header = T, sep='\t')
