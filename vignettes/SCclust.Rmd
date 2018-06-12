@@ -28,9 +28,12 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-The *SCclust* package implements feature selection based on
-breakpoints, permutations for FDRs for Fisher test p-values and identification
-of the clone structure in single cell copy number profiles.
+The *SCclust* package performs phylogenetic analysis for sets of integer-valued genomic DNA copy-number profiles, each representing
+a single nucleus.
+For this purpose,*SCclust* determines a joint set of change points present in the profiles and uses these as features.
+An incidence table is then set up, with profiles as columns and features as rows and the binary values indicating, for each profile
+and feature, the presence of the feature in the profile. Dissimilarities among the profiles are computed as Fisher test p-values 
+for pairs of columns. For these, false discovery rates (FDR) are computed using permutations within the table. A hierarchical tree is derived from the dissimilarity matrix, and its branches are identified as clones or sub-clones depending on the maximal dissimilarity and on the number of features shared withing the branch. 
 
 In this tutorial we show how to use *SCclust* package using data, prepared by
 *sgains* pipeline as described in 
