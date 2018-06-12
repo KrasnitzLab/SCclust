@@ -51,30 +51,30 @@ This tutorial is based on data published in:
 [Navin N, Kendall J, Troge J, et al. Tumor Evolution Inferred by Single 
 Cell Sequencing. 
 Nature. 2011;472(7341):90-94. doi:10.1038/nature09807.](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4504184/)
-In particular we will use the data for polygenomic breast tumor T10 case available from SRA.
+In particular we will use single-cell data for polygenomic breast tumor T10 case available from SRA.
 Description of samples for T10 could be found in
 [Supplementary Table 1 | Summary of 100 Single Cells in the Polygenomic Tumor 
 T10](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4504184/bin/NIHMS706545-supplement-Supplement_Table_1.xls)
 
-We are going to run *SCclust* package on prepared by *sgains* pipeline [`varbin` step](https://github.com/KrasnitzLab/sgains/blob/master/docs/tutorial-navin2011.md#varbin-step).
-You can go through all the step in [*sgains* T10 tutorial](https://github.com/KrasnitzLab/sgains/blob/master/docs/tutorial-navin2011.md)
-and prepare this data.
+Here we will execute *SCclust* package on input prepared by *sgains* pipeline [`varbin` step](https://github.com/KrasnitzLab/sgains/blob/master/docs/tutorial-navin2011.md#varbin-step).
+Alternatively, the reader can go through the data pre-processing steps following [*sgains* T10 tutorial](https://github.com/KrasnitzLab/sgains/blob/master/docs/tutorial-navin2011.md).
 
 For the purposes of this tutorial we recomend you to download already prepared `varbin` data from 
 [example data](https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0RC3/navin_t10_varbin_data.tar.gz).
-Apart from `varbin` T10 data you will need the binning scheme used in the analysis, that could be found [here](https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0RC3/hg19_R50_B20k_bins_boundaries.txt.gz).
-And also we will need `cytoBand.txt` for HG19 that you can download it from UCSC Genome Browser.
+Apart from `varbin` T10 data you will need the binning scheme used in the analysis, which could be found [here](https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0RC3/hg19_R50_B20k_bins_boundaries.txt.gz).
+Finally, we will need `cytoBand.txt`, the cytoband annotation file for the HG19 version of the human genome, which can be downloaded
+from the UCSC Genome Browser.
 
 ## Collect the Neccessary Data
 
-Let us create a directory, where to store all the data used in this tutorial:
+We first create a directory, where the data used in this tutorial will be stored:
 
 ```bash
 mkdir T10data
 cd T10data
 ```
 
-and let us download and extract T10 `varbin` data:
+then download and extract T10 `varbin` data:
 
 ```bash
 wget -c \
@@ -83,7 +83,7 @@ tar zxvf navin_t10_varbin_data.tar.gz
 rm navin_t10_varbin_data.tar.gz
 ```
 
-Let us also download and extract the binning scheme used in preparation of `varbin` data:
+We also download and extract the binning scheme used in preparation of `varbin` data:
 
 ```bash
 wget -c \
@@ -91,7 +91,7 @@ wget -c \
 gunzip hg19_R50_B20k_bins_boundaries.txt.gz
 ```
 
-And finally let us download the `cytoBand.txt` for Human reference genome *hg19*:
+And finally we download the `cytoBand.txt` for Human reference genome *hg19*:
 
 ```bash
 wget -c \
@@ -99,7 +99,7 @@ wget -c \
 gunzip cytoBand.txt.gz
 ```
 
-Our data directory should have following structure:
+The data directory should have following structure:
 
 ```bash
 .
@@ -115,7 +115,7 @@ Our data directory should have following structure:
 
 ## Explore the Dowloaded Data
 
-We are going to use *SCclust* package so let us load it:
+Next, we attach *SCclust* to the R session:
 
 ```{r}
 library("SCclust")
@@ -126,7 +126,7 @@ library(futile.logger)
 flog.threshold(ERROR)
 ```
 
-### Binning schema
+### Binning scheme
 
 \todo{Describe the data.}
 
@@ -136,7 +136,7 @@ gc_df$chrom.numeric <- chrom_numeric(gc_df$bin.chrom)
 pander::pandoc.table(head(gc_df))
 ```
 
-We are using binning scheme with 20000 bins:
+We are using a binning scheme with 20000 bins:
 
 ```{r, results = "asis"}
 dim(gc_df)
