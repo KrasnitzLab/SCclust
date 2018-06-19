@@ -59,7 +59,7 @@ T10](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4504184/bin/NIHMS706545-supple
 Here we will execute *SCclust* package on input prepared by *sgains* pipeline [`varbin` step](https://github.com/KrasnitzLab/sgains/blob/master/docs/tutorial-navin2011.md#varbin-step).
 Alternatively, the reader can go through the data pre-processing steps following [*sgains* T10 tutorial](https://github.com/KrasnitzLab/sgains/blob/master/docs/tutorial-navin2011.md).
 
-For the purposes of this tutorial we recomend you to download already prepared `varbin` data from 
+For the purposes of this tutorial we recomend that you download already prepared `varbin` data from 
 [example data](https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0RC3/navin_t10_varbin_data.tar.gz).
 Apart from `varbin` T10 data you will need the binning scheme used in the analysis, which could be found [here](https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0RC3/hg19_R50_B20k_bins_boundaries.txt.gz).
 Finally, we will need `cytoBand.txt`, the cytoband annotation file for the HG19 version of the human genome, which can be downloaded
@@ -156,10 +156,11 @@ cytobands <- read.csv("T10data/cytoBand.txt", header = F, sep='\t')
 knitr::kable(head(cytobands))
 ```
 
-The main reason we need `cytoBand.txt` is to get the location of centromeres. Since centromere areas contain a lot
-of repetitive sequencies they are excluded from analysis when segmenting and clustering samples.
+The main reason we need `cytoBand.txt` is to get the location of centromeres. Centromeric regions of the genome often 
+contain repetitive sequence, leading to mapping artefacts and distorted read counts. For this reason, we opt to mask them 
+prior to copy-number profile segmentationsegmenting.
 
-To find regions where centromeres are located we are using `calc_centroareas` function:
+To identify centromeric regions we use `calc_centroareas` function:
 
 ```{r, results = "asis"}
 centroareas <- calc_centroareas(cytobands)
@@ -167,7 +168,7 @@ knitr::kable(head(centroareas))
 ```
 
 
-So, in `centroareas` for each chromosome we have the region where the centromere is located.
+The location of centromeric regions is now tabulated in `centroareas`.
 
 ### Varbin Samples Data
 
