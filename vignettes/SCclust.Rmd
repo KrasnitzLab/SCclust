@@ -190,17 +190,17 @@ knitr::kable(head(sample_df))
 
 ## Prepare list of bins that are inside or intersect with centromeres regions
 
-Using centromere regions calculated from `cytoBand.txt` we calculate which bins are inside
-or intersect with centromere regions using `calc_regions2bins` function:
+Using centromeric regions tabulated in `cytoBand.txt` we determine which bins are inside
+or intersect with centromeric regions using `calc_regions2bins` function:
 
 ```{r, results = "asis"}
 centrobins <- calc_regions2bins(gc_df, centroareas)
 length(centrobins)
 ```
 
-## Exclude centromeres bins from binning scheme
+## Exclude centromeric bins from the binning scheme
 
-After excluding centromeres bins from binning scheme, the new binning scheme has smaller number of bins:
+After excluding centromeric bins from the binning scheme, the new binning scheme has smaller number of bins:
 
 ```{r, results = "asis"}
 gc_df <- gc_df[-centrobins, ]
@@ -209,7 +209,7 @@ dim(gc_df)
 
 ## Collect Varbin files for all samples
 
-The function `varbin_input_files` helps us to collect varbin files for all samples from our `T10data/varbin`
+The function `varbin_input_files` helps us to collect varbin files for all samples in our `T10data/varbin`
 directory:
 
 ```{r, results = "asis"}
@@ -217,7 +217,7 @@ varbin_files <- varbin_input_files("T10data/varbin", "*.varbin.20k.txt")
 knitr::kable(head(varbin_files))
 ```
 
-Let us use not all the 100 samples but a subset of first 10 samples found by `varbin_input_files` function:
+For the purpose of this tutorial we will use a subset of the first 10 samples out of a 100 totalfound by `varbin_input_files` function:
 
 ```{r}
 varbin_files <- varbin_files[seq(10),]
@@ -227,12 +227,14 @@ dim(varbin_files)
 ## Segment varbin files
 
 \todo{Explain segmentation}
+Next, we approximate the copy number ratio as a function of the bin number by a piecewise-constant function. This process is called 
+segmentation.
 
 ```{r}
 res <- segment_varbin_files(varbin_files, gc_df, centrobins)
 ```
 
-The `segment_varbin_files` function returns list of segmentation and ratios for the samples
+The `segment_varbin_files` function returns the segmented copy number ratio along with the input ratios for all the samples
 
 ```{r, results = "asis"}
 knitr::kable(head(res$seg))
@@ -269,7 +271,7 @@ dir("T10data/results")
 # Construct features and feature matrix
 
 \todo{Explain how we calculate features}
-
+Next, we convert the set of segmented copy number profiles into a feature matrix. This process includes a number of steps.
 ```{r}
 pins <- calc_pinmat(gc_df, res$seg, dropareas=centroareas)
 pinmat_df <- pins$pinmat
