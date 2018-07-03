@@ -113,7 +113,7 @@ The data directory should have following structure:
         ...
 ```
 
-## Explore the Dowloaded Data
+## Explore the Downloaded Data
 
 Next, we attach *SCclust* to the R session:
 
@@ -158,9 +158,9 @@ knitr::kable(head(cytobands))
 
 The main reason we need `cytoBand.txt` is to get the location of centromeres. Centromeric regions of the genome often 
 contain repetitive sequence, leading to mapping artefacts and distorted read counts. For this reason, we opt to mask them 
-prior to copy-number profile segmentationsegmenting.
+prior to copy-number profile segmentation.
 
-To identify centromeric regions we use `calc_centroareas` function:
+To identify centromeric regions to be masked we use `calc_centroareas` function:
 
 ```{r, results = "asis"}
 centroareas <- calc_centroareas(cytobands)
@@ -168,13 +168,12 @@ knitr::kable(head(centroareas))
 ```
 
 
-The location of centromeric regions is now tabulated in `centroareas`.
+The locations of centromeric regions are now tabulated in `centroareas`.
 
 ### Varbin Samples Data
 
 \todo{Describe the data.}
-
-For each `varbin` sample
+Each 'varbin' file is a comma-separated table with each row representing a bin and with columns for etc.
 
 ```{r, results = "asis"}
 sample_df <- read.csv("T10data/varbin/SRR052047.varbin.20k.txt", header=T, sep='\t')
@@ -190,8 +189,7 @@ knitr::kable(head(sample_df))
 
 ## Prepare list of bins that are inside or intersect with centromeres regions
 
-Using centromeric regions tabulated in `cytoBand.txt` we determine which bins are inside
-or intersect with centromeric regions using `calc_regions2bins` function:
+Next, we use the `calc_regions2bins` function to determine which bins overlap with regions tabulated in `centroareas`:
 
 ```{r, results = "asis"}
 centrobins <- calc_regions2bins(gc_df, centroareas)
@@ -200,7 +198,7 @@ length(centrobins)
 
 ## Exclude centromeric bins from the binning scheme
 
-After excluding centromeric bins from the binning scheme, the new binning scheme has smaller number of bins:
+After excluding centromeric bins from the binning scheme, the new binning scheme has fewer bins:
 
 ```{r, results = "asis"}
 gc_df <- gc_df[-centrobins, ]
@@ -209,8 +207,8 @@ dim(gc_df)
 
 ## Collect Varbin files for all samples
 
-The function `varbin_input_files` helps us to collect varbin files for all samples in our `T10data/varbin`
-directory:
+With the help of `varbin_input_files` we create a vector of character strings, each representing a path to a `varbin` data file 
+in `T10data/varbin` directory:
 
 ```{r, results = "asis"}
 varbin_files <- varbin_input_files("T10data/varbin", "*.varbin.20k.txt")
@@ -228,7 +226,8 @@ dim(varbin_files)
 
 \todo{Explain segmentation}
 Next, we approximate the copy number ratio as a function of the bin number by a piecewise-constant function. This process is called 
-segmentation.
+segmentation. The segmentation algorithm we use is Circular Binary Segmentation (CBS), as implemented in the R package `DNAcopy`, but 
+modified for a more consistent elimination of very short segments.
 
 ```{r}
 res <- segment_varbin_files(varbin_files, gc_df, centrobins)
@@ -244,7 +243,7 @@ knitr::kable(head(res$seg))
 knitr::kable(head(res$ratio))
 ```
 
-## Construct results filenames and store segmentation and ratio results
+## Construct file names for the segmented output and store segmentation and ratio results.
 
 ```{r}
 filenames <- case_filenames("T10data/results", "NavinT10")
@@ -270,8 +269,19 @@ dir("T10data/results")
 
 # Construct features and feature matrix
 
+\todo{Where do we remove shredded cells?}
 \todo{Explain how we calculate features}
-Next, we convert the set of segmented copy number profiles into a feature matrix. This process includes a number of steps.
+At this point, we convert the set of segmented copy number profiles into a feature matrix. This process includes a number of steps. 
+First, since single-cell copy number must be integer, we round the segmented values to the nearest integer. Some of the neighboring 
+segments may merge as a result. Next, we replace each profile by a set of change points, i.e., discontinuities in the integer segmented
+value. Each change point has two values associated with it: position (bin number) and the sign of change going in the direction of
+increasing bin number. The positive and negative change points are handled separately.  Further, we turn change points into short 
+intervals centered at the change point positions, with the interval length is an integer number of bin sdetermined by the `smear` 
+parameter. For each sign of the change points, the features are a minimal set of points such that at least one of them is contained 
+in each of the short intervals centered at the change points. The feature matrix  is then a binary matrix with cells as columns 
+and features as rows, indicating, for each cell and feature, the presence of a short change-point centered interval containing the 
+feature. The results are stored in a list called `pins`, with two items: `pins` is a tabulation of the feature locations and signs and
+`pinmat` is the feature matrix.
 ```{r}
 pins <- calc_pinmat(gc_df, res$seg, dropareas=centroareas)
 pinmat_df <- pins$pinmat
@@ -285,8 +295,15 @@ dir("T10data/results")
 ```
 
 
-# Fisher FDR
+# Dissimilarity matrix and significance of dissimilarities
 
+In the next step, we use the feature matrix to compute dissimilarities among cells. These are defined, for each pair of cells,
+as (one-sided) Fisher test p-values for the corresponding two columns of the feature matrix. To analyze the significance of 
+dissimilarities, we will need to compare their observed distribution to a sampling from a null model. For the latter, we perform `nsim` 
+permutations of the feature set, preserving the column and, approximately, the row sums and recomputing the dissimilarity matrix each 
+time. Each permutation consists of `nsweep` sweeps. The entire procedure is implemented as `sim_fisher_wrapper` function, which 
+returns a list, with the vectors of the observed dissimilarities and those sampled from the null distribution as items.
+\todo{describe sweeps}
 ```{r}
 fisher <- sim_fisher_wrapper(
       pinmat_df, pins_df, njobs=30, nsim=150, nsweep=10)
