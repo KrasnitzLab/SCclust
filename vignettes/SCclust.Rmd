@@ -301,17 +301,24 @@ In the next step, we use the feature matrix to compute dissimilarities among cel
 as (one-sided) Fisher test p-values for the corresponding two columns of the feature matrix. To analyze the significance of 
 dissimilarities, we will need to compare their observed distribution to a sampling from a null model. For the latter, we perform `nsim` 
 permutations of the feature set, preserving the column and, approximately, the row sums and recomputing the dissimilarity matrix each 
-time. Each permutation consists of `nsweep` sweeps. The entire procedure is implemented as `sim_fisher_wrapper` function, which 
-returns a list, with the vectors of the observed dissimilarities and those sampled from the null distribution as items.
-\todo{describe sweeps}
+time. Each permutation consists of `nsweep` sweeps. A sweep consists of a Metroplolis-Hastings step for every row and a swapping move 
+for pairs of columns, such that every column is involved. Positive and negative feature submatrices are permuted separately. The entire 
+procedure is implemented as `sim_fisher_wrapper` function, which returns a list, with the vectors of the observed dissimilarities and 
+those sampled from the null distribution as items.
 ```{r}
 fisher <- sim_fisher_wrapper(
       pinmat_df, pins_df, njobs=30, nsim=150, nsweep=10)
 true_pv <- fisher$true
 sim_pv <- fisher$sim
 ```
-
-
+These distributuions can be saved if so desired.
+```{r}
+save_mat(filenames$true_pv, true_pv)
+save_mat(filenames$sim_pv, sim_pv)
+```
+Next, we use function `fisher_fdr` to determine which of the observed dissimilarities are outliers on the left in the null distribution, 
+i.e., much smaller than expected. The value is a matrix of false discovery rates (FDR) for every pair of cells. We also arrange the 
+observed dissimilarities in a distance matrix.
 ```{r}
 # devtools::load_all()
 # flog.threshold(DEBUG)
@@ -319,10 +326,7 @@ mfdr <- fisher_fdr(true_pv, sim_pv, cells)
 mdist <- fisher_dist(true_pv, cells)
 ```
 
-```{r}
-save_mat(filenames$true_pv, true_pv)
-save_mat(filenames$sim_pv, sim_pv)
-```
+
 
 # Hierarchical clustering
 
