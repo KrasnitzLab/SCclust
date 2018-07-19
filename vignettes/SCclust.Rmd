@@ -329,9 +329,15 @@ mdist <- fisher_dist(true_pv, cells)
 
 
 # Hierarchical clustering
-
+\todo{What are the arguments of hclust_tree?}
+At this point, we use the distance matrix derived as above to compute hierarchical clustering of cells. The function `hclust_tree`
+invokes the R core function `hclust` with the linkage choice as indicated (here `'average'`, the default value) and with `mdist` as the
+dissimilarity matrix. The value is an extension of the `R` `hclust` object, to include additional items, as required for the clone
+identification in the following. The more important ones are `nodesize` (the number of leaves for each node), `mergefdr` (maximal
+pairwise FDR anywhere in the node) and `sharing`, a matrix specifying for each node and each feature the fraction of leaves in the node
+with the feature. 
 ```{r}
-hc <- hclust_tree(pinmat_df, mfdr, mdist)
+hc <- hclust_tree(pinmat_df, mfdr, mdist,hcmethod='average')
 tree_df <- tree_py(mdist, method='average')
 ```
 
