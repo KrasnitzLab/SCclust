@@ -105,7 +105,7 @@ filter_dropareas_short <- function(short_df, dropareas = NULL) {
 
 
 calc_smear_breakpoints <- function(
-    short_df, censored, smear=1, keepboundaries=F, chromrange=1:22) {
+    short_df, censored=NULL, smear=1, keepboundaries=F, chromrange=1:22) {
 
   dtshort<-cbind(
     short_df[,c("profid","chrom")],
@@ -121,9 +121,14 @@ calc_smear_breakpoints <- function(
   if(keepboundaries){
     dtshort[(dtshort[,"bpstart"]+smear)==ustart[dtshort[,"chrom"]],"bpsign"]<-
       2*dtshort[(dtshort[,"bpstart"]+smear)==ustart[dtshort[,"chrom"]],"bpsign"]
-    dtshort<-dtshort[!censored,]
+    if(!is.null(censored)) {
+      dtshort<-dtshort[!censored,]
+    }
   } else {
-    dtshort<-dtshort[((dtshort[,"bpstart"]+smear) > ustart[dtshort[,"chrom"]])&!censored,]
+    dtshort<-dtshort[((dtshort[,"bpstart"]+smear) > ustart[dtshort[,"chrom"]]),]
+    if(!is.null(censored)) {
+      dtshort<-dtshort[!censored,]
+    }
     dtshort[dtshort[,"bpstart"]<ustart[dtshort[,"chrom"]],"bpstart"]<-
       ustart[dtshort[dtshort[,"bpstart"]<ustart[dtshort[,"chrom"]],"chrom"]]
     dtshort[dtshort[,"bpend"]>uend[dtshort[,"chrom"]],"bpend"]<-
@@ -235,13 +240,16 @@ calc_pinmat_short <- function(short_df, smear_df) {
 #' @return a list of pinmat and pins objects.
 #'         pinmat is the incidence table; pins is the bin location
 #' @export
-calc_pinmat <- function(gc_df, segment_df, homoloss=0.0, dropareas=NULL) {
+calc_pinmat <- function(gc_df, segment_df, homoloss=0.0, dropareas=NULL, chromrange=1:22) {
 
   augment_df <- augment_gc(gc_df, segment_df)
   short_df <- calc_segments_short(augment_df, segment_df, homoloss=homoloss)
   
-  censored_index <- calc_censored_index(short_df, dropareas)
-  smear_df <- calc_smear_breakpoints(short_df, censored_index)
+  censored_index = NULL
+  if(!is.null(dropareas)) {
+    censored_index <- calc_censored_index(short_df, dropareas)
+  }
+  smear_df <- calc_smear_breakpoints(short_df, censored_index, chromrange)
   
   return(calc_pinmat_short(short_df, smear_df))
 }

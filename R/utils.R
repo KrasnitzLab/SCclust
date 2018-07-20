@@ -129,6 +129,21 @@ chrom_numeric <- function(chrom) {
 }
 
 
+chrom_numeric_mouse <- function(chrom) {
+  if(is.numeric(chrom)) {
+    chrom.numeric <- chrom
+    return(chrom.numeric)
+  } else {
+    chrom.numeric <- substring(chrom, 4)
+    chrom.numeric[which(chrom == "chrX")] <- "20"
+    chrom.numeric[which(chrom == "chrY")] <- "21"
+    
+    chrom.numeric <- as.numeric(chrom.numeric)
+    return(chrom.numeric)
+  }
+}
+
+
 tree_clustersize <- function(indextable) {
   clustersize<-rep(NA,nrow(indextable))
 
