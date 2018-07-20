@@ -335,7 +335,7 @@ invokes the R core function `hclust` with the linkage choice as indicated (here 
 dissimilarity matrix. The value is an extension of the `R` `hclust` object, to include additional items, as required for the clone
 identification in the following. The more important ones are `nodesize` (the number of leaves for each node), `mergefdr` (maximal
 pairwise FDR anywhere in the node) and `sharing`, a matrix specifying for each node and each feature the fraction of leaves in the node
-with the feature. 
+with the feature. As an interface with Python software, the function `tree_py` is provided, which outputs the same hierarchical tree in the format for Python hierarchical clustering suite.
 ```{r}
 hc <- hclust_tree(pinmat_df, mfdr, mdist,hcmethod='average')
 tree_df <- tree_py(mdist, method='average')
