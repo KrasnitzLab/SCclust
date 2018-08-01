@@ -225,8 +225,10 @@ dim(varbin_files)
 ## Segment varbin files
 
 Next, we approximate the copy number ratio as a function of the bin number by a piecewise-constant function. This process is called 
-segmentation. The segmentation algorithm we use is Circular Binary Segmentation (CBS), as implemented in the R package `DNAcopy`, but 
+segmentation. First we normalize bincount based on the GC content using lowess smoothing and after that we use Circular Binary 
+Segmentation (CBS) algorithm, as implemented in the R package `DNAcopy`, but 
 modified for a more consistent elimination of very short segments.
+
 \todo{mention the quantal procedure}
 ```{r}
 res <- segment_varbin_files(varbin_files, gc_df, centrobins)
@@ -234,18 +236,18 @@ res <- segment_varbin_files(varbin_files, gc_df, centrobins)
 
 The `segment_varbin_files` function returns the segmented copy number ratio along with the input ratios for all the samples
 
-```{r, results = "asis"}
-knitr::kable(head(res$seg))
+```{r segments-data, results = "asis"}
+knitr::kable(head(res$seg[,c(1:8)]))
 ```
 
-```{r, results = "asis"}
-knitr::kable(head(res$ratio))
+```{r ratio-data, results = "asis"}
+knitr::kable(head(res$ratio[,c(1:8)]))
 ```
 
 ## Construct file names for the segmented output and store segmentation and ratio results.
 
 The file names as constructed will be required for visualization.
-```{r}
+```{r case-filenames}
 filenames <- case_filenames("T10data/results", "NavinT10")
 ```
 
@@ -270,9 +272,13 @@ dir("T10data/results")
 # Construct features and feature matrix
 
 \todo{Where do we remove shredded cells? ploidies.txt? homoloss?}
+
 At this point, we convert the set of segmented copy number profiles into a feature matrix. This process includes a number of steps. 
 First, since single-cell copy number must be integer, we round the segmented values to the nearest integer. Some of the neighboring 
-segments may merge as a result. Next, we replace each profile by a set of change points, i.e., discontinuities in the integer segmented
+segments may merge as a result. As part of this procedure we calculate the ploidity and homoloss of each cell and remove the cells with
+high homoloss (this could be controlled using `homoloss` parameter of `calc_pinmat` fuction).
+
+Next, we replace each profile by a set of change points, i.e., discontinuities in the integer segmented
 value. Each change point has two values associated with it: position (bin number) and the sign of change going in the direction of
 increasing bin number. The positive and negative change points are handled separately.  Further, we turn change points into short 
 intervals centered at the change point positions, with the interval length is an integer number of bin sdetermined by the `smear` 
@@ -281,7 +287,7 @@ in each of the short intervals centered at the change points. The feature matrix
 and features as rows, indicating, for each cell and feature, the presence of a short change-point centered interval containing the 
 feature. The results are stored in a list called `pins`, with two items: `pins` is a tabulation of the feature locations and signs and
 `pinmat` is the feature matrix.
-```{r}
+```{r featuremat}
 pins <- calc_pinmat(gc_df, res$seg, dropareas=centroareas)
 pinmat_df <- pins$pinmat
 pins_df <- pins$pins
@@ -304,21 +310,26 @@ time. Each permutation consists of `nsweep` sweeps. A sweep consists of a Metrop
 for pairs of columns, such that every column is involved. Positive and negative feature submatrices are permuted separately. The entire 
 procedure is implemented as `sim_fisher_wrapper` function, which returns a list, with the vectors of the observed dissimilarities and 
 those sampled from the null distribution as items.
-```{r}
+
+```{r simfisher}
 fisher <- sim_fisher_wrapper(
       pinmat_df, pins_df, njobs=30, nsim=150, nsweep=10)
 true_pv <- fisher$true
 sim_pv <- fisher$sim
 ```
+
 These distributuions can be saved if so desired.
+
 ```{r}
 save_mat(filenames$true_pv, true_pv)
 save_mat(filenames$sim_pv, sim_pv)
 ```
+
 Next, we use function `fisher_fdr` to determine which of the observed dissimilarities are outliers on the left in the null distribution, 
 i.e., much smaller than expected. The value is a matrix of false discovery rates (FDR) for every pair of cells. We also arrange the 
 observed dissimilarities in a distance matrix.
-```{r}
+
+```{r fisher-fdr}
 # devtools::load_all()
 # flog.threshold(DEBUG)
 mfdr <- fisher_fdr(true_pv, sim_pv, cells)
@@ -331,15 +342,15 @@ mdist[1:5,1:5]
 
 # Hierarchical clustering
 
-\todo{What are the arguments of hclust_tree?}
-
 At this point, we use the distance matrix derived as above to compute hierarchical clustering of cells. The function `hclust_tree`
 invokes the R core function `hclust` with the linkage choice as indicated (here `'average'`, the default value) and with `mdist` as the
 dissimilarity matrix. The value is an extension of the `R` `hclust` object, to include additional items, as required for the clone
 identification in the following. The more important ones are `nodesize` (the number of leaves for each node), `mergefdr` (maximal
 pairwise FDR anywhere in the node) and `sharing`, a matrix specifying for each node and each feature the fraction of leaves in the node
-with the feature. As an interface with Python software, the function `tree_py` is provided, which outputs the same hierarchical tree in the format for Python hierarchical clustering suite.
-```{r}
+with the feature. As an interface with Python software, the function `tree_py` is provided, which outputs the same hierarchical tree in 
+the format for Python hierarchical clustering suite.
+
+```{r clustering-tree}
 hc <- hclust_tree(pinmat_df, mfdr, mdist,hcmethod='average')
 names(hc)
 tree_df <- tree_py(mdist, method='average')
@@ -354,16 +365,27 @@ save_table(filenames$tree, tree_df)
 
 # Finding clones and subclones
 
-\todo{Where are the parameters such as max FDR and the number of shared features defined? Also, since hc is the only argument, it is hard for the user to see the relation between these parameters and how the clones are computed.}
+\todo{Where are the parameters such as max FDR and the number of shared features defined? 
+Also, since hc is the only argument, it is hard for the user to see the relation between these parameters and how the clones are computed.}
+
 Finally, we determine which nodes of the tree represent clones. Two types of clones are considered: hard and soft. A hard clone is 
 defined as a node with at least `minsize` leaves for which `mergefdr` is below `fdrthresh` (the FDR condition), the number of features 
 shared by at least `sharemin` 
 leaves is at least `nshare` (the sharing condition), and such that the parent node does not have at least one of these two properties. 
 Once the hard clones are identified, they can be expanded as follows: ask whether the parent of the hard clone meets the sharing 
 condition as above; if not, the hard clone is also the soft clone; if so, expand the clone to the parent and iterate. 
-```{r}
+```{r clones}
 hc <- find_clones(hc)
 ```
+
+The suction `find_clones` supports a lot of parameters that control its behavior such as 
+`fdrthresh` that defines maximal allowed value for log10(FDR) for any pair of leaves in a clone node,
+`sharemin` that defines when a feature is considered 'widely shared' if present in sharemin fraction of leaves in a node,
+`nshare` that defines minimal number of 'widely shared' features in a hard clone. For the full list of parameters please consult
+the manual of SCclust package.
+
+
+
 As a result of this computation, an item called `softclones` is added to `hc`. It is a matrix with two rows named `hard` and `soft` and 
 as many columns as there are hard clones. In the hard row the node numbers for all hard clones are listed, whereas the soft row contains 
 the node numbers for the soft clones obtained by expanding each of the hard clones. An expansion from distinct hard clones may result in 
@@ -373,9 +395,11 @@ hc$softclones
 ```
 
 To complete the analysis, we compute subclones. 
-```{r}
+```{r subclones}
 subclones <- find_subclones(hc, pinmat_df, pins_df, nsim=nsim)
 ```
+
+For the full list of parameters that control the behavior of `find_sublones` consult the manual pages of SCclust package.
 
 ```{r}
 save_table(filenames$clone, subclones)
