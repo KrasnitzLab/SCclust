@@ -173,7 +173,9 @@ The locations of centromeric regions are now tabulated in `centroareas`.
 ### Varbin Samples Data
 
 \todo{Describe the data.}
-Each 'varbin' file is a comma-separated table with each row representing a bin and with columns for etc.
+The `SGAINS` pipeline produces separate `varbin` file for each sample. Each 'varbin' file is a comma-separated table with 
+each row representing a bin and with columns for chromosome,
+position of the bin in the chromosome, absolute position of the bin, how many reads are mapped in this bin and the ratio.
 
 ```{r, results = "asis"}
 sample_df <- read.csv("T10data/varbin/SRR052047.varbin.20k.txt", header=T, sep='\t')
@@ -215,7 +217,8 @@ varbin_files <- varbin_input_files("T10data/varbin", "*.varbin.20k.txt")
 knitr::kable(head(varbin_files))
 ```
 
-For the purpose of this tutorial we will use a subset of the first 10 samples out of a 100 totalfound by `varbin_input_files` function:
+For the purpose of this tutorial we will use a subset of the first 10 samples out of a 100 total
+found by `varbin_input_files` function:
 
 ```{r}
 varbin_files <- varbin_files[seq(10),]
