@@ -9,8 +9,6 @@ fast_fisher<-function(i,yy,ny,nn){
   for(j in i:nrow(yy)) {
     m = abs(matrix(nrow=2,ncol=2,
         data=c(yy[i,j],ny[i,j],ny[j,i],nn[i,j])))
-    # flog.debug("matrix:")
-    # str(m)
     ftp[j]<-fisher.test(m, alternative="greater")$p.value
   }
   return(ftp)
@@ -89,11 +87,8 @@ sim_fisher<-function(m, nsim, nsweep, seedme, njobs=1,
       next
     }
     for(j in 1:length(m)){
-      flog.debug("i=%s, j=%s", i, j)
       
       if(nsweep>0 && length(rf[[j]]) > 1){
-        flog.debug("length of m[[%s]]: %s", j, length(m[[j]]))
-        flog.debug("length of rf[[%s]]: %s", j, length(rf[[j]]))
         m[[j]] <- parallel::parApply(
             cl=cl, X=m[[j]], MARGIN=2,
             FUN=metro, p=rf[[j]], sweeps=nsweep)
@@ -103,32 +98,13 @@ sim_fisher<-function(m, nsim, nsweep, seedme, njobs=1,
       ny<-t(1-m[[j]])%*%m[[j]]
       nn<-t(1-m[[j]])%*%(1-m[[j]])
 
-      flog.debug("yy:")
-      str(yy)
-      flog.debug("ny:")
-      str(ny)
-      flog.debug("nn:")
-      str(nn)
-      
       lbi<-1:nrow(yy)
       lbi[lbi%%2==0]<-nrow(yy)+2-nrow(yy)%%2-lbi[lbi%%2==0]
-      flog.debug("lbi=%s; yy=%s,%s; ny=%s,%s; nn=%s,%s", 
-          length(lbi), 
-          nrow(yy), ncol(yy), 
-          nrow(ny), ncol(ny), 
-          nrow(nn), ncol(nn))
       assertthat::assert_that(nrow(yy) == ncol(yy))
       if(ncol(yy) < 2) {
         flog.warn("sim_fisher skipping fast fisher because ncol(yy)=%s", ncol(yy))
         next
       }
-      flog.debug("lbi:")
-      str(lbi)
-      
-#      x <- sapply(
-#          X=lbi,
-#          FUN=fast_fisher,yy=yy,ny=ny,nn=nn)[,order(lbi)]
-      
       x <- parallel::parSapply(
           cl, X=lbi,
           FUN=fast_fisher,yy=yy,ny=ny,nn=nn)[,order(lbi)]
@@ -173,18 +149,16 @@ sim_fisher_wrapper <- function(pinmat_df, pins_df, njobs=NULL,
   if(is.null(njobs)) {
     njobs <- parallel::detectCores()-4
   }
-  flog.debug("sim_fisher_wrapper: njobjs=%s", njobs)
+  flog.debug("sim_fisher_wrapper: njobs=%s", njobs)
 
   len <- length(unique(pins_df[,"sign"]))
   m<-vector(mode="list",length=len)
-  flog.debug("m vector build: %s", m)
   if(len <= 1) {
     return(NULL)
   }
   for(i in 1:len) {
     m[[i]]<-as.matrix(pinmat_df[pins_df[,"sign"]==unique(pins_df[,"sign"])[i],,drop=F])
   }
-  flog.debug("m vector initialized...")
 
   vtrue <- sim_fisher(m, nsim=1, nsweep=0,
                       seedme=seedme, njobs=njobs, combo="fisher")

@@ -12,6 +12,7 @@ augment_gc <- function(gc_df, df) {
     augment_df[,"absstart"] + (augment_df[,"chromend"] - augment_df[,"chromstart"])
   )
   colnames(augment_df) <- c("chrom", "chromstart", "chromend", "absstart", "absend")
+  assertthat::assert_that(all(augment_df$chrom == df$chrom))
   return(augment_df)
 }
 
@@ -21,6 +22,7 @@ calc_segments_short <- function(gc_df, segment_df, homoloss=0.01) {
   assertthat::assert_that(all(colnames(gc_df) == 
               c("chrom", "chromstart", "chromend", "absstart", "absend")))
   assertthat::assert_that(nrow(gc_df) == nrow(segment_df))
+  assertthat::assert_that(all(gc_df$chrom == segment_df$chrom))
 
   a <- round(as.matrix(segment_df[,-(1:3)]))
 
@@ -32,6 +34,7 @@ calc_segments_short <- function(gc_df, segment_df, homoloss=0.01) {
   segstarts <- row(a)[bb]
   segvals <- a[bb]
   profid <- dimnames(a)[[2]][cumsum(segstarts==1)]
+  
   segends <- c(segstarts[-1]-1,nrow(a))
   segends[segends==0] <- nrow(a)
   segbins <- segends-segstarts+1
@@ -50,6 +53,7 @@ calc_segments_short <- function(gc_df, segment_df, homoloss=0.01) {
     tshort <- tshort[tshort[,"profid"]%in%dimnames(ploidies_df)[[1]][
             ploidies_df[,"homoloss"] <= homoloss],]
   }
+  
   return(tshort)
 }
 
@@ -62,14 +66,14 @@ calc_ploidies <- function(gc_df, segment_df, rounded_df=NULL) {
 
   getmode<-function(x) as.numeric(
         names(which.max(tapply(X=x,INDEX=as.factor(x), FUN=length))))
-  ploidymod<-apply(rounded_df[gc_df[,"chrom"]<23,],2,getmode)
-  ploidymed<-apply(rounded_df[gc_df[,"chrom"]<23,],2,median)
+  ploidymod<-apply(rounded_df[gc_df[,"chrom"]<21,],2,getmode)
+  ploidymed<-apply(rounded_df[gc_df[,"chrom"]<21,],2,median)
   ploidychromod<-apply(
-          rounded_df[gc_df[,"chrom"]<23,], 2, modeofmodes,
-          otherlabel=gc_df[gc_df[,"chrom"]<23,"chrom"],
+          rounded_df[gc_df[,"chrom"]<21,], 2, modeofmodes,
+          otherlabel=gc_df[gc_df[,"chrom"]<21,"chrom"],
           tiebreaker=2, tiebreakerside="greater")
-  homoloss<-colSums(!rounded_df[gc_df[,"chrom"]<23,])/
-    sum(gc_df[,"chrom"]<23)
+  homoloss<-colSums(!rounded_df[gc_df[,"chrom"]<21,])/
+    sum(gc_df[,"chrom"]<21)
   ploidies <- cbind(ploidymed, ploidymod, ploidychromod, homoloss)
   return(ploidies)
 }
@@ -107,14 +111,16 @@ filter_dropareas_short <- function(short_df, dropareas = NULL) {
 calc_smear_breakpoints <- function(
     short_df, censored=NULL, smear=1, keepboundaries=F, chromrange=1:22) {
 
+  assertthat::assert_that(is.numeric(smear))
+  
   dtshort<-cbind(
-    short_df[,c("profid","chrom")],
+    short_df[,c("profid", "chrom")],
     short_df[,"segstarts"]-smear,
     short_df[,"segstarts"]+smear,
     sign(short_df[,"cvals"]-c(0,short_df[-nrow(short_df),"cvals"]))
   )
-  dimnames(dtshort)[[2]]<-c("profid","chrom","bpstart","bpend","bpsign")
-
+  colnames(dtshort)<-c("profid","chrom","bpstart","bpend","bpsign")
+  
   ustart<-short_df[match(unique(short_df[,"chrom"]),short_df[,"chrom"]),"segstarts"]
   uend<-c((ustart-1)[-1],short_df[nrow(short_df),"segends"])
 
@@ -240,7 +246,8 @@ calc_pinmat_short <- function(short_df, smear_df) {
 #' @return a list of pinmat and pins objects.
 #'         pinmat is the incidence table; pins is the bin location
 #' @export
-calc_pinmat <- function(gc_df, segment_df, homoloss=0.0, dropareas=NULL, chromrange=1:22) {
+calc_pinmat <- function(gc_df, segment_df, homoloss=0.0, dropareas=NULL, 
+    smear=1, chromrange=1:22) {
 
   augment_df <- augment_gc(gc_df, segment_df)
   short_df <- calc_segments_short(augment_df, segment_df, homoloss=homoloss)
@@ -249,7 +256,11 @@ calc_pinmat <- function(gc_df, segment_df, homoloss=0.0, dropareas=NULL, chromra
   if(!is.null(dropareas)) {
     censored_index <- calc_censored_index(short_df, dropareas)
   }
-  smear_df <- calc_smear_breakpoints(short_df, censored_index, chromrange)
+  
+  smear_df <- calc_smear_breakpoints(
+      short_df, censored=censored_index,
+      smear=smear, 
+      chromrange=chromrange)
   
   return(calc_pinmat_short(short_df, smear_df))
 }

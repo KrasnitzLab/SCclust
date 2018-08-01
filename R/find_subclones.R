@@ -25,7 +25,8 @@
 find_subclones <- function(
     hc, pinmat, pins, 
     nmin = 6, 
-    nsim = 500, 
+    nsim = 500,
+    njobs=NULL,
     lmmax = 0.001, 
     hcmethod = "average", 
     baseshare = 3, 
@@ -60,7 +61,7 @@ find_subclones <- function(
       nshare <- baseshare + sum(rowSums(clonemat) > (sharemin * ncol(clonemat)))
       cellnames <- colnames(clonemat)
       flog.debug("subclone number of cells: %s", length(cellnames))
-      res <- sim_fisher_wrapper(clonemat, clonepins, nsim=nsim)
+      res <- sim_fisher_wrapper(clonemat, clonepins, nsim=nsim, njobs=njobs)
       if(is.null(res)) {
         next
       }
