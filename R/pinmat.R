@@ -247,7 +247,7 @@ calc_pinmat_short <- function(short_df, smear_df) {
 #'         pinmat is the incidence table; pins is the bin location
 #' @export
 calc_pinmat <- function(gc_df, segment_df, homoloss=0.0, dropareas=NULL, 
-    smear=1, chromrange=1:21) {
+    smear=1, chromrange=1:21, keepboundaries=F) {
 
   augment_df <- augment_gc(gc_df, segment_df)
   short_df <- calc_segments_short(augment_df, segment_df, homoloss=homoloss)
@@ -260,6 +260,7 @@ calc_pinmat <- function(gc_df, segment_df, homoloss=0.0, dropareas=NULL,
   smear_df <- calc_smear_breakpoints(
       short_df, censored=censored_index,
       smear=smear, 
+      keepboundaries=keepboundaries,
       chromrange=chromrange)
   
   return(calc_pinmat_short(short_df, smear_df))
