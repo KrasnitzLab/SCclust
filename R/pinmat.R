@@ -66,14 +66,14 @@ calc_ploidies <- function(gc_df, segment_df, rounded_df=NULL) {
 
   getmode<-function(x) as.numeric(
         names(which.max(tapply(X=x,INDEX=as.factor(x), FUN=length))))
-  ploidymod<-apply(rounded_df[gc_df[,"chrom"]<21,],2,getmode)
-  ploidymed<-apply(rounded_df[gc_df[,"chrom"]<21,],2,median)
+  ploidymod<-apply(rounded_df[gc_df[,"chrom"]<20,],2,getmode)
+  ploidymed<-apply(rounded_df[gc_df[,"chrom"]<20,],2,median)
   ploidychromod<-apply(
-          rounded_df[gc_df[,"chrom"]<21,], 2, modeofmodes,
-          otherlabel=gc_df[gc_df[,"chrom"]<21,"chrom"],
+          rounded_df[gc_df[,"chrom"]<20,], 2, modeofmodes,
+          otherlabel=gc_df[gc_df[,"chrom"]<20,"chrom"],
           tiebreaker=2, tiebreakerside="greater")
-  homoloss<-colSums(!rounded_df[gc_df[,"chrom"]<21,])/
-    sum(gc_df[,"chrom"]<21)
+  homoloss<-colSums(!rounded_df[gc_df[,"chrom"]<20,])/
+    sum(gc_df[,"chrom"]<20)
   ploidies <- cbind(ploidymed, ploidymod, ploidychromod, homoloss)
   return(ploidies)
 }
@@ -109,7 +109,7 @@ filter_dropareas_short <- function(short_df, dropareas = NULL) {
 
 
 calc_smear_breakpoints <- function(
-    short_df, censored=NULL, smear=1, keepboundaries=F, chromrange=1:22) {
+    short_df, censored=NULL, smear=1, keepboundaries=F, chromrange=1:21) {
 
   assertthat::assert_that(is.numeric(smear))
   
@@ -247,7 +247,7 @@ calc_pinmat_short <- function(short_df, smear_df) {
 #'         pinmat is the incidence table; pins is the bin location
 #' @export
 calc_pinmat <- function(gc_df, segment_df, homoloss=0.0, dropareas=NULL, 
-    smear=1, chromrange=1:22) {
+    smear=1, chromrange=1:21) {
 
   augment_df <- augment_gc(gc_df, segment_df)
   short_df <- calc_segments_short(augment_df, segment_df, homoloss=homoloss)
