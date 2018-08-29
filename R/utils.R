@@ -32,8 +32,7 @@ filter_evil_columns <- function(df, evil_cells, skip=0) {
 #' Calculates centromere regions (areas). 
 #' 
 #' @export
-calc_centroareas <- function(cyto) {
-  centromere<-c("p11","q11")
+calc_centroareas <- function(cyto, centromere=c("p11", "q11")) {
   cyto[,1]<-chrom_numeric(cyto[,1])
   cyto<-cyto[order(cyto[,1]),]
 
@@ -129,6 +128,10 @@ chrom_numeric <- function(chrom) {
 }
 
 
+#' Converts chrom name to numeric and adds `chrom.numeric` column to the 
+#' dataframe. 
+#' 
+#' @export
 chrom_numeric_mouse <- function(chrom) {
   if(is.numeric(chrom)) {
     chrom.numeric <- chrom

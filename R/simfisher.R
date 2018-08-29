@@ -144,10 +144,10 @@ sim_fisher<-function(m, nsim, nsweep, seedme, njobs=1,
 #'         for the observation (true) and for the permutations (sim).
 #'@export
 sim_fisher_wrapper <- function(pinmat_df, pins_df, njobs=NULL, 
-    nsim=150, nsweep=200, seedme=123) {
+    nsim=150, nsweep=200, seedme=123, combo="fisher") {
 
   if(is.null(njobs)) {
-    njobs <- parallel::detectCores()-4
+    njobs <- parallel::detectCores()-2
   }
   flog.debug("sim_fisher_wrapper: njobs=%s", njobs)
 
@@ -161,9 +161,9 @@ sim_fisher_wrapper <- function(pinmat_df, pins_df, njobs=NULL,
   }
 
   vtrue <- sim_fisher(m, nsim=1, nsweep=0,
-                      seedme=seedme, njobs=njobs, combo="fisher")
+                      seedme=seedme, njobs=njobs, combo=combo)
   msim <- sim_fisher(m, nsim=nsim, nsweep=nsweep,
-                     seedme=seedme, njobs=njobs, combo="fisher")
+                     seedme=seedme, njobs=njobs, combo=combo)
 
   res <- list(vtrue, msim)
   names(res) <- c("true", "sim")

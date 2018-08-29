@@ -25,7 +25,7 @@ library("futile.logger")
 sgains_pipeline <- function(
     scgv_dir, case_name,
     varbin_dir, varbin_suffix,
-    bins_boundaries,
+    bins_boundaries_filename,
     cytoband,
     badbins=NULL,
     nsim=150,
@@ -37,7 +37,7 @@ sgains_pipeline <- function(
   filenames <- case_filenames(scgv_dir, case_name)
   
   flog.debug("loading bin boundarires...")
-  gc_df <-load_table(bins_boundaries)
+  gc_df <-load_table(bins_boundaries_filename)
   gc_df$chrom.numeric <- chrom_numeric(gc_df$bin.chrom)
   
   if(is.null(badbins)) {

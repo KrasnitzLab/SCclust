@@ -109,7 +109,7 @@ filter_dropareas_short <- function(short_df, dropareas = NULL) {
 
 
 calc_smear_breakpoints <- function(
-    short_df, censored=NULL, smear=1, keepboundaries=F, chromrange=1:21) {
+    short_df, censored=NULL, smear=1, keepboundaries=F, chromrange=1:24) {
 
   assertthat::assert_that(is.numeric(smear))
   
@@ -131,10 +131,12 @@ calc_smear_breakpoints <- function(
       dtshort<-dtshort[!censored,]
     }
   } else {
-    dtshort<-dtshort[((dtshort[,"bpstart"]+smear) > ustart[dtshort[,"chrom"]]),]
     if(!is.null(censored)) {
-      dtshort<-dtshort[!censored,]
+        dtshort<-dtshort[((dtshort[,"bpstart"]+smear) > ustart[dtshort[,"chrom"]])&!censored,]
+    } else {
+        dtshort<-dtshort[((dtshort[,"bpstart"]+smear) > ustart[dtshort[,"chrom"]]),]
     }
+    
     dtshort[dtshort[,"bpstart"]<ustart[dtshort[,"chrom"]],"bpstart"]<-
       ustart[dtshort[dtshort[,"bpstart"]<ustart[dtshort[,"chrom"]],"chrom"]]
     dtshort[dtshort[,"bpend"]>uend[dtshort[,"chrom"]],"bpend"]<-
@@ -247,7 +249,7 @@ calc_pinmat_short <- function(short_df, smear_df) {
 #'         pinmat is the incidence table; pins is the bin location
 #' @export
 calc_pinmat <- function(gc_df, segment_df, homoloss=0.0, dropareas=NULL, 
-    smear=1, chromrange=1:21, keepboundaries=F) {
+    smear=1, chromrange=1:24, keepboundaries=F) {
 
   augment_df <- augment_gc(gc_df, segment_df)
   short_df <- calc_segments_short(augment_df, segment_df, homoloss=homoloss)
