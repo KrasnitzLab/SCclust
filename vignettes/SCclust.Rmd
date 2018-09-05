@@ -58,9 +58,9 @@ T10](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4504184/bin/NIHMS706545-supple
 
 Here we will execute *SCclust* package on input prepared by *sgains* pipeline [`varbin` step](https://github.com/KrasnitzLab/sgains/blob/master/docs/tutorial-navin2011.md#varbin-step).
 Alternatively, the reader can go through the data pre-processing steps following [*sgains* T10 tutorial](https://github.com/KrasnitzLab/sgains/blob/master/docs/tutorial-navin2011.md).
-\todo{some minimal info on the varbin format}
-For the purposes of this tutorial we recomend that you download already prepared `varbin` data from 
+For the purposes of this tutorial we recommend that you download already prepared `varbin` data from 
 [example data](https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0RC3/navin_t10_varbin_data.tar.gz).
+For convenience, we briefly describe the `varbin` data format later in this tutorial.
 Apart from `varbin` T10 data you will need the binning scheme used in the analysis, which could be found [here](https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0RC3/hg19_R50_B20k_bins_boundaries.txt.gz).
 Finally, we will need `cytoBand.txt`, the cytoband annotation file for the HG19 version of the human genome, which can be downloaded
 from the UCSC Genome Browser. 
@@ -128,7 +128,6 @@ flog.threshold(ERROR)
 
 ### Binning scheme
 
-\todo{Describe the data.}
 The binning scheme is a table describing a partition of the genome into bins to sort the sequence reads into. The bin boundaries 
 are defined such that each bin contains an approximately equal number of uniquely mapping reads. Also tabulated is the GC content of 
 each bin.
@@ -282,8 +281,13 @@ dir("T10data/results")
 
 At this point, we convert the set of segmented copy number profiles into a feature matrix. This process includes a number of steps. 
 First, since single-cell copy number must be integer, we round the segmented values to the nearest integer. Some of the neighboring 
-segments may merge as a result. As part of this procedure we calculate the ploidity and homoloss of each cell and remove the cells with
-high homoloss (this could be controlled using `homoloss` parameter of `calc_pinmat` fuction).
+segments may merge as a result. As part of this procedure we calculate the ploidy of each cell. Ploidy here means the predominant 
+integer value of copy number in the cell genome. We compute this 
+value for three alternative definitions of ploidy: the genome-wide median, the genome-wide mode and the mode of all chromosome-wide
+modes. Also, at this point we compute the percentage of the genome with copy number 0, i.e., lost homozygously. A high percentage of
+homozygous loss is likely a sign of DNA degradation ex-vivo. Such cells are removed from further processing (this is controlled using 
+`homoloss` parameter of `calc_pinmat` fuction).
+\todo{Display the ploidies table here?}
 
 Next, we replace each profile by a set of change points, i.e., discontinuities in the integer segmented
 value. Each change point has two values associated with it: position (bin number) and the sign of change going in the direction of
