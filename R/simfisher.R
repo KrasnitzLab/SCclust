@@ -7,8 +7,8 @@ library("futile.logger")
 fast_fisher<-function(i,yy,ny,nn){
   ftp <- rep(1,nrow(yy))
   for(j in i:nrow(yy)) {
-    m = abs(matrix(nrow=2,ncol=2,
-        data=c(yy[i,j],ny[i,j],ny[j,i],nn[i,j])))
+    m = matrix(nrow=2,ncol=2,
+        data=c(yy[i,j],ny[i,j],ny[j,i],nn[i,j]))
     ftp[j]<-fisher.test(m, alternative="greater")$p.value
   }
   return(ftp)
