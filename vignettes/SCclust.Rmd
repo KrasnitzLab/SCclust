@@ -171,7 +171,6 @@ The locations of centromeric regions are now tabulated in `centroareas`.
 
 ### Varbin Samples Data
 
-\todo{Describe the data.}
 The `SGAINS` pipeline produces separate `varbin` file for each sample. Each 'varbin' file is a comma-separated table with 
 each row representing a bin and with columns for chromosome,
 position of the bin in the chromosome, absolute position of the bin, how many reads are mapped in this bin and the ratio. Here 
@@ -277,8 +276,6 @@ dir("T10data/results")
 
 # Construct features and feature matrix
 
-\todo{Where do we remove shredded cells? ploidies.txt? homoloss?}
-
 At this point, we convert the set of segmented copy number profiles into a feature matrix. This process includes a number of steps. 
 First, since single-cell copy number must be integer, we round the segmented values to the nearest integer. Some of the neighboring 
 segments may merge as a result. As part of this procedure we calculate the ploidy of each cell. Ploidy here means the predominant 
@@ -348,7 +345,6 @@ mfdr[1:5,1:5]
 mdist <- fisher_dist(true_pv, cells)
 mdist[1:5,1:5]
 ```
-\todo{check the output format}
 
 
 # Hierarchical clustering
@@ -375,10 +371,6 @@ save_table(filenames$tree, tree_df)
 
 
 # Finding clones and subclones
-
-\todo{Where are the parameters such as max FDR and the number of shared features defined? 
-Also, since hc is the only argument, it is hard for the user to see the relation between these parameters and how the clones 
-are computed.}
 
 Finally, we determine which nodes of the tree represent clones. Two types of clones are considered: hard and soft. A hard clone is 
 defined as a node with at least `minsize` leaves for which `mergefdr` is below `fdrthresh` (the FDR condition), the number of features 
