@@ -16,7 +16,7 @@ augment_gc <- function(gc_df, df) {
   return(augment_df)
 }
 
-calc_segments_short <- function(gc_df, segment_df, homoloss=0.01) {
+calc_segments_short <- function(gc_df, segment_df, homoloss=0.01, chromrange=1:24) {
   assertthat::assert_that(is.numeric(gc_df$chrom))
   assertthat::assert_that(is.numeric(segment_df$chrom))
   assertthat::assert_that(all(colnames(gc_df) == 
@@ -43,7 +43,7 @@ calc_segments_short <- function(gc_df, segment_df, homoloss=0.01) {
                   gc_df[segends,c("chromend","absend")])
   tshort <- data.frame(I(profid), segloc, segstarts, segends, segbins, segvals)
 
-  ploidies_df <- calc_ploidies(gc_df, segment_df, a)
+  ploidies_df <- calc_ploidies(gc_df, segment_df, a, chromrange=chromrange)
 
   tshort <- cbind(tshort, tshort[,"segvals"] - 
           ploidies_df[tshort[,"profid"], "ploidychromod"])
@@ -57,7 +57,9 @@ calc_segments_short <- function(gc_df, segment_df, homoloss=0.01) {
   return(tshort)
 }
 
-calc_ploidies <- function(gc_df, segment_df, rounded_df=NULL) {
+
+calc_ploidies <- function(gc_df, segment_df, rounded_df=NULL, chromrange=1:24) {
+  last_autosome = tail(chromrange, n=1) - 2
   if(is.null(rounded_df)) {
     rounded_df <- round(as.matrix(segment_df[,-(1:3)]))
   }
@@ -66,14 +68,14 @@ calc_ploidies <- function(gc_df, segment_df, rounded_df=NULL) {
 
   getmode<-function(x) as.numeric(
         names(which.max(tapply(X=x,INDEX=as.factor(x), FUN=length))))
-  ploidymod<-apply(rounded_df[gc_df[,"chrom"]<20,],2,getmode)
-  ploidymed<-apply(rounded_df[gc_df[,"chrom"]<20,],2,median)
+  ploidymod<-apply(rounded_df[gc_df[,"chrom"]<=last_autosome,],2,getmode) # FIXME:
+  ploidymed<-apply(rounded_df[gc_df[,"chrom"]<=last_autosome,],2,median)
   ploidychromod<-apply(
-          rounded_df[gc_df[,"chrom"]<20,], 2, modeofmodes,
-          otherlabel=gc_df[gc_df[,"chrom"]<20,"chrom"],
+          rounded_df[gc_df[,"chrom"]<=last_autosome,], 2, modeofmodes,
+          otherlabel=gc_df[gc_df[,"chrom"]<=last_autosome,"chrom"],
           tiebreaker=2, tiebreakerside="greater")
-  homoloss<-colSums(!rounded_df[gc_df[,"chrom"]<20,])/
-    sum(gc_df[,"chrom"]<20)
+  homoloss<-colSums(!rounded_df[gc_df[,"chrom"]<last_autosome,])/
+    sum(gc_df[,"chrom"]<last_autosome)
   ploidies <- cbind(ploidymed, ploidymod, ploidychromod, homoloss)
   return(ploidies)
 }
@@ -113,6 +115,9 @@ calc_smear_breakpoints <- function(
 
   assertthat::assert_that(is.numeric(smear))
   
+  last_autosome = tail(chromrange, n=1) - 2
+  autosomal_chromrange = 1:last_autosome
+
   dtshort<-cbind(
     short_df[,c("profid", "chrom")],
     short_df[,"segstarts"]-smear,
@@ -120,6 +125,10 @@ calc_smear_breakpoints <- function(
     sign(short_df[,"cvals"]-c(0,short_df[-nrow(short_df),"cvals"]))
   )
   colnames(dtshort)<-c("profid","chrom","bpstart","bpend","bpsign")
+  flog.debug("dtshort rows: %s", nrow(dtshort))
+  if(!is.null(censored)) {
+      flog.debug("censored rows: %s", sum(censored))
+  }
   
   ustart<-short_df[match(unique(short_df[,"chrom"]),short_df[,"chrom"]),"segstarts"]
   uend<-c((ustart-1)[-1],short_df[nrow(short_df),"segends"])
@@ -131,6 +140,7 @@ calc_smear_breakpoints <- function(
       dtshort<-dtshort[!censored,]
     }
   } else {
+    
     if(!is.null(censored)) {
         dtshort<-dtshort[((dtshort[,"bpstart"]+smear) > ustart[dtshort[,"chrom"]])&!censored,]
     } else {
@@ -142,7 +152,7 @@ calc_smear_breakpoints <- function(
     dtshort[dtshort[,"bpend"]>uend[dtshort[,"chrom"]],"bpend"]<-
       uend[dtshort[dtshort[,"bpend"]>uend[dtshort[,"chrom"]],"chrom"]]
   }
-  dtshort<-dtshort[dtshort[,"chrom"]%in%chromrange,]
+  dtshort<-dtshort[dtshort[,"chrom"]%in%autosomal_chromrange,]
   return(dtshort)
 }
 
