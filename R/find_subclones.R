@@ -25,7 +25,7 @@
 find_subclones <- function(
     hc, pinmat, pins, 
     nmin = 6, 
-    nsim = 500,
+    nsim = 500, 
     njobs=NULL,
     lmmax = 0.001, 
     hcmethod = "average", 
