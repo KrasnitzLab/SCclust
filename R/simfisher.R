@@ -158,7 +158,7 @@ sim_fisher_wrapper <- function(pinmat_df, pins_df, njobs=NULL,
 
   len <- length(unique(pins_df[,"sign"]))
   m<-vector(mode="list",length=len)
-  # flog.debug("m vector build: %s", m)
+  flog.debug("m vector build: %s", m)
   if(len <= 1) {
     return(NULL)
   }
@@ -169,6 +169,7 @@ sim_fisher_wrapper <- function(pinmat_df, pins_df, njobs=NULL,
 
   vtrue <- sim_fisher(m, nsim=1, nsweep=0,
                       seedme=seedme, njobs=njobs, combo="fisher")
+  flog.debug("vtrue done...")
   msim <- sim_fisher(m, nsim=nsim, nsweep=nsweep,
                      seedme=seedme, njobs=njobs, combo="fisher")
 
