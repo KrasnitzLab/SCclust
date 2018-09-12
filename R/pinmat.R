@@ -58,6 +58,7 @@ calc_segments_short <- function(gc_df, segment_df, homoloss=0.01, chromrange=1:2
 }
 
 
+
 calc_ploidies <- function(gc_df, segment_df, rounded_df=NULL, chromrange=1:24) {
   last_autosome = tail(chromrange, n=1) - 2
   if(is.null(rounded_df)) {

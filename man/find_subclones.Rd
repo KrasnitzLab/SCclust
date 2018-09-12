@@ -4,9 +4,10 @@
 \alias{find_subclones}
 \title{Identify subclones in a clonal branch of a hierarchical tree.}
 \usage{
-find_subclones(hc, pinmat, pins, nmin = 6, nsim = 500, lmmax = 0.001,
-  hcmethod = "average", baseshare = 3, fdrthresh = -2, sharemin = 0.85,
-  bymax = T, climbfromsize = 2, climbtoshare = 3, clonetype = "soft")
+find_subclones(hc, pinmat, pins, nmin = 6, nsim = 500, njobs = NULL,
+  lmmax = 0.001, hcmethod = "average", baseshare = 3, fdrthresh = -2,
+  sharemin = 0.85, bymax = T, climbfromsize = 2, climbtoshare = 3,
+  clonetype = "soft")
 }
 \arguments{
 \item{hc}{The hclust object with clones identified.}

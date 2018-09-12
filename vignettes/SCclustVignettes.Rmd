@@ -24,6 +24,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+devtools::load_all("..")
 ```
 
 # Introduction
@@ -78,7 +79,8 @@ Next, we download and extract T10 `varbin` data:
 
 ```bash
 wget -c \
-  https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0RC3/navin_t10_varbin_data.tar.gz
+  https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0RC3/\
+  navin_t10_varbin_data.tar.gz
 tar zxvf navin_t10_varbin_data.tar.gz
 rm navin_t10_varbin_data.tar.gz
 ```
@@ -87,7 +89,8 @@ We also download and extract the binning scheme used in preparation of `varbin` 
 
 ```bash
 wget -c \
-  https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0RC3/hg19_R50_B20k_bins_boundaries.txt.gz
+  https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0RC3/\
+  hg19_R50_B20k_bins_boundaries.txt.gz
 gunzip hg19_R50_B20k_bins_boundaries.txt.gz
 ```
 
@@ -133,7 +136,8 @@ are defined such that each bin contains an approximately equal number of uniquel
 each bin.
 
 ```{r, results = "asis"}
-gc_df <- read.csv("T10data/hg19_R50_B20k_bins_boundaries.txt", header = T, sep='\t')
+gc_df <- read.csv("T10data/hg19_R50_B20k_bins_boundaries.txt", 
+                  header = T, sep='\t')
 gc_df$chrom.numeric <- chrom_numeric(gc_df$bin.chrom)
 pander::pandoc.table(head(gc_df))
 ```
@@ -159,10 +163,10 @@ The main reason we need `cytoBand.txt` is to get the location of centromeres. Ce
 contain repetitive sequence, leading to mapping artefacts and distorted read counts. For this reason, we opt to mask them 
 prior to copy-number profile segmentation. In the present version we mask cytobands p11 through q11.
 
-To identify centromeric regions to be masked we use `calc_centroareas` function:
+To identify centromeric regions to be masked we use `calc_centroareas` function passing the list of bands to be masked:
 
 ```{r, results = "asis"}
-centroareas <- calc_centroareas(cytobands)
+centroareas <- calc_centroareas(cytobands, centromere=c("p11", "q11"))
 knitr::kable(head(centroareas))
 ```
 
@@ -178,12 +182,14 @@ the absolute position means the position relative to the start of chromosome 1, 
 concatenated.
 
 ```{r, results = "asis"}
-sample_df <- read.csv("T10data/varbin/SRR052047.varbin.20k.txt", header=T, sep='\t')
+sample_df <- read.csv("T10data/varbin/SRR052047.varbin.20k.txt", 
+                      header=T, sep='\t')
 knitr::kable(head(sample_df))
 ```
 
 ```{r, results = "asis"}
-sample_df <- read.csv("T10data/varbin/SRR052148.varbin.20k.txt", header=T, sep='\t')
+sample_df <- read.csv("T10data/varbin/SRR052148.varbin.20k.txt", 
+                      header=T, sep='\t')
 knitr::kable(head(sample_df))
 ```
 
@@ -201,7 +207,6 @@ length(centrobins)
 
 ## Exclude centromeric bins from the binning scheme
 
-\todo{Right now we mask p11 through q11. Ideally we should make this a parameter in the config file.}
 After excluding centromeric bins from the binning scheme, the new binning scheme has fewer bins:
 
 ```{r, results = "asis"}
@@ -286,6 +291,7 @@ homozygous loss is likely a sign of DNA degradation ex-vivo. Such cells are remo
 `homoloss` parameter of `calc_pinmat` fuction).
 \todo{Display the ploidies table here?}
 
+
 Next, we replace each profile by a set of change points, i.e., discontinuities in the integer segmented
 value. Each change point has two values associated with it: position (bin number) and the sign of change going in the direction of
 increasing bin number. The positive and negative change points are handled separately.  Further, we turn change points into short 
@@ -295,6 +301,7 @@ in each of the short intervals centered at the change points. The feature matrix
 and features as rows, indicating, for each cell and feature, the presence of a short change-point centered interval containing the 
 feature. The results are stored in a list called `pins`, with two items: `pins` is a tabulation of the feature locations and signs and
 `pinmat` is the feature matrix.
+
 ```{r featuremat}
 pins <- calc_pinmat(gc_df, res$seg, dropareas=centroareas)
 pinmat_df <- pins$pinmat

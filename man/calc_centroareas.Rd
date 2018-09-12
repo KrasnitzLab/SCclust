@@ -4,7 +4,7 @@
 \alias{calc_centroareas}
 \title{Calculates centromere regions (areas).}
 \usage{
-calc_centroareas(cyto)
+calc_centroareas(cyto, centromere = c("p11", "q11"))
 }
 \description{
 Calculates centromere regions (areas).

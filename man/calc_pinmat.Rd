@@ -4,7 +4,8 @@
 \alias{calc_pinmat}
 \title{Select features and generate the incidence table.}
 \usage{
-calc_pinmat(gc_df, segment_df, homoloss = 0, dropareas = NULL)
+calc_pinmat(gc_df, segment_df, homoloss = 0, dropareas = NULL, smear = 1,
+  chromrange = 1:24, keepboundaries = F)
 }
 \arguments{
 \item{gc_df}{bining schema used for the analysis}

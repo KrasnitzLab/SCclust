@@ -4,8 +4,9 @@
 \alias{sgains_pipeline}
 \title{Integration with 'sGAINS' tool.}
 \usage{
-sgains_pipeline(scgv_dir, case_name, varbin_dir, varbin_suffix, bins_boundaries,
-  cytoband, badbins = NULL, nsim = 150, sharemin = 0.85)
+sgains_pipeline(scgv_dir, case_name, varbin_dir, varbin_suffix,
+  bins_boundaries_filename, cytoband, badbins = NULL, nsim = 150,
+  sharemin = 0.85)
 }
 \arguments{
 \item{scgv_dir}{directory where the results of the analysis should be stored}
@@ -16,8 +17,6 @@ sgains_pipeline(scgv_dir, case_name, varbin_dir, varbin_suffix, bins_boundaries,
 
 \item{varbin_suffix}{common suffix for files produced by 'varbin' step of sGAINS}
 
-\item{bins_boundaries}{file name for binning scheme to use in the analysis}
-
 \item{cytoband}{file name for a cytoband coordinate table for the version of the genome being used}
 
 \item{badbins}{a file name for a table of bad bins (bins with outlying read counts) for the specified binning scheme}
@@ -26,6 +25,8 @@ sgains_pipeline(scgv_dir, case_name, varbin_dir, varbin_suffix, bins_boundaries,
 
 \item{sharemin}{a feature is considered 'widely shared' by leaves of a tree node if present in sharemin fraction 
 of leaves}
+
+\item{bins_boundaries}{file name for binning scheme to use in the analysis}
 }
 \description{
 This function is called by sGAINS tools to perform the final step in preparation

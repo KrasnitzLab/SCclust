@@ -224,9 +224,6 @@ remove_segment <- function( rsShort, rsSegnum, ratioData, sd.undo ) {
               tempShort[appendIndex, "seg.start"]:tempShort[appendIndex, "seg.end"]], 
           base=2))
   
-  # cat("append", tempShort[appendIndex, "chrom"], tempShort[appendIndex, "loc.start"], tempShort[appendIndex, "loc.end"],
-  #     tempShort[appendIndex, "num.mark"], tempShort[appendIndex, "seg.mean"], tempShort[appendIndex, "seg.start"], tempShort[appendIndex, "seg.end"], "\n")
-  
   tempShort <- tempShort[-rsSegnum, ]
   tempShort$segnum <- seq(1:nrow(tempShort))
   
@@ -239,9 +236,8 @@ remove_segment <- function( rsShort, rsSegnum, ratioData, sd.undo ) {
       leftIndex <- appendIndex - 2
       rightIndex <- appendIndex - 1
     }
-    #thisSd <- sd(ratioData[tempShort$seg.start[leftIndex]:tempShort$seg.start[rightIndex], "lowratio"])
-    
-    ## sd of log2 (reason to use sqrt(2) here)GC normalized bin count data (the data before segmentation)
+    # sd of log2 (reason to use sqrt(2) here)GC normalized bin count data 
+    # (the data before segmentation)
     thisSd <- mad(diff(ratioData[, "lowratio"])) / sqrt(2)
     
     ############################################
@@ -251,13 +247,6 @@ remove_segment <- function( rsShort, rsSegnum, ratioData, sd.undo ) {
     ## check whether the new splitting a real change point
     
     if (abs(tempShort$seg.mean[leftIndex] - tempShort$seg.mean[rightIndex]) < (sd.undo * thisSd) ) {
-      
-      # cat("left", tempShort[leftIndex, "chrom"], tempShort[leftIndex, "loc.start"],
-      #     tempShort[leftIndex, "loc.end"], tempShort[leftIndex, "num.mark"], tempShort[leftIndex, "seg.mean"],
-      #     tempShort[leftIndex, "seg.start"], tempShort[leftIndex, "seg.end"], "\n")
-      # cat("right", tempShort[rightIndex, "chrom"], tempShort[rightIndex, "loc.start"],
-      #     tempShort[rightIndex, "loc.end"], tempShort[rightIndex, "num.mark"], tempShort[rightIndex, "seg.mean"],
-      #     tempShort[rightIndex, "seg.start"], tempShort[rightIndex, "seg.end"], "\n")
       
       ##  remove changepoint (combine)
       tempShort[leftIndex, "loc.end"] <- tempShort[rightIndex, "loc.end"]
@@ -293,8 +282,6 @@ segment_varbin_files <- function(varbin_files, gc_df, badbins=NULL) {
   
   ncells <- nrow(varbin_files)
   cells <- varbin_files$cells
-  
-  # ncells <- 5
   
   for(index in seq(1, ncells)) {
       varbin_file <- varbin_files$paths[index]
