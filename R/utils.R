@@ -119,8 +119,12 @@ chrom_numeric <- function(chrom) {
     return(chrom.numeric)
   } else {
     chrom.numeric <- substring(chrom, 4)
-    chrom.numeric[which(chrom == "chrX")] <- "23"
-    chrom.numeric[which(chrom == "chrY")] <- "24"
+    for(c in c("chrX", "chrY")) {
+      c_index = which(unique(chrom)==c)
+      if(is.number(c_index)) {
+        chrom.numeric[which(chrom == c)] <- c_index
+      }
+    }
     
     chrom.numeric <- as.numeric(chrom.numeric)
     return(chrom.numeric)
@@ -128,23 +132,23 @@ chrom_numeric <- function(chrom) {
 }
 
 
-#' Converts chrom name to numeric and adds `chrom.numeric` column to the 
-#' dataframe. 
-#' 
-#' @export
-chrom_numeric_mouse <- function(chrom) {
-  if(is.numeric(chrom)) {
-    chrom.numeric <- chrom
-    return(chrom.numeric)
-  } else {
-    chrom.numeric <- substring(chrom, 4)
-    chrom.numeric[which(chrom == "chrX")] <- "20"
-    chrom.numeric[which(chrom == "chrY")] <- "21"
-    
-    chrom.numeric <- as.numeric(chrom.numeric)
-    return(chrom.numeric)
-  }
-}
+## #' Converts chrom name to numeric and adds `chrom.numeric` column to the 
+## #' dataframe. 
+## #' 
+## #' @export
+## chrom_numeric_mouse <- function(chrom) {
+##   if(is.numeric(chrom)) {
+##     chrom.numeric <- chrom
+##     return(chrom.numeric)
+##   } else {
+##     chrom.numeric <- substring(chrom, 4)
+##     chrom.numeric[which(chrom == "chrX")] <- "20"
+##     chrom.numeric[which(chrom == "chrY")] <- "21"
+##     
+##     chrom.numeric <- as.numeric(chrom.numeric)
+##     return(chrom.numeric)
+##   }
+## }
 
 
 tree_clustersize <- function(indextable) {
