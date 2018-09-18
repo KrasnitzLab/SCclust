@@ -236,10 +236,12 @@ dim(varbin_files)
 
 Next, we approximate the copy number ratio as a function of the bin number by a piecewise-constant function. This process is called 
 segmentation. First we normalize bincount based on the GC content using LOWESS smoothing and after that we use Circular Binary 
-Segmentation (CBS) algorithm, as implemented in the R package `DNAcopy`, but 
-modified for a more consistent elimination of very short segments.
+Segmentation (CBS) algorithm, as implemented in the R package `DNAcopy`, but with two important enhancements. 
+First, very short segments are eliminated more consistently, such that they are guaranteed to be absent from the output segment table.
+Secondly, single-cell copy number is integer everywhere in the genome. We use this property to estimate the absolute copy number: the 
+segmented copy-number ratio is multiplied by a factor, chosen such that the result is as close as possible to an integer, on average
+throughout the genome.
 
-\todo{mention the quantal procedure}
 ```{r}
 res <- segment_varbin_files(varbin_files, gc_df, centrobins)
 ```
