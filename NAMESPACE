@@ -3,6 +3,7 @@
 export(calc_bins2regions)
 export(calc_centroareas)
 export(calc_pinmat)
+export(calc_ploidies)
 export(calc_regions2bins)
 export(case_filenames)
 export(chrom_numeric)

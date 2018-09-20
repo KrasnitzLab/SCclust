@@ -291,8 +291,13 @@ value for three alternative definitions of ploidy: the genome-wide median, the g
 modes. Also, at this point we compute the percentage of the genome with copy number 0, i.e., lost homozygously. A high percentage of
 homozygous loss is likely a sign of DNA degradation ex-vivo. Such cells are removed from further processing (this is controlled using 
 `homoloss` parameter of `calc_pinmat` fuction).
+
 \todo{Display the ploidies table here?}
 
+```{r ploidis-data, results = "asis"}
+ploidies_df <- calc_ploidies(gc_df, res$seg)
+knitr::kable(head(ploidies_df))
+```
 
 Next, we replace each profile by a set of change points, i.e., discontinuities in the integer segmented
 value. Each change point has two values associated with it: position (bin number) and the sign of change going in the direction of
