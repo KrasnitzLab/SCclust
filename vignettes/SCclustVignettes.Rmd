@@ -287,12 +287,10 @@ At this point, we convert the set of segmented copy number profiles into a featu
 First, since single-cell copy number must be integer, we round the segmented values to the nearest integer. Some of the neighboring 
 segments may merge as a result. As part of this procedure we calculate the ploidy of each cell. Ploidy here means the predominant 
 integer value of copy number in the cell genome. We compute this 
-value for three alternative definitions of ploidy: the genome-wide median, the genome-wide mode and the mode of all chromosome-wide
-modes. Also, at this point we compute the percentage of the genome with copy number 0, i.e., lost homozygously. A high percentage of
-homozygous loss is likely a sign of DNA degradation ex-vivo. Such cells are removed from further processing (this is controlled using 
-`homoloss` parameter of `calc_pinmat` fuction).
-
-\todo{Display the ploidies table here?}
+value for three alternative definitions of ploidy: the genome-wide median (`ploidymed`), the genome-wide mode (`ploidymod`) and the mode 
+of all chromosome-widemodes (`ploidychromod`). Also, at this point we compute the percentage of the genome with copy number 0, i.e., lost 
+homozygously (`homoloss`). A high percentage of homozygous loss is likely a sign of DNA degradation ex-vivo. Such cells are removed from 
+further processing (this is controlled using `homoloss` parameter of `calc_pinmat` fuction).
 
 ```{r ploidis-data, results = "asis"}
 ploidies_df <- calc_ploidies(gc_df, res$seg)
