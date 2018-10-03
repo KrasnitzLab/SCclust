@@ -1,10 +1,14 @@
 #' Identify subclones in a clonal branch of a hierarchical tree.
 #'
-#' Iterate the procedure for clone identification for a subset of cells forming a clone.
+#' Iterate the procedure for clone identification for a subset of cells forming 
+#' a clone.
 #' @param hc The hclust object with clones identified.
-#' @param pinmat The feature incidence matrix: columns are cells, rows are features, 1 if a feature is present, 0 if not.
-#' @param A two-column matrix, one row per feature, providing the bin number and thepy (sign) of the feature.
-#' @param nmin An integer. Default: 6. The minimal allowed size of a clone to be examined for subclones.
+#' @param pinmat The feature incidence matrix: columns are cells, rows are 
+#'        features, 1 if a feature is present, 0 if not.
+#' @param A two-column matrix, one row per feature, providing the bin number 
+#'        and thepy (sign) of the feature.
+#' @param nmin An integer. Default: 6. The minimal allowed size of a clone to 
+#'        be examined for subclones.
 #' @param nsim The number of permutation simulations for subclone identification. 
 #'        Default: 500.
 #' @param lmmax Numeric value. Default: 0.001. The threshold parameter for a 
@@ -17,9 +21,12 @@
 #'        of leaves in a node.Default: 0.85.
 #' @param bymax Logical. If TRUE (Default), use maximal pairwise FDR for the node 
 #'        to find subclones, otherwise use mean over all pairs.
-#' @param climbfromsize An integer specifying the minimal size of a hard subclone allowed to be expanded. Default: 2.
-#' @param climbtoshare An integer the minimal number of widely shared features in a soft subclone Default: 3.
-#' @param clonetype. A character string specifying whether hard or soft subclones are to be determined. Default: 'soft'.
+#' @param climbfromsize An integer specifying the minimal size of a hard 
+#'        subclone allowed to be expanded. Default: 2.
+#' @param climbtoshare An integer the minimal number of widely shared features 
+#'        in a soft subclone Default: 3.
+#' @param clonetype. A character string specifying whether hard or soft 
+#'        subclones are to be determined. Default: 'soft'.
 #' @return A list of hclust objects for clones.
 #' @export
 find_subclones <- function(

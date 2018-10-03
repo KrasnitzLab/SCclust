@@ -1,14 +1,14 @@
-#'Compute FDRs for Fisher's test p-values.
+#' Compute FDRs for Fisher's test p-values.
 #'
-#'Linear fit to the tail of empirical null distribution of Fisher p-values;
-#'FDR computation: compare true to simulated CDF(empirical null).
-#'@param true_pv The Fisher's test p-values for the observation.
-#'@param sim_pv The Fisher's test p-values for the permutations.
-#'@param cell_names A character vector. The names of cells.
-#'@param lmmax Numeric value. Default: 0.001. The threshold parameter 
+#' Linear fit to the tail of empirical null distribution of Fisher p-values;
+#' FDR computation: compare true to simulated CDF(empirical null).
+#' @param true_pv The Fisher's test p-values for the observation.
+#' @param sim_pv The Fisher's test p-values for the permutations.
+#' @param cell_names A character vector. The names of cells.
+#' @param lmmax Numeric value. Default: 0.001. The threshold parameter 
 #'          for the linear fit.
-#'@return A list containing the matrix of the FDR values (mat_fdr)
-#'@export
+#' @return A list containing the matrix of the FDR values (mat_fdr)
+#' @export
 fisher_fdr <- function(
     true_pv, sim_pv, cell_names, lmmax = 0.001){
   flog.debug("cells: %d", length(cell_names))

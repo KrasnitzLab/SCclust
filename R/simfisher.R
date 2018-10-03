@@ -1,9 +1,10 @@
 library("parallel")
 library("futile.logger")
 
-# kXk matrices yy, ny, t(ny) and nn contain matrix elements [1,1], [2,1], [1,2] and [2,2] of
-# the 2X2 contingency tables for all possible combinations of k variables. For a variable i
-# return its Fisher exact p-values with variables j>=i.
+# kXk matrices yy, ny, t(ny) and nn contain matrix elements [1,1], [2,1], [1,2] 
+# and [2,2] of the 2X2 contingency tables for all possible combinations of k 
+# variables. For a variable i return its Fisher exact p-values with 
+# variables j>=i.
 fast_fisher<-function(i,yy,ny,nn){
   ftp <- rep(1,nrow(yy))
   for(j in i:nrow(yy)) {
@@ -14,10 +15,11 @@ fast_fisher<-function(i,yy,ny,nn){
   return(ftp)
 }
 
-# Metropolis randomization of vector x of 0s and 1s, where p is a vector of occupancy
-# probabilities, keeping the sum of x fixed. If there are more 0s than 1s in x, a subset of
-# vacant positions is chosen at random, and 1s are moved to these positions with Metropolis
-# transition probability. If there are more 1s than 0s, the roles of 0s and 1s are inetrchanged
+# Metropolis randomization of vector x of 0s and 1s, where p is a vector of 
+# occupancy probabilities, keeping the sum of x fixed. If there are more 0s 
+# than 1s in x, a subset of vacant positions is chosen at random, and 1s are 
+# moved to these positions with Metropolis transition probability. If there 
+# are more 1s than 0s, the roles of 0s and 1s are inetrchanged
 metro<-function(x,p,sweeps){
   for(i in 1:sweeps){
     occ<-which(x==1&p<1)
@@ -42,7 +44,8 @@ metro<-function(x,p,sweeps){
 }
 
 # Stouffer and Fisher combos come courtesy of Wikipedia:
-# http://en.wikipedia.org/wiki/Fisher's_method . I only changed the function names.
+# http://en.wikipedia.org/wiki/Fisher's_method . I only changed the function 
+# names.
 stouffer_combo <- function(p, w) { # p is a vector of p-values
   if (missing(w)) {
     w <- rep(1, length(p))/length(p)
@@ -147,7 +150,7 @@ sim_fisher<-function(m, nsim, nsweep, seedme, njobs=1,
 #' @param nsim the number of permutations/simulations. Default value: 150.
 #' @return a list of two numeric vector objects. The Fisher's test p-values 
 #'         for the observation (true) and for the permutations (sim).
-#'@export
+#' @export
 sim_fisher_wrapper <- function(pinmat_df, pins_df, njobs=NULL, 
     nsim=150, nsweep=200, seedme=123) {
 

@@ -8,18 +8,25 @@ library("futile.logger")
 #'Integration with 'sGAINS' tool. 
 #' 
 #' This function is called by sGAINS tools to perform the final step in preparation
-#' of results: phylogenetic analysis of single-cell genomes represented by their copy-number profiles
+#' of results: phylogenetic analysis of single-cell genomes represented by their 
+#' copy-number profiles
 #'
 #' @param scgv_dir directory where the results of the analysis should be stored
-#' @param case_name name of the case to be used for storing results of the analysis
-#' @param varbin_dir directory where output of 'varbin' step of sGAINS(the binning scheme) is located
-#' @param varbin_suffix common suffix for files produced by 'varbin' step of sGAINS
+#' @param case_name name of the case to be used for storing results of the 
+#'        analysis
+#' @param varbin_dir directory where output of 'varbin' step of sGAINS (the 
+#'        binning scheme) is located
+#' @param varbin_suffix common suffix for files produced by 'varbin' step of 
+#'        sGAINS
 #' @param bins_boundaries file name for binning scheme to use in the analysis
-#' @param cytoband file name for a cytoband coordinate table for the version of the genome being used
-#' @param badbins a file name for a table of bad bins (bins with outlying read counts) for the specified binning scheme
-#' @param nsim number of simulations to run for calculating simulated FDR distribution
-#' @param sharemin a feature is considered 'widely shared' by leaves of a tree node if present in sharemin fraction 
-#'        of leaves
+#' @param cytoband file name for a cytoband coordinate table for the version of 
+#'        the genome being used
+#' @param badbins a file name for a table of bad bins (bins with outlying read 
+#'        counts) for the specified binning scheme
+#' @param nsim number of simulations to run for calculating simulated FDR 
+#'        distribution
+#' @param sharemin a feature is considered 'widely shared' by leaves of a tree 
+#         node if present in sharemin fraction of leaves
 #' @export
 
 sgains_pipeline <- function(

@@ -143,7 +143,9 @@ calc_smear_breakpoints <- function(
   } else {
     
     if(!is.null(censored)) {
-        dtshort<-dtshort[((dtshort[,"bpstart"]+smear) > ustart[dtshort[,"chrom"]])&!censored,]
+        dtshort<-dtshort[
+            ((dtshort[,"bpstart"]+smear) > ustart[dtshort[,"chrom"]])
+            &!censored,]
     } else {
         dtshort<-dtshort[((dtshort[,"bpstart"]+smear) > ustart[dtshort[,"chrom"]]),]
     }

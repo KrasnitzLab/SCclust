@@ -26,7 +26,8 @@ hclust_tree <- function(pinmat, mat_fdr, mat_dist, hcmethod = "average"){
   meanfdr<-rep(NA, nrow(hc$merge))
   # Number of leaves in the node
   nodesize <- rep(NA, nrow(hc$merge))
-  # For each node and each feature(pin) determine the fraction of leaves in the node with the feature
+  # For each node and each feature(pin) determine the fraction of leaves in the 
+  # node with the feature
   sharing <- matrix(NA, nrow = nrow(pinmat), ncol = nrow(hc$merge))
   # Mean number of features per leaf in a node
   complexity <- rep(NA, nrow(hc$merge))
