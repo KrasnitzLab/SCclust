@@ -12,9 +12,11 @@ find_subclones(hc, pinmat, pins, nmin = 6, nsim = 500, njobs = NULL,
 \arguments{
 \item{hc}{The hclust object with clones identified.}
 
-\item{pinmat}{The feature incidence matrix: columns are cells, rows are features, 1 if a feature is present, 0 if not.}
+\item{pinmat}{The feature incidence matrix: columns are cells, rows are 
+features, 1 if a feature is present, 0 if not.}
 
-\item{nmin}{An integer. Default: 6. The minimal allowed size of a clone to be examined for subclones.}
+\item{nmin}{An integer. Default: 6. The minimal allowed size of a clone to 
+be examined for subclones.}
 
 \item{nsim}{The number of permutation simulations for subclone identification. 
 Default: 500.}
@@ -35,17 +37,22 @@ of leaves in a node.Default: 0.85.}
 \item{bymax}{Logical. If TRUE (Default), use maximal pairwise FDR for the node 
 to find subclones, otherwise use mean over all pairs.}
 
-\item{climbfromsize}{An integer specifying the minimal size of a hard subclone allowed to be expanded. Default: 2.}
+\item{climbfromsize}{An integer specifying the minimal size of a hard 
+subclone allowed to be expanded. Default: 2.}
 
-\item{climbtoshare}{An integer the minimal number of widely shared features in a soft subclone Default: 3.}
+\item{climbtoshare}{An integer the minimal number of widely shared features 
+in a soft subclone Default: 3.}
 
-\item{A}{two-column matrix, one row per feature, providing the bin number and thepy (sign) of the feature.}
+\item{A}{two-column matrix, one row per feature, providing the bin number 
+and thepy (sign) of the feature.}
 
-\item{clonetype.}{A character string specifying whether hard or soft subclones are to be determined. Default: 'soft'.}
+\item{clonetype.}{A character string specifying whether hard or soft 
+subclones are to be determined. Default: 'soft'.}
 }
 \value{
 A list of hclust objects for clones.
 }
 \description{
-Iterate the procedure for clone identification for a subset of cells forming a clone.
+Iterate the procedure for clone identification for a subset of cells forming 
+a clone.
 }

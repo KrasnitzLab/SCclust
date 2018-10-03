@@ -11,24 +11,30 @@ sgains_pipeline(scgv_dir, case_name, varbin_dir, varbin_suffix,
 \arguments{
 \item{scgv_dir}{directory where the results of the analysis should be stored}
 
-\item{case_name}{name of the case to be used for storing results of the analysis}
+\item{case_name}{name of the case to be used for storing results of the 
+analysis}
 
-\item{varbin_dir}{directory where output of 'varbin' step of sGAINS(the binning scheme) is located}
+\item{varbin_dir}{directory where output of 'varbin' step of sGAINS (the 
+binning scheme) is located}
 
-\item{varbin_suffix}{common suffix for files produced by 'varbin' step of sGAINS}
+\item{varbin_suffix}{common suffix for files produced by 'varbin' step of 
+sGAINS}
 
-\item{cytoband}{file name for a cytoband coordinate table for the version of the genome being used}
+\item{cytoband}{file name for a cytoband coordinate table for the version of 
+the genome being used}
 
-\item{badbins}{a file name for a table of bad bins (bins with outlying read counts) for the specified binning scheme}
+\item{badbins}{a file name for a table of bad bins (bins with outlying read 
+counts) for the specified binning scheme}
 
-\item{nsim}{number of simulations to run for calculating simulated FDR distribution}
+\item{nsim}{number of simulations to run for calculating simulated FDR 
+distribution}
 
-\item{sharemin}{a feature is considered 'widely shared' by leaves of a tree node if present in sharemin fraction 
-of leaves}
+\item{sharemin}{a feature is considered 'widely shared' by leaves of a tree}
 
 \item{bins_boundaries}{file name for binning scheme to use in the analysis}
 }
 \description{
 This function is called by sGAINS tools to perform the final step in preparation
-of results: phylogenetic analysis of single-cell genomes represented by their copy-number profiles
+of results: phylogenetic analysis of single-cell genomes represented by their 
+copy-number profiles
 }
