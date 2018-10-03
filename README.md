@@ -7,14 +7,22 @@ breakpoints, permutations for FDRs for Fisher test p-values and identification
 of the clone structure in single cell copy number profiles.
 
 
-## Installation
+## Installation from source
 
 * Download `SCclust` package source build from Github:
-[https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0RC3/SCclust_1.0.0RC3.tar.gz](https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0RC3/SCclust_1.0.0RC3.tar.gz)
+[https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0/SCclust_1.0.0.tar.gz](https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0/SCclust_1.0.0.tar.gz)
 into your working directory;
 
 * Install the package from downloaded source:
 
     ```
-    install.packages("SCclust_1.0.0RC3.tar.gz")
+    install.packages("SCclust_1.0.0.tar.gz")
+    ```
+
+## Conda installer
+
+* The `SCclust` package could be install using KransnitzLab Anaconda channel:
+
+    ```
+    conda install -c conda-forge -c krasnitzlab scclust
     ```
