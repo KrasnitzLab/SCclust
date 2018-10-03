@@ -11,9 +11,6 @@
 #' @export
 fisher_fdr <- function(
     true_pv, sim_pv, cell_names, lmmax = 0.001){
-  flog.debug("cells: %d", length(cell_names))
-  flog.debug("dim(true_pv): %d", length(true_pv))
-  flog.debug("dim(sim_pv): %d", length(sim_pv))
   
   assertthat::assert_that(length(cell_names) == (1 + sqrt(1 + 8*length(true_pv)))/2)
   
@@ -71,9 +68,6 @@ fisher_fdr <- function(
   # (a power-law fit to the low-p tail of the null CDF, use it to extrapolate 
   # to very low p-values)
   lowp_index <- (cumsum(sim_count)/sum(sim_count)) < lmmax
-  flog.debug("lowp_index=%s; len=%s; sum=%s", 
-      lowp_index, length(lowp_index), sum(lowp_index))
-  # flog.debug("sim_unique[lowp_index]=%s", sim_unique[lowp_index])
   
   if(sum(lowp_index) > 1) {
     lmu <- max(sim_unique[lowp_index])

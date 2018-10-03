@@ -124,11 +124,6 @@ Next, we attach *SCclust* to the R session:
 library("SCclust")
 ```
 
-```{r}
-library(futile.logger)
-flog.threshold(ERROR)
-```
-
 ### Binning scheme
 
 The binning scheme is a table describing a partition of the genome into bins to sort the sequence reads into. The bin boundaries 
@@ -350,8 +345,6 @@ i.e., much smaller than expected. The value is a matrix of false discovery rates
 observed dissimilarities in a distance matrix.
 
 ```{r fisher-fdr}
-# devtools::load_all()
-# flog.threshold(DEBUG)
 mfdr <- fisher_fdr(true_pv, sim_pv, cells)
 mfdr[1:5,1:5]
 mdist <- fisher_dist(true_pv, cells)

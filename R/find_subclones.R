@@ -67,7 +67,7 @@ find_subclones <- function(
 
       nshare <- baseshare + sum(rowSums(clonemat) > (sharemin * ncol(clonemat)))
       cellnames <- colnames(clonemat)
-      flog.debug("subclone number of cells: %s", length(cellnames))
+
       res <- sim_fisher_wrapper(clonemat, clonepins, nsim=nsim, njobs=njobs)
       if(is.null(res)) {
         next
@@ -85,11 +85,6 @@ find_subclones <- function(
       mdist <- fisher_dist(true_pv, cellnames)
 
       subhc <- hclust_tree(pinmat, mfdr, mdist, hcmethod = hcmethod)
-      flog.debug("fdrthresh=%s; sharemin=%s; nshare=%s; bymax=%s;", 
-          fdrthresh, sharemin, nshare, bymax)
-      flog.debug("climbfromsize=%s; climbtoshare=%s",
-          climbfromsize, climbtoshare)
-      flog.debug("subhc=%s", subhc)
 
       subhc <- find_clones(
           subhc, 
@@ -137,7 +132,6 @@ construct_clonetracks<- function(
     assertthat::assert_that(!is.null(subhc$labellist))
     
     clunique <- unique(subhc$softclones[clonetype,])
-    flog.debug("clunique=%s", clunique)
 
     if (length(clunique) > 1){
       for(nodes in clunique){

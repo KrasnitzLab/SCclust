@@ -5,9 +5,6 @@
 
 library(testthat)
 
-library(futile.logger)
-flog.threshold(DEBUG)
-
 devtools::load_all(".")
 
 testthat::test_dir("tests/testthat")

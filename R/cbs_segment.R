@@ -287,9 +287,7 @@ segment_varbin_files <- function(varbin_files, gc_df, badbins=NULL) {
       varbin_file <- varbin_files$paths[index]
       cell <- varbin_files$cells[index]
       name <- varbin_files$names[index]
-      
-      flog.debug("processing varbin file: %s (cell: %s)", varbin_file, cell)
-      
+            
       bin_df <- load_table(varbin_file)
       bin_df$chrom.numeric <- chrom_numeric(bin_df$chrom)
       if(!is.null(badbins)) {

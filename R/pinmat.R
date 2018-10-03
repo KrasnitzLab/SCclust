@@ -126,10 +126,6 @@ calc_smear_breakpoints <- function(
     sign(short_df[,"cvals"]-c(0,short_df[-nrow(short_df),"cvals"]))
   )
   colnames(dtshort)<-c("profid","chrom","bpstart","bpend","bpsign")
-  flog.debug("dtshort rows: %s", nrow(dtshort))
-  if(!is.null(censored)) {
-      flog.debug("censored rows: %s", sum(censored))
-  }
   
   ustart<-short_df[match(unique(short_df[,"chrom"]),short_df[,"chrom"]),"segstarts"]
   uend<-c((ustart-1)[-1],short_df[nrow(short_df),"segends"])

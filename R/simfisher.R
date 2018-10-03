@@ -1,5 +1,4 @@
 library("parallel")
-library("futile.logger")
 
 # kXk matrices yy, ny, t(ny) and nn contain matrix elements [1,1], [2,1], [1,2] 
 # and [2,2] of the 2X2 contingency tables for all possible combinations of k 
@@ -91,8 +90,6 @@ sim_fisher<-function(m, nsim, nsweep, seedme, njobs=1,
     }
     for(j in 1:length(m)){
       if(nsweep>0 && length(rf[[j]]) > 1){
-#        flog.debug("length of m[[%s]]: %s", j, length(m[[j]]))
-#        flog.debug("length of rf[[%s]]: %s", j, length(rf[[j]]))
         m[[j]] <- parallel::parApply(
             cl=cl, X=m[[j]], MARGIN=2,
             FUN=metro, p=rf[[j]], sweeps=nsweep)
@@ -104,14 +101,8 @@ sim_fisher<-function(m, nsim, nsweep, seedme, njobs=1,
 
       lbi<-1:nrow(yy)
       lbi[lbi%%2==0]<-nrow(yy)+2-nrow(yy)%%2-lbi[lbi%%2==0]
-#      flog.debug("lbi=%s; yy=%s,%s; ny=%s,%s; nn=%s,%s", 
-#          length(lbi), 
-#          nrow(yy), ncol(yy), 
-#          nrow(ny), ncol(ny), 
-#          nrow(nn), ncol(nn))
       assertthat::assert_that(nrow(yy) == ncol(yy))
       if(ncol(yy) < 2) {
-        flog.warn("sim_fisher skipping fast fisher because ncol(yy)=%s", ncol(yy))
         next
       }
       x <- parallel::parSapply(
@@ -130,7 +121,7 @@ sim_fisher<-function(m, nsim, nsweep, seedme, njobs=1,
       tp[,i]<-1-sapply(Z,pnorm)
     }
     if(i %% 20 == 0) {
-      flog.debug("sim fisher simulations %s out of %s", i, nsim)
+      print("sim fisher simulations %s out of %s", i, nsim)
     }
   }
   parallel::stopCluster(cl)
@@ -157,22 +148,18 @@ sim_fisher_wrapper <- function(pinmat_df, pins_df, njobs=NULL,
   if(is.null(njobs)) {
     njobs <- parallel::detectCores()-4
   }
-  flog.debug("sim_fisher_wrapper: njobjs=%s", njobs)
 
   len <- length(unique(pins_df[,"sign"]))
   m<-vector(mode="list",length=len)
-  flog.debug("m vector build: %s", m)
   if(len <= 1) {
     return(NULL)
   }
   for(i in 1:len) {
     m[[i]]<-as.matrix(pinmat_df[pins_df[,"sign"]==unique(pins_df[,"sign"])[i],,drop=F])
   }
-  flog.debug("m vector initialized...")
 
   vtrue <- sim_fisher(m, nsim=1, nsweep=0,
                       seedme=seedme, njobs=njobs, combo="fisher")
-  flog.debug("vtrue done...")
   msim <- sim_fisher(m, nsim=nsim, nsweep=nsweep,
                      seedme=seedme, njobs=njobs, combo="fisher")
 
