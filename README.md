@@ -21,7 +21,7 @@ into your working directory;
 
 ## Conda installer
 
-* The `SCclust` package could be install using KransnitzLab Anaconda channel:
+* The `SCclust` package can also be installed using KrasnitzLab Anaconda channel:
 
     ```
     conda install -c conda-forge -c krasnitzlab scclust
