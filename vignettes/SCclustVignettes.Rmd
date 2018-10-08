@@ -100,6 +100,12 @@ wget -c \
 gunzip cytoBand.txt.gz
 ```
 
+Create a directory `results` where we are going to store results from the analysis:
+
+```
+mkdir -p results
+```
+
 The data directory should have following structure:
 
 ```bash
@@ -107,6 +113,7 @@ The data directory should have following structure:
 |-- T10data
     |-- cytoBand.txt
     |-- hg19_R50_B20k_bins_boundaries.txt
+    |-- results
     |-- varbin
         |-- SRR052047.varbin.20k.txt
         |-- SRR052148.varbin.20k.txt
