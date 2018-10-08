@@ -411,7 +411,7 @@ hc$softclones
 To complete the analysis, we compute subclones. In essence, this computation is a loop over clones. If the number of cells in the clone
 exceeds a minimal value (e.g., 6), we extract a submatrix of the feature matrix, restricted to the cells in the clone. The clonal structure analysis is then performed for this sub-matrix as described above, starting with the computation of dissimilarities. 
 ```{r subclones}
-subclones <- find_subclones(hc, pinmat_df, pins_df, nsim=nsim)
+subclones <- find_subclones(hc, pinmat_df, pins_df, nsim=150)
 ```
 
 For the full list of parameters that control the behavior of `find_sublones` please consult the manual pages of SCclust package.
