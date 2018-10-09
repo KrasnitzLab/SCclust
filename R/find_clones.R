@@ -56,7 +56,6 @@ find_clones <- function(hc,
   } else { 
     node_compliant <- (hc$meanfdr < fdrthresh & count_pins_share > nshare)
   }
-  flog.debug("node_compliant=%s", node_compliant)
   
   leftchild <- (hc$merge[,1] < 0)
   leftchild[hc$merge[,1] > 0] <- node_compliant[hc$merge[hc$merge[,1] > 0, 1]]
@@ -65,7 +64,6 @@ find_clones <- function(hc,
   rightchild[hc$merge[,2] > 0] <- node_compliant[hc$merge[hc$merge[,2] > 0, 2]]
 
   new_node_compliant <- node_compliant & leftchild & rightchild
-  flog.debug("new_node_compliant=%s", new_node_compliant)
   
   while(!is.na(new_node_compliant) && !is.na(node_compliant) && 
         !all(new_node_compliant == node_compliant)){
@@ -78,15 +76,12 @@ find_clones <- function(hc,
     rightchild[hc$merge[,2] > 0] <- node_compliant[hc$merge[hc$merge[,2] > 0, 2]]
 
     new_node_compliant <- node_compliant & leftchild & rightchild
-    flog.debug("node_compliant=%s; new_node_compliant=%s", 
-        node_compliant, new_node_compliant)
   }
 
 
   #Clone nodes are maximum compliant nodes
   clone_nodes <- setdiff((1:nrow(hc$merge))[node_compliant],
                          c(hc$merge[node_compliant, 1], hc$merge[node_compliant, 2]))
-  flog.debug("clone_nodes=%s", clone_nodes)
 
   hc$fdrthresh <- fdrthresh
   hc$clonenodes <- clone_nodes

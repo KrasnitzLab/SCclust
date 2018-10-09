@@ -79,8 +79,7 @@ Next, we download and extract T10 `varbin` data:
 
 ```bash
 wget -c \
-  https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0RC3/\
-  navin_t10_varbin_data.tar.gz
+  https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0RC3/navin_t10_varbin_data.tar.gz
 tar zxvf navin_t10_varbin_data.tar.gz
 rm navin_t10_varbin_data.tar.gz
 ```
@@ -89,8 +88,7 @@ We also download and extract the binning scheme used in preparation of `varbin` 
 
 ```bash
 wget -c \
-  https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0RC3/\
-  hg19_R50_B20k_bins_boundaries.txt.gz
+  https://github.com/KrasnitzLab/SCclust/releases/download/v1.0.0RC3/hg19_R50_B20k_bins_boundaries.txt.gz
 gunzip hg19_R50_B20k_bins_boundaries.txt.gz
 ```
 
@@ -102,6 +100,12 @@ wget -c \
 gunzip cytoBand.txt.gz
 ```
 
+Create a directory `results` where we are going to store results from the analysis:
+
+```
+mkdir -p results
+```
+
 The data directory should have following structure:
 
 ```bash
@@ -109,6 +113,7 @@ The data directory should have following structure:
 |-- T10data
     |-- cytoBand.txt
     |-- hg19_R50_B20k_bins_boundaries.txt
+    |-- results
     |-- varbin
         |-- SRR052047.varbin.20k.txt
         |-- SRR052148.varbin.20k.txt
@@ -122,11 +127,6 @@ Next, we attach *SCclust* to the R session:
 
 ```{r}
 library("SCclust")
-```
-
-```{r}
-library(futile.logger)
-flog.threshold(ERROR)
 ```
 
 ### Binning scheme
@@ -350,8 +350,6 @@ i.e., much smaller than expected. The value is a matrix of false discovery rates
 observed dissimilarities in a distance matrix.
 
 ```{r fisher-fdr}
-# devtools::load_all()
-# flog.threshold(DEBUG)
 mfdr <- fisher_fdr(true_pv, sim_pv, cells)
 mfdr[1:5,1:5]
 mdist <- fisher_dist(true_pv, cells)
@@ -413,7 +411,7 @@ hc$softclones
 To complete the analysis, we compute subclones. In essence, this computation is a loop over clones. If the number of cells in the clone
 exceeds a minimal value (e.g., 6), we extract a submatrix of the feature matrix, restricted to the cells in the clone. The clonal structure analysis is then performed for this sub-matrix as described above, starting with the computation of dissimilarities. 
 ```{r subclones}
-subclones <- find_subclones(hc, pinmat_df, pins_df, nsim=nsim)
+subclones <- find_subclones(hc, pinmat_df, pins_df, nsim=150)
 ```
 
 For the full list of parameters that control the behavior of `find_sublones` please consult the manual pages of SCclust package.

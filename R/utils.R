@@ -1,4 +1,3 @@
-library("futile.logger")
 
 filter_evil_short <- function(short_df, eviltwins=NULL) {
   good_cells <- unique(short_df[,"profid"])
@@ -69,8 +68,6 @@ calc_regions2bins <- function(gc_df, regions) {
         ((df$bin.start >= from) & (df$bin.start <= to)) | 
             ((df$bin.end >= from) & (df$bin.end <= to)),]
 
-    flog.debug("chrom: %s; from: %s; to: %s; bins filtered: %s", 
-        chrom, from, to, nrow(df))
     bins <- append(bins, rownames(df))
   }
   return(as.numeric(unlist(bins, recursive=T)))
@@ -94,7 +91,6 @@ calc_bins2regions <- function(gc_df, bins) {
       region <- data.frame(chrom, from, to)
     } else if(region$to == from & region$chrom == chrom) {
       # extend
-      flog.debug("extending region: %s", region)
       region$to <- to
     } else {
       if(is.null(regions)) {

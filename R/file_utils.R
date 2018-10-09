@@ -21,7 +21,6 @@ varbin_input_files <- function(input_file_dir, suffix_pattern="") {
 
 
 load_table <- function(filename) {
-  flog.debug("loading table: %s", filename)
   assertthat::assert_that(file.exists(filename))
 
   df <- read.table(filename, header=T, as.is=T)
@@ -29,7 +28,6 @@ load_table <- function(filename) {
 }
 
 load_cytobands <- function(filename) {
-  flog.debug("loading cytobands: %s", filename)
   assertthat::assert_that(file.exists(filename))
   
   return(read.table(cyto_file, header=F,as.is=T))
@@ -37,18 +35,15 @@ load_cytobands <- function(filename) {
 
 #' @export
 save_table <- function(filename, df) {
-  flog.debug("writing table: %s", filename)
   write.table(df, filename, col.names=T, row.names=F, sep="\t", quote=F)
 }
 
 #' @export
 save_mat <- function(filename, mat) {
-  flog.debug("writing matrix: %s", filename)
   write(mat, file=filename)
 }
 
 load_mat <- function(filename) {
-  flog.debug("loading matrix: %s", filename)
   return(as.matrix(scan(filename)))
 }
 

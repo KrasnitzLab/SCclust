@@ -2,7 +2,6 @@
 # Author: lubo
 # Created: Mar 28, 2018
 ###############################################################################
-library("futile.logger")
 
 
 #'Integration with 'sGAINS' tool. 
@@ -43,29 +42,20 @@ sgains_pipeline <- function(
   }
   filenames <- case_filenames(scgv_dir, case_name)
   
-  flog.debug("loading bin boundarires...")
   gc_df <-load_table(bins_boundaries_filename)
   gc_df$chrom.numeric <- chrom_numeric(gc_df$bin.chrom)
   
   if(is.null(badbins)) {
-    flog.debug("loading cytoband data...")
     cyto_data <- read.table(cytoband, header=F,as.is=T)
-    flog.debug("calculating centromere regions...")
     dropareas <- calc_centroareas(cyto_data)
-    flog.debug("calculating dropbins from centromere regions...")
     badbins <- calc_regions2bins(gc_df, dropareas)
   }
   
   gc_df <- gc_df[-badbins, ]
-  flog.debug("centrobins filtered; gc rows: %s", nrow(gc_df))
   
-  flog.debug("looking for varbin files...")
   varbin_files <- varbin_input_files(varbin_dir, varbin_suffix)
   cells <- varbin_files$cells
-  
-  flog.debug("varbin files found: ", varbin_files)
-  print(head(varbin_files))
-  
+    
   res <- segment_varbin_files(varbin_files, gc_df, badbins)
   uber_seg <- res$seg
   uber_ratio <- res$ratio

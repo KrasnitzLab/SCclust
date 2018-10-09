@@ -19,7 +19,6 @@ Suggests:
 VignetteBuilder: knitr
 Imports:
     DNAcopy,
-    futile.logger,
     tools,
     parallel,
     assertthat
