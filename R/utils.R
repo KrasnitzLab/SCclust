@@ -117,7 +117,7 @@ chrom_numeric <- function(chrom) {
     chrom.numeric <- substring(chrom, 4)
     for(c in c("chrX", "chrY")) {
       c_index = which(unique(chrom)==c)
-      if(is.number(c_index)) {
+      if(is.numeric(c_index)) {
         chrom.numeric[which(chrom == c)] <- c_index
       }
     }
