@@ -32,17 +32,21 @@ filter_evil_columns <- function(df, evil_cells, skip=0) {
 #' 
 #' @export
 calc_centroareas <- function(cyto, centromere=c("p11", "q11")) {
-  cyto[,1]<-chrom_numeric(cyto[,1])
-  cyto<-cyto[order(cyto[,1]),]
 
-  centroleft<-cyto[grep(centromere[1],cyto[,4]),]
-  centroright<-cyto[grep(centromere[2],cyto[,4]),]
-  centroleft<-centroleft[match(unique(centroleft[,1]),centroleft[,1]),]
-  centroright<-centroright[nrow(centroright):1,]
-  centroright<-centroright[match(unique(centroright[,1]),centroright[,1]),]
-  centroright<-centroright[nrow(centroright):1,]
-  centroareas<-cbind(centroleft[,c(1,2)],centroright[,3])
-  dimnames(centroareas)[[2]]<-c("chrom","from","to")
+    cyto[,1]<-chrom_numeric(cyto[,1])
+    cyto<-cyto[order(cyto[,1]),]
+
+    centroleft<-cyto[grep(centromere[1],cyto[,4]),]
+    centroright<-cyto[grep(centromere[2],cyto[,4]),]
+
+    centroleft<-centroleft[match(unique(centroleft[,1]),centroleft[,1]),]
+    centroright<-centroright[nrow(centroright):1,]
+    centroright<-centroright[match(unique(centroright[,1]),centroright[,1]),]
+    centroright<-centroright[nrow(centroright):1,]
+
+    centroareas<-cbind(centroleft[,c(1,2)],centroright[,3])
+
+    colnames(centroareas)<-c("chrom","from","to")
 
   return(centroareas)
 }
@@ -110,20 +114,19 @@ calc_bins2regions <- function(gc_df, bins) {
 #' 
 #' @export
 chrom_numeric <- function(chrom) {
-  if(is.numeric(chrom)) {
-    chrom.numeric <- chrom
-    return(chrom.numeric)
-  } else {
-    chrom.numeric <- substring(chrom, 4)
-    for(c in c("chrX", "chrY")) {
-      c_index = which(unique(chrom)==c)
-      if(is.numeric(c_index)) {
-        chrom.numeric[which(chrom == c)] <- c_index
-      }
-    }
+    if(is.numeric(chrom)) {
+        chrom.numeric <- chrom
+        return(chrom.numeric)
+    } else {
+        unique_chrom = unique(chrom)
+        chrom_count <- length(unique_chrom)
+
+        chrom.numeric <- substring(chrom, 4)
+        chrom.numeric[which(chrom == "chrX")] <- chrom_count - 1
+        chrom.numeric[which(chrom == "chrY")] <- chrom_count
     
-    chrom.numeric <- as.numeric(chrom.numeric)
-    return(chrom.numeric)
+        chrom.numeric <- as.numeric(chrom.numeric)
+        return(chrom.numeric)
   }
 }
 
