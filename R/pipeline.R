@@ -35,7 +35,10 @@ sgains_pipeline <- function(
     cytoband,
     badbins=NULL,
     nsim=150,
-    sharemin=0.85) {
+    sharemin=0.85,
+    fdrthres=-2,
+    nshare=3,
+    climbtoshare=3) {
 
   if(!file.exists(scgv_dir)) {
     dir.create(scgv_dir)
@@ -84,8 +87,14 @@ sgains_pipeline <- function(
   
   tree_df <- tree_py(mdist, method='average')
 
-  hc <- find_clones(hc, sharemin=sharemin)
-  subclones <- find_subclones(hc, pinmat_df, pins_df, nsim=nsim, sharemin=sharemin)
+  hc <- find_clones(hc, 
+        fdrthres=fdrthres, sharemin=sharemin,
+        nshare=nshare, climbtoshare=climbtoshare)
+
+  subclones <- find_subclones(hc, pinmat_df, pins_df, 
+        nsim=nsim, 
+        fdrthres=fdrthres, sharemin=sharemin,
+        baseshare=nshare, climbtoshare=climbtoshare)
   
   save_table(filenames$tree, tree_df)
   save_table(filenames$clone, subclones)
