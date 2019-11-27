@@ -39,6 +39,14 @@ find_clones <- function(hc,
   # leaves of the node together with the shared features form a bicluster
   count_pins_share <- colSums(hc$sharing > sharemin)
 
+	# How many features are widely shared by both descendants of the node?
+	leftshares<-matrix(nrow=nrow(hc$sharing),ncol=ncol(hc$sharing))
+	leftshares[,hc$merge[,1]>0]<-hc$sharing[,hc$merge[hc$merge[,1]>0,1]]>sharemin
+	leftshares[,hc$merge[,1]<0]<-hc$featuremat[,-hc$merge[hc$merge[,1]<0,1]]
+	rightshares<-matrix(nrow=nrow(hc$sharing),ncol=ncol(hc$sharing))
+	rightshares[,hc$merge[,2]>0]<-hc$sharing[,hc$merge[hc$merge[,2]>0,2]]>sharemin
+	rightshares[,hc$merge[,2]<0]<-hc$featuremat[,-hc$merge[hc$merge[,2]<0,2]]
+	crossshares<-colSums(leftshares&rightshares)
 
 
   # A node is considered compliant if FDR is below and its sharing across above 
@@ -89,6 +97,7 @@ find_clones <- function(hc,
   hc$count_pins_share <- count_pins_share
   hc$sharemin <- sharemin
   hc$nshare <- nshare
+	hc$crossshares<-crossshares
 
   if(!is.null(hc$clonenodes)){
     hc$softclones <- hc_climb(
