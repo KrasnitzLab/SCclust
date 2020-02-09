@@ -200,7 +200,8 @@ hc_climb<-function(hc, minsize, minshare){
       ancestor<-cnode
       while(nodenow<nrow(hc$merge)){
         nodenow<-row(hc$merge)[hc$merge==nodenow]
-        if(hc$count_pins_share[nodenow]>=minshare)ancestor<-nodenow
+        if(hc$count_pins_share[nodenow]>=minshare&
+					hc$crossshares[nodenow]>=minshare)ancestor<-nodenow
       }
       
       hard2soft<-cbind(hard2soft,c(cnode,ancestor))

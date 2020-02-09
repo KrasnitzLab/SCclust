@@ -61,6 +61,7 @@ hclust_tree <- function(pinmat, mat_fdr, mat_dist, hcmethod = "average"){
   hc$labellist <- labellist
   hc$sharing <- sharing
   hc$complexity <- complexity
+	hc$featuremat<-abs(pinmat)
 
 
   # return the hclust object which have new features added
