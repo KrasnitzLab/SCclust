@@ -68,9 +68,13 @@ cbs_segment_varbin <- function(bin_mat, alpha=0.05, nperm=1000, undo.SD=1.0, min
   discardSegments <- TRUE
   while (discardSegments) {
     orderShort <- workShort[order(workShort$num.mark, abs(workShort$seg.mean)), ]
-    if (orderShort[1, "num.mark"] < min.width) {
-      workShort <- remove_segment(workShort, orderShort[1, "segnum"], bin_mat, undo.SD)
-    } else {
+    for(i in 1:nrow(orderShort)) {
+      if(sum(workShort[workShort[, "chrom"] == orderShort[i, "chrom"], "num.mark"]) >= min.width) {
+        if(orderShort[i, "num.mark"] < min.width) {
+          workShort <- remove_segment(workShort, orderShort[i, "segnum"], bin_mat, undo.SD)
+          break
+        } 
+      }
       discardSegments <- FALSE
     }
   }
