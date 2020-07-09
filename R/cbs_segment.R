@@ -19,7 +19,10 @@ cbs_segment_ratio <- function(gc_df, bin_df) {
   return(bin_df)
 }
 
-cbs_segment_varbin <- function(bin_mat, alpha=0.05, nperm=1000, undo.SD=1.0, min.width=5){
+cbs_segment_varbin <- function(
+    bin_mat, alpha=0.05, nperm=1000, undo.SD=1.0, min.width=5,
+    mult.min=1.5, mult.max=5.5){
+
   assertthat::assert_that(is.numeric(bin_mat$chrom.numeric))
   assertthat::assert_that(all(!is.na(bin_mat$chrom.numeric)))
 
@@ -95,7 +98,7 @@ cbs_segment_varbin <- function(bin_mat, alpha=0.05, nperm=1000, undo.SD=1.0, min
   
   bin_mat$seg.mean.LOWESS <- m[, 1]
   
-  thisGrid <- seq(1.5, 5.5, by=0.05)
+  thisGrid <- seq(mult.min, mult.max, by=0.05)
   thisOuter <- bin_mat$seg.mean.LOWESS %o% thisGrid
   thisOuterRound <- round(thisOuter)
   thisOuterDiff <- (thisOuter - thisOuterRound) ^ 2
