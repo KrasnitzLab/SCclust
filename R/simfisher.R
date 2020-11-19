@@ -72,7 +72,9 @@ sim_fisher<-function(m, nsim, nsweep, seedme, njobs=1,
 
   ncores <- min(njobs, parallel::detectCores())
 
-  cl <- parallel::makeCluster(getOption("cl.cores",ncores))
+  cl <- parallel::makeCluster(
+    getOption("cl.cores",ncores), setup_strategy = "sequential")
+
   parallel::clusterSetRNGStream(cl)
 
   RNGkind("L'Ecuyer-CMRG")
