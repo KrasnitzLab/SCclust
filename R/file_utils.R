@@ -68,7 +68,7 @@ cells_filename <- function(output_dir, casename) {
 case_filenames <- function(output_dir, casename) {
   suffixes <- list(
     'ratio', 'clone', 'tree', 'seg',
-    'featuremat', 'features',
+    'featuremat', 'features', 'ploidies',
     'guide', 'genome', 'cells',
     'sim_pv', 'true_pv')
 

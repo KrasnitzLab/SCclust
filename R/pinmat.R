@@ -16,7 +16,7 @@ augment_gc <- function(gc_df, df) {
   return(augment_df)
 }
 
-calc_segments_short <- function(gc_df, segment_df, homoloss=0.01, chromrange=1:24) {
+calc_segments_short <- function(gc_df, segment_df, homoloss=1.0, chromrange=1:24) {
   assertthat::assert_that(is.numeric(gc_df$chrom))
   assertthat::assert_that(is.numeric(segment_df$chrom))
   assertthat::assert_that(all(colnames(gc_df) == 
@@ -51,11 +51,9 @@ calc_segments_short <- function(gc_df, segment_df, homoloss=0.01, chromrange=1:2
 
   cells <- rownames(ploidies_df)
 
-  if(homoloss > 0) {
-    good_index <- ploidies_df[,"homoloss"] <= homoloss
-    tshort <- tshort[tshort[,"profid"]%in%dimnames(ploidies_df)[[1]][good_index],]
-    cells <- rownames(ploidies_df[good_index,])
-  }
+  good_index <- ploidies_df[,"homoloss"] <= homoloss
+  tshort <- tshort[tshort[,"profid"]%in%dimnames(ploidies_df)[[1]][good_index],]
+  cells <- rownames(ploidies_df[good_index,])
 
   res <- list(tshort, ploidies_df, cells)
   names(res) <- c("short", "ploidies", "cells")
@@ -276,7 +274,7 @@ calc_ploidies <- function(gc_df, segment_df, chromrange=1:24) {
 #' @return a list of pinmat and pins objects.
 #'         pinmat is the incidence table; pins is the bin location
 #' @export
-calc_pinmat <- function(gc_df, segment_df, homoloss=0.0, dropareas=NULL, 
+calc_pinmat <- function(gc_df, segment_df, homoloss=1.0, dropareas=NULL, 
     smear=1, chromrange=1:24, keepboundaries=F) {
 
   augment_df <- augment_gc(gc_df, segment_df)
