@@ -49,12 +49,18 @@ calc_segments_short <- function(gc_df, segment_df, homoloss=0.01, chromrange=1:2
           ploidies_df[tshort[,"profid"], "ploidychromod"])
   colnames(tshort)[ncol(tshort)] <- "cvals"
 
+  cells <- rownames(ploidies_df)
+
   if(homoloss > 0) {
-    tshort <- tshort[tshort[,"profid"]%in%dimnames(ploidies_df)[[1]][
-            ploidies_df[,"homoloss"] <= homoloss],]
+    good_index <- ploidies_df[,"homoloss"] <= homoloss
+    tshort <- tshort[tshort[,"profid"]%in%dimnames(ploidies_df)[[1]][good_index],]
+    cells <- rownames(ploidies_df[good_index,])
   }
-  
-  return(tshort)
+
+  res <- list(tshort, ploidies_df, cells)
+  names(res) <- c("short", "ploidies", "cells")
+
+  return(res)
 }
 
 
@@ -274,8 +280,13 @@ calc_pinmat <- function(gc_df, segment_df, homoloss=0.0, dropareas=NULL,
     smear=1, chromrange=1:24, keepboundaries=F) {
 
   augment_df <- augment_gc(gc_df, segment_df)
-  short_df <- calc_segments_short(augment_df, segment_df, homoloss=homoloss)
-  
+
+  result <- calc_segments_short(
+    augment_df, segment_df, homoloss=homoloss)
+  short_df <- result$short
+  ploidies_df <- result$ploidies
+  cells <- result$cells
+
   censored_index = NULL
   if(!is.null(dropareas)) {
     censored_index <- calc_censored_index(short_df, dropareas)
@@ -287,5 +298,12 @@ calc_pinmat <- function(gc_df, segment_df, homoloss=0.0, dropareas=NULL,
       keepboundaries=keepboundaries,
       chromrange=chromrange)
   
-  return(calc_pinmat_short(short_df, smear_df))
+  res <- calc_pinmat_short(short_df, smear_df)
+  pinmat_df <- res$pinmat
+  pins_df <- res$pins
+
+  res <- list(pinmat_df, pins_df, cells, ploidies_df)
+  names(res) <- c("pinmat", "pins", "cells", "ploidies")
+
+  return(res)
 }
