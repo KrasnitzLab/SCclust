@@ -21,6 +21,8 @@ Imports:
     DNAcopy,
     tools,
     parallel,
-    assertthat
+    assertthat,
+    Rcpp  (>= 0.12.18)
+LinkingTo: Rcpp
 URL: https://github.com/KrasnitzLab/SCclust
 BugReports: https://github.com/KrasnitzLab/SCclust/issues

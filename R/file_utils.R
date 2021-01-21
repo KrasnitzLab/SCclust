@@ -47,6 +47,11 @@ load_mat <- function(filename) {
   return(as.matrix(scan(filename)))
 }
 
+load_matrix <- function(filename) {
+    m <- as.matrix(read.table(filename, sep="\t", header=F))
+    return(m)
+}
+
 #' @export
 uber_cells <- function(df, skip=3) {
   cells <- colnames(df)[c((skip+1):ncol(df))]

@@ -1,4 +1,8 @@
+library(devtools)
 library(testthat)
-library(SCclust)
+library(futile.logger)
 
-test_check("SCclust")
+flog.threshold(DEBUG)
+
+devtools::load_all(".")
+test_dir("tests/testthat")

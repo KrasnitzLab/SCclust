@@ -7,3 +7,5 @@ tmp
 out_many
 /junit_test_results.xml
 vignettes/T10data
+*.o
+SCclust.so
