@@ -236,9 +236,7 @@ test_that("we can use contingencies 3x3", {
 
     i <- build_incidence_table(m)
 
-    p <- squeeze_vector(c(F, T, T))
-    # partition   <-squeeze_vector(
-    #     sample(as.raw(c(T,F)), size=ncol(incidence[[1]]),replace=T))
+    p <- squeeze_vector(c(T, F, F))
     r <- contingencies(i, p)
     flog.debug("result: %s", r)
 

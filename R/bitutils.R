@@ -2,8 +2,9 @@
 squeeze_vector <- function(v){
     if(!is.raw(v))
         v <- as.raw(v)
-    packBits(
-        c(v, rep(as.raw(F), (8 - length(v) %% 8) %% 8)), type="raw")
+    return(
+        packBits(
+            c(v, rep(as.raw(F), (8 - length(v) %% 8) %% 8)), type="raw"))
 }
 
 showBits <- function(r) {
@@ -14,21 +15,19 @@ showBits <- function(r) {
 build_incidence_table <- function(m) {
     assertthat::assert_that(class(m) == "matrix")
     
-    # flog.debug("dimnames: %s", dimnames(matrix))
-    # leafnames<-dimnames(matrix)[[2]]
-    # flog.debug("leafnames: %s", leafnames)
-
     flog.warn("elements of incidence will be coerced to raw")
     incidence <- list(
             apply(m, 2, squeeze_vector),
             apply(m, 1, squeeze_vector))
-    class(incidence)<-"incidencetable"
+    
     if(is.null(dim(incidence[[1]]))) {
         dim(incidence[[1]]) <- c(1, length(incidence[[1]]))
     }
     if(is.null(dim(incidence[[2]]))) {
         dim(incidence[[2]]) <- c(1, length(incidence[[2]]))
     }
+
+    class(incidence)<-"incidencetable"
 
     return(incidence)    
 }
@@ -93,15 +92,16 @@ contingencies<-function(incidence, partition){
             ncol=ncol(incidence[[2]]),
             data=sapply(partition & incidence[[2]], setBits)))
 	rsi <- colSums(
-        matrix(ncol=ncol(incidence[[2]]),
-		    data=sapply(incidence[[2]],setBits)))
+        matrix(
+            ncol=ncol(incidence[[2]]),
+		    data=sapply(incidence[[2]], setBits)))
 
 	sp  <- sum(sapply(partition, setBits))
 	rsp <- rep(sp, ncol(incidence[[2]]))
 	lp  <- ncol(incidence[[1]])
 	rlp <- rep(lp, ncol(incidence[[2]]))
 
-    contables  <- cbind( pinc, rsi - pinc, rsp - pinc, rlp - rsi - rsp + pinc)
+    contables  <- cbind(pinc, rsi - pinc, rsp - pinc, rlp - rsi - rsp + pinc)
     pmarginals <- c(sp, lp - sp)
 
     return(list(contables=contables, pmarginals=pmarginals))
