@@ -1,7 +1,11 @@
 context("bit utils work as expected")
 
 test_that("we can use setBit function", {
-    setBits(1)
+    flog.debug("setBits called: %s", setBits(1))
+
+    expect_equal(1, setBits(1))
+    expect_equal(1, setBits(2))
+    expect_equal(2, setBits(3))
 })
 
 
@@ -239,6 +243,20 @@ test_that("we can use contingencies 3x3", {
     p <- squeeze_vector(c(T, F, F))
     r <- contingencies(i, p)
     flog.debug("result: %s", r)
+
+    expect_true(all(names(r) == c("contables", "pmarginals")))
+
+    ct <- r$contables
+    expect_true(all(dim(ct) == c(3, 4)))
+
+    expect_true(all(ct[1, ] == c(0, 1, 1, 1)))
+    expect_true(all(ct[2, ] == c(0, 1, 1, 1)))
+    expect_true(all(ct[3, ] == c(1, 0, 0, 2)))
+
+    cm <- r$pmarginals
+    flog.debug("pmarginals: %s, %s", cm[1], cm[2])
+
+    expect_true(all(cm == c(1, 2)))
 
 })
 
