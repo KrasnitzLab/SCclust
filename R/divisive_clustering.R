@@ -107,3 +107,10 @@ contingencies<-function(incidence, partition){
     return(list(contables=contables, pmarginals=pmarginals))
 }
 
+misum <- function(contingencies) {
+    contribs<-(allcounts$contables!=0)
+    result <- sum(allcounts$contables[contribs]*log(allcounts$contables[contribs]))-
+        nrow(allcounts$contables)*sum(allcounts$pmarginals[allcounts$pmarginals!=0]*
+        log(allcounts$pmarginals[allcounts$pmarginals!=0]))
+    return(result)
+}
