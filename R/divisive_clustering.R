@@ -22,8 +22,7 @@ build_incidence_table <- function(m) {
     flog.warn("elements of incidence will be coerced to raw")
     incidence <- list(
             apply(m, 2, squeeze_vector),
-            apply(m, 1, squeeze_vector),
-            dim(m))
+            apply(m, 1, squeeze_vector))
     
     if(is.null(dim(incidence[[1]]))) {
         dim(incidence[[1]]) <- c(1, length(incidence[[1]]))
@@ -45,6 +44,13 @@ load_incidence_table <- function(filename) {
 }
 
 
+#' incidence[[1]] is the original (F,T)-valued incidence matrix, packed column by
+#' column into raws. incidence[[2]] is the same matrix, packed row by row (or the 
+#' transposed matrix, packed column by column) into raws. Re-create
+#' incidence[[3-from]] from incidence[[from]]. This is useful if, e.g., all-0
+#' and/or all-1 columns are dropped from incidence[[from]]. It is simpler to
+#' restore consistency by re-creating the [[3-from]] from the [[from]] 
+#' than by modifying the rows in the [[3-from]].
 replicate_incidence <- function(incidence, from) {
     assertthat::assert_that(from == 1 | from == 2)
     if (from == 1) 
@@ -58,18 +64,26 @@ replicate_incidence <- function(incidence, from) {
 	inblocks  <- ((1 : ncol(incidence[[to]])) - 1) %/% 8 + 1
 	whichbits <- ((1 : ncol(incidence[[to]])) - 1) %% 8 + 1
 
-    # func <- function(v) {
-    #     return( squeeze_vector(rawShift(incidence[[from]][v[1],], 1 - v[2]) & rawone) )
-    # }
-
 	incidence[[to]] <- apply(
         cbind(inblocks, whichbits), 1, 
         function(v) squeeze_vector(rawShift(incidence[[from]][v[1],], 1 - v[2]) & rawone)
     )
 
+    if(is.null(dim(incidence[[1]]))) {
+        dim(incidence[[1]]) <- c(1, length(incidence[[1]]))
+    }
+    if(is.null(dim(incidence[[2]]))) {
+        dim(incidence[[2]]) <- c(1, length(incidence[[2]]))
+    }
+
     return(incidence)
 }
 
+
+#' This function removes uninformative all-0 and all-1 columns or rows from the
+#' incidence table. We do the removal in incidence[[1]] or incidence[[2]], 
+#' depending on whether columns or rows are removed. Then we call 
+#' replicateIncidence to restore consistency.
 consolidate_incidence <- function(incidence, from) {
     assertthat::assert_that(from == 1 | from == 2)
     if (from == 1) 
@@ -84,7 +98,7 @@ consolidate_incidence <- function(incidence, from) {
 
 	incidence[[from]]<-incidence[[from]][ ,
         (colSums(incidence[[from]]==allup)!=nrow(incidence[[from]]))&
-		(colSums(incidence[[from]]==alldown)!=nrow(incidence[[from]])),drop=F]
+		(colSums(incidence[[from]]==alldown)!=nrow(incidence[[from]])), drop=F]
 
 	return(replicate_incidence(incidence, from))
 }
@@ -128,42 +142,6 @@ misum <- function(contingencies) {
     result <- sum(contingencies$contables[contribs]*log(contingencies$contables[contribs]))-
         nrow(contingencies$contables)*sum(contingencies$pmarginals[contingencies$pmarginals!=0]*
         log(contingencies$pmarginals[contingencies$pmarginals!=0]))
-    return(result)
-}
-
-
-#' recompute mutual information with the column "updateme" of the incidence 
-#' matrix moved from its current to the other part.
-#' We use the incidence table packed as bits into raws row by row,
-#' i.e., incidence[[2]], for this purpose.
-miupdate<-function(updateme, incidence, contingencies, partition) {
-
-	inblocks <- (updateme - 1) %/% 8 + 1
-	whichbits <- (updateme - 1) %% 8 + 1
-
-    rawone<-as.raw(T)
-
-	myp <- as.logical(rawone & rawShift(partition[inblocks], 1 - whichbits))
-	din <- 1 - 2 * myp
-    flog.debug("myp=%s, din=%s", myp, din)
-	newpmarginals <- contingencies$pmarginals + c(din,-din)
-    flog.debug("newpmarginals=%s, %s", newpmarginals[1], newpmarginals[2])
-
-	mybits <- as.logical(rawone & rawShift(incidence[[2]][inblocks,], 1 - whichbits))
-	dp <- (!myp) - myp
-	dcont <- mybits * dp
-    flog.debug("dcont=%s", dcont)
-
-	newct <<- contingencies$contables
-	newct[,1] <<- newct[,1] + dcont
-	newct[,2] <<- newct[,2] - dcont
-	dcont<-(!mybits)*dp
-	newct[,3] <<- newct[,3] + dcont
-	newct[,4] <<- newct[,4] - dcont
-	contribs<-(newct!=0)
-	result <- sum(newct[contribs]*log(newct[contribs]))-
-		nrow(newct)*sum(newpmarginals[newpmarginals!=0]*
-		log(newpmarginals[newpmarginals!=0]))
     return(result)
 }
 
@@ -215,6 +193,39 @@ default_swappars <- list(
 # )
 
 
+
+#' recompute mutual information with the column "updateme" of the incidence 
+#' matrix moved from its current to the other part.
+#' We use the incidence table packed as bits into raws row by row,
+#' i.e., incidence[[2]], for this purpose.
+alist.miupdate<-alist(updateme=,
+{
+	inblocks<-(updateme-1)%/%8+1
+	whichbits<-(updateme-1)%%8+1
+	myp<-as.logical(rawone&rawShift(partition[inblocks],1-whichbits))
+	din<-1-2*myp
+	newpmarginals<<-allcounts$pmarginals+c(din,-din)
+	mybits<-as.logical(rawone&rawShift(incidence[[2]][inblocks,],1-whichbits))
+
+	newct<<-allcounts$contables
+
+	dp<-(!myp)-myp
+	dcont<-mybits*dp
+	newct[,1]<<-newct[,1]+dcont
+	newct[,2]<<-newct[,2]-dcont
+
+	dcont<-(!mybits)*dp
+	newct[,3]<<-newct[,3]+dcont
+	newct[,4]<<-newct[,4]-dcont
+	
+	contribs<-(newct!=0)
+	sum(newct[contribs]*log(newct[contribs]))-
+		nrow(newct)*sum(newpmarginals[newpmarginals!=0]*
+		log(newpmarginals[newpmarginals!=0]))
+}
+)
+
+
 #' for a given incidence matrix (in the calling environment) find a column
 #' partition maximizing the objective function, defined as the sum of mutual 
 #' information MI between the partition and each row, summed over all rows
@@ -223,51 +234,21 @@ mimax <- function(incidence, saspars=default_saspars) {
 	
 	partition <- squeeze_vector(
         sample(as.raw(c(T,F)), size=ncol(incidence[[1]]), replace=T))
-	contingencies <- contingencies(incidence, partition)
-	bestmi <- misum(contingencies)
+	allcounts <- contingencies(incidence, partition)
+	bestmi <- misum(allcounts)
 	bestpartition <- partition
 
-    miupdate <- function(updateme) {
-
-        inblocks <- (updateme - 1) %/% 8 + 1
-        whichbits <- (updateme - 1) %% 8 + 1
-
-
-        myp <- as.logical(
-            rawone & rawShift(partition[inblocks], 1 - whichbits))
-        din <- 1 - 2 * myp
-        pmarginals <- contingencies$pmarginals
-
-        newpmarginals <- contingencies$pmarginals + c(din, -din)
-        mybits <- as.logical(
-            rawone & rawShift(incidence[[2]][inblocks,], 1 - whichbits))
-        dp <- (!myp) - myp
-        dcont <- mybits * dp
-
-        newct <<- contingencies$contables
-        newct[,1] <<- newct[,1] + dcont
-        newct[,2] <<- newct[,2] - dcont
-        dcont<-(!mybits)*dp
-        newct[,3] <<- newct[,3] + dcont
-        newct[,4] <<- newct[,4] - dcont
-        contribs <- (newct!=0)
-        assertthat::assert_that(all(newct[contribs] != 0))
-
-        result <- sum(newct[contribs]*log(newct[contribs]))-
-            nrow(newct)*sum(newpmarginals[newpmarginals>0]*
-            log(newpmarginals[newpmarginals>0]))
-
-        return(result)
-    }
+	miupdate<-as.function(alist.miupdate)
 
 	for(newstart in 1 : saspars$restarts){
 
 		partition <- squeeze_vector(
-            sample(as.raw(c(T,F)),size=ncol(incidence[[1]]),replace=T))
-	    contingencies <- contingencies(incidence, partition)
-		minow <- misum(contingencies)
-		newpmarginals <- contingencies$pmarginals
-		newct <- contingencies$contables
+            sample(as.raw(c(T,F)), size=ncol(incidence[[1]]), replace=T))
+
+	    allcounts <- contingencies(incidence, partition)
+		minow <- misum(allcounts)
+		newpmarginals <- allcounts$pmarginals
+		newct <- allcounts$contables
 
 		deltami <- sapply(1:ncol(incidence[[1]]), miupdate) - minow
 		beta <- log(saspars$acceptance)/mean(-abs(deltami))/saspars$cooler
@@ -278,13 +259,13 @@ mimax <- function(incidence, saspars=default_saspars) {
 			for(sweeps in 1 : saspars$sweepspercycle){
 				for(updateme in 1 : ncol(incidence[[1]])){
 					newmi <- miupdate(updateme)
-    				if((exp(beta*(newmi-minow)))>runif(1)){
-						contingencies$contables <- newct
-						contingencies$pmarginals <- newpmarginals
+    				if((exp(beta*(newmi-minow))) > runif(1)){
+						allcounts$contables <- newct
+						allcounts$pmarginals <- newpmarginals
 						inblocks <- (updateme-1)%/%8+1
 						whichbits <- (updateme-1)%%8+1
 						partition[inblocks]<-
-							xor(partition[inblocks],rawShift(rawone,whichbits-1))
+							xor(partition[inblocks], rawShift(rawone,whichbits-1))
 						minow <- newmi
 						if(minow > bestmi){
 							bestmi <- minow
@@ -298,16 +279,83 @@ mimax <- function(incidence, saspars=default_saspars) {
 		}
 	}
 	partition <- bestpartition
-	contingencies <- contingencies(incidence, partition)
+	allcounts <- contingencies(incidence, partition)
 	result <- list(
         partition=partition,
-        contables=contingencies$contables,
-		pmarginals=contingencies$pmarginals,
+        contables=allcounts$contables,
+		pmarginals=allcounts$pmarginals,
         beta=beta,
         cycles=cycles,
         mi=bestmi)
     return(result)
 }
+
+
+#' incidence[[1]] is the original (F,T)-valued incidence matrix, packed column by
+#' column into raws. incidence[[2]] is the same matrix, packed row by row (or the 
+#' transposed matrix, packed column by column) into raws. The following, if 
+#' mymargin = 1, encodes choosing a random pair of columns in the original matrix 
+#' and performing a maximal-possible raw- and column-sum preserving swap of Ts and
+#' Fs between these two columns. The columns and rows are interchanged if 
+#' mymargin = 2. The argument niter is the total number of swaps to be performed.
+#' The swaps are applied to the incidence matrix in the calling environment.
+mpshuffle<- function(incidence, niter, choosemargin=default_swappars$choosemargin) {
+	for(iter in 1:niter){
+		rawone <- as.raw(1)
+		mymargin <- 1 + (runif(1) > choosemargin)
+        # flog.debug("mymargin=%s", mymargin)
+        assertthat::assert_that(mymargin == 1 | mymargin == 2)
+
+		weswap <- sample(ncol(incidence[[3-mymargin]]), size=2)
+        # flog.debug("weswap=(%s, %s)", weswap[1], weswap[2])
+
+		inblocks <- (weswap - 1) %/% 8 + 1
+		whichbits <- (weswap - 1) %% 8 + 1
+
+        # flog.debug(
+        #     "inblocks=%s; whichbits=%s",
+        #     paste(inblocks, collapse=","), paste(whichbits, collapse=","))
+    
+		oneup <- rawone&rawShift(incidence[[mymargin]][inblocks[1],],1-whichbits[1])
+		twoup <- rawone&rawShift(incidence[[mymargin]][inblocks[2],],1-whichbits[2])
+        # flog.debug(
+        #     "oneup=%s; twoup=%s",
+        #     paste(oneup, collapse=","), paste(twoup, collapse=","))
+
+		twonotone <- which((twoup&!oneup)==rawone)
+		onenottwo <- which((oneup&!twoup)==rawone)
+        # flog.debug(
+        #     "twonotone=%s; onenottwo=%s (%s)",
+        #     paste(twonotone, collapse=","), 
+        #     paste(onenottwo, collapse=","), 
+        #     length(onenottwo))
+
+        if(length(onenottwo) == 0 | length(twonotone) == 0)
+            break
+
+		nswap <- min(length(onenottwo), length(twonotone))
+		swapus <- sort(
+            c(onenottwo[sample(length(onenottwo),size=nswap)],
+			twonotone[sample(length(twonotone),size=nswap)]))
+
+		incidence[[mymargin]][inblocks[1],swapus]<-
+			xor(incidence[[mymargin]][inblocks[1],swapus], 
+			rawShift(rawone,whichbits[1]-1))
+
+		incidence[[mymargin]][inblocks[2],swapus]<-
+			xor(incidence[[mymargin]][inblocks[2], swapus],
+			rawShift(rawone,whichbits[2] - 1))
+		swapusrows <- (swapus - 1) %/% 8 + 1
+		swapusbits <- (swapus - 1) %% 8 + 1
+		swapmask <- as.vector(tapply(swapusbits, swapusrows,
+			function(v)Reduce("|", Map(rawShift, rawone,v-1))))
+		urows<-unique(swapusrows)
+		incidence[[3 - mymargin]][urows, weswap]<-
+			xor(incidence[[3 - mymargin]][urows, weswap], swapmask)
+	}
+    return(incidence)
+}
+
 
 
 
@@ -358,16 +406,20 @@ minode <- function(incidence, pathcode) {
 #' table, maximize mutual information (MI) over all possible partitions using 
 #' simulated annealing (SA). SA parameters are given by saspars and randomization
 #' parameters by swappars. Return a vector of best MI values.
-randomimax<-function(incidence, saspars=default_saspars, swappars=swappars){
-	mimax<-as.function(alist.mimax)
-	mpshuffle<-as.function(alist.mpshuffle)
+randomimax<-function(incidence, saspars=default_saspars, swappars=default_swappars){
 	bestmirand<-rep(NA,swappars$configs)
 	choosemargin<-swappars$choosemargin
+
 	for(myconfig in 1:swappars$configs){
-		mpshuffle(swappars$burnin*(myconfig==1)+swappars$permeas*(myconfig>1))
-		bestmirand[myconfig]<-mimax()$mi
+        niter <- swappars$burnin*(myconfig==1)+swappars$permeas*(myconfig>1)
+
+		incidence <- mpshuffle(
+            incidence,
+            niter,
+            choosemargin=choosemargin)
+		bestmirand[myconfig]<-mimax(incidence, saspars=saspars)$mi
 	}
-	bestmirand
+	return(bestmirand)
 }
 
 #' perform divisive hierarchical clustering (recursive binary partitioning)
