@@ -381,31 +381,34 @@ test_that("we can use mpshuffle", {
 })
 
 
-# test_that("we can use randomimax 13x9", {
+test_that("we can use randomimax 13x9", {
 
-# m <- matrix(c(
-#     1, 1, 1, 1, 1, 0, 0, 0, 0, 
-#     1, 1, 1, 1, 1, 0, 0, 0, 0,
-#     1, 1, 1, 1, 1, 0, 0, 0, 0,
-#     1, 1, 1, 1, 1, 0, 0, 0, 0,
-#     1, 1, 1, 1, 1, 0, 0, 0, 0,
-#     1, 1, 1, 1, 1, 0, 0, 0, 0,
-#     0, 0, 0, 0, 0, 1, 1, 1, 1,
-#     0, 0, 0, 0, 0, 1, 1, 1, 1,
-#     0, 0, 0, 0, 0, 1, 1, 1, 1,
-#     0, 0, 0, 0, 0, 1, 1, 1, 1,
-#     0, 0, 0, 0, 0, 1, 1, 1, 1,
-#     0, 0, 0, 0, 0, 1, 1, 1, 1,
-#     0, 0, 0, 0, 0, 1, 1, 1, 1),
-#     ncol=9, byrow=T)
+    set.seed(1)
+    m <- matrix(c(
+        1, 1, 1, 1, 1, 0, 0, 0, 0, 
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1),
+        ncol=9, byrow=T)
 
-# i <- build_incidence_table(m)
+    i <- build_incidence_table(m)
+    swappars <- list(
+        configs=5,
+        burnin=5,
+        permeas=50,
+        choosemargin=0.5)
+    r <- randomimax(i, swappars=swappars)
+    e <- c(-5.004,  -5.004, -60.904, -61.262, -63.241)
 
-# swappars <- list(
-#     configs=50,
-#     burnin=10,
-#     permeas=500,
-#     choosemargin=0.5)
-# r <- randomimax(i, swappars=swappars)
+    expect_true(all(abs(r - e) <= 10e-3))
 
-# })
+})

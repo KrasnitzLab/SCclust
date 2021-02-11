@@ -362,17 +362,16 @@ mpshuffle<- function(incidence, niter, choosemargin=default_swappars$choosemargi
 #' simulated annealing (SA). SA parameters are given by saspars and randomization
 #' parameters by swappars. Return a vector of best MI values.
 randomimax<-function(incidence, saspars=default_saspars, swappars=default_swappars){
-	bestmirand<-rep(NA,swappars$configs)
-	choosemargin<-swappars$choosemargin
+	bestmirand<-rep(NA, swappars$configs)
 
-	for(myconfig in 1:swappars$configs){
-        niter <- swappars$burnin*(myconfig==1)+swappars$permeas*(myconfig>1)
+	for(config in 1:swappars$configs){
+        niter <- swappars$burnin * (config==1) + swappars$permeas * (config>1)
 
 		incidence <- mpshuffle(
             incidence,
             niter,
-            choosemargin=choosemargin)
-		bestmirand[myconfig]<-mimax(incidence, saspars=saspars)$mi
+            choosemargin=swappars$choosemargin)
+		bestmirand[config] <- mimax(incidence, saspars=saspars)$mi
 	}
 	return(bestmirand)
 }
