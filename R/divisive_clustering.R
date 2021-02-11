@@ -421,8 +421,8 @@ minode <- function(
 	incidence <- replicate_incidence(incidence, from=1)
 	incidence <- consolidate_incidence(incidence, from=2)
 
-	bestsplit<-mimax(incidence, saspars=saspars)
-	nullmi<-randomimax(incidence, saspars=saspars, swappars=swappars)
+	bestsplit <- mimax(incidence, saspars=saspars)
+	nullmi <- randomimax(incidence, saspars=saspars, swappars=swappars)
 
 	empv <- (sum(nullmi > bestsplit$mi) + 1) / (length(nullmi) + 2)
 
