@@ -334,19 +334,32 @@ test_that("we can use mimax 13x9", {
     }
 })
 
-# test_that("we can use mpshuffle", {
+test_that("we can use mpshuffle", {
 
-#     m <- matrix(c(
-#         1, 1, 0, 
-#         1, 1, 0,
-#         0, 0, 1),
-#         nrow=3, ncol=3, byrow=T)
+    set.seed(1)
 
-#     i <- build_incidence_table(m)
+    m <- matrix(c(
+        1, 1, 0, 
+        1, 1, 0,
+        0, 0, 1),
+        nrow=3, ncol=3, byrow=T)
 
-#     newi <- mpshuffle(i, 2)
+    i <- build_incidence_table(m)
 
-# })
+    expect_true( all(as.raw(c(0x3, 0x3, 0x4)) == i[[1]]) )
+    expect_true( all(as.raw(c(0x3, 0x3, 0x4)) == i[[2]]) )
+
+    r <- mpshuffle(i, 1)
+
+    expect_true( all(as.raw(c(0x3, 0x5, 0x2)) == r[[1]]) )
+    expect_true( all(as.raw(c(0x3, 0x5, 0x2)) == r[[2]]) )
+
+    rr <- mpshuffle(r, 1)
+
+    expect_true( all(as.raw(c(0x3, 0x6, 0x1)) == rr[[1]]) )
+    expect_true( all(as.raw(c(0x5, 0x3, 0x2)) == rr[[2]]) )
+
+})
 
 
 # test_that("we can use randomimax 13x9", {
