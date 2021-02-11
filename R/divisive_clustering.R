@@ -357,6 +357,25 @@ mpshuffle<- function(incidence, niter, choosemargin=default_swappars$choosemargi
 }
 
 
+#' repeatedly randomize the incidence table (incidence) and, for each randomized
+#' table, maximize mutual information (MI) over all possible partitions using 
+#' simulated annealing (SA). SA parameters are given by saspars and randomization
+#' parameters by swappars. Return a vector of best MI values.
+randomimax<-function(incidence, saspars=default_saspars, swappars=default_swappars){
+	bestmirand<-rep(NA,swappars$configs)
+	choosemargin<-swappars$choosemargin
+
+	for(myconfig in 1:swappars$configs){
+        niter <- swappars$burnin*(myconfig==1)+swappars$permeas*(myconfig>1)
+
+		incidence <- mpshuffle(
+            incidence,
+            niter,
+            choosemargin=choosemargin)
+		bestmirand[myconfig]<-mimax(incidence, saspars=saspars)$mi
+	}
+	return(bestmirand)
+}
 
 
 
@@ -402,25 +421,6 @@ minode <- function(incidence, pathcode) {
 }
 
 
-#' repeatedly randomize the incidence table (incidence) and, for each randomized
-#' table, maximize mutual information (MI) over all possible partitions using 
-#' simulated annealing (SA). SA parameters are given by saspars and randomization
-#' parameters by swappars. Return a vector of best MI values.
-randomimax<-function(incidence, saspars=default_saspars, swappars=default_swappars){
-	bestmirand<-rep(NA,swappars$configs)
-	choosemargin<-swappars$choosemargin
-
-	for(myconfig in 1:swappars$configs){
-        niter <- swappars$burnin*(myconfig==1)+swappars$permeas*(myconfig>1)
-
-		incidence <- mpshuffle(
-            incidence,
-            niter,
-            choosemargin=choosemargin)
-		bestmirand[myconfig]<-mimax(incidence, saspars=saspars)$mi
-	}
-	return(bestmirand)
-}
 
 #' perform divisive hierarchical clustering (recursive binary partitioning)
 #' of data represented by a binary incidence matrix incidence. The leaves of

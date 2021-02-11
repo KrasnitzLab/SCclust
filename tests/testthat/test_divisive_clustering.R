@@ -285,6 +285,7 @@ test_that("we can use misum", {
 
 
 test_that("we can use mimax 5x5", {
+    set.seed(1)
 
     m <- matrix(c(
         1, 1, 1, 0, 0, 
@@ -296,15 +297,28 @@ test_that("we can use mimax 5x5", {
 
     i <- build_incidence_table(m)
 
-    for(k in 1:15) {
-        r <- mimax(i)
-        showBits(r$partition)
-        flog.info("partition: %s", showBits(r$partition))
-    }
+    r <- mimax(i)
+    showBits(r$partition)
+    flog.info("partition: %s", showBits(r$partition))
+    expect_true( 
+        all(as.raw(c(0x07)) == r$partition) )
+
+    r <- mimax(i)
+    showBits(r$partition)
+    flog.info("partition: %s", showBits(r$partition))
+    expect_true( 
+        all(as.raw(c(0x07)) == r$partition) )
+
+    r <- mimax(i)
+    showBits(r$partition)
+    flog.info("partition: %s", showBits(r$partition))
+    expect_true( 
+        all(as.raw(c(0x18)) == r$partition) )
 })
 
 
 test_that("we can use mimax 13x9", {
+    set.seed(1)
 
     m <- matrix(c(
         1, 1, 1, 1, 1, 0, 0, 0, 0, 
@@ -324,14 +338,19 @@ test_that("we can use mimax 13x9", {
 
     i <- build_incidence_table(m)
 
-    for(k in 1:15) {
-        r <- mimax(i)
-        showBits(r$partition)
-        flog.info("mi=%s; partition: %s", r$mi, showBits(r$partition))
-        expect_true( 
-            all(as.raw(c(0xe0, 0x01)) == r$partition) || 
-            all(as.raw(c(0x1f, 0x00)) == r$partition) )
-    }
+    r <- mimax(i)
+    showBits(r$partition)
+    flog.info("mi=%s; partition: %s", r$mi, showBits(r$partition))
+    expect_true( 
+        all(as.raw(c(0x1f, 0x00)) == r$partition) )
+
+    r <- mimax(i)
+    showBits(r$partition)
+    flog.info("mi=%s; partition: %s", r$mi, showBits(r$partition))
+    expect_true( 
+        all(as.raw(c(0xe0, 0x01)) == r$partition) )
+
+
 })
 
 test_that("we can use mpshuffle", {
