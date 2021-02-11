@@ -377,6 +377,26 @@ randomimax<-function(incidence, saspars=default_saspars, swappars=default_swappa
 }
 
 
+inititial_pathcode <- function(incidence, maxgens=7) {
+	if(maxgens > 7){
+		flog.warn("initial_pathcode maxgens (%s) > 7; reseting to 7", maxgens)
+		maxgens <- 7
+	}
+
+	rawone <- as.raw(T)	#least significant bit set
+	rawzero <- as.raw(F)	#no bits set
+	rawff <- !rawzero	#all bits set
+	raweighty <- rawShift(rawone,7)	#most significant bit set
+	firstpath <- rawzero
+
+	for(pushme in 0:(7-maxgens))
+		firstpath <- rawShift(firstpath,1) | rawone
+
+	pathcode <- rep(firstpath, ncol(incidence[[1]]))
+
+	return(pathcode)
+}
+
 
 #' Recursively partition items represented as columns of a binary incidence 
 #' table (IT). Thus, each row of the table represents a feature. Find a partition
@@ -393,30 +413,56 @@ randomimax<-function(incidence, saspars=default_saspars, swappars=default_swappa
 #' 	the path from the tree root to the current node.
 #' value: a raw vector, encoding, for each leaf, the path from the root to the 
 #' leaf. In addition, height and upath are updated in the calling environment.
-minode <- function(incidence, pathcode) {
-	replicateIncidence<-as.function(alist.replicateIncidence)
-	replicateIncidence(from=1)
-	consolidateIncidence<-as.function(alist.consolidateIncidence)
-	consolidateIncidence(from=2)
-	mimax<-as.function(alist.mimax)
-	bestsplit<-mimax()
-	nullmi<-randomimax(incidence,saspars,swappars)
-	empv<-(sum(nullmi>bestsplit$mi)+1)/(length(nullmi)+2)
-	if(empv<maxempv){
-		upath<-c(upath,pathcode[1])
-		height<-c(height,-log(empv))
-		longpartition<-rawToBits(bestsplit$partition)[1:ncol(incidence[[1]])]
-		pathcode<-longpartition&rawShift(pathcode,1)
-		raweighty<-rawShift(rawone,7)
-		if((pathcode[1]&raweighty)==raweighty)break
-		subincidence<-list(incidence[[1]][,longpartition==rawone],incidence[[2]])
-		pathcode[longpartition==rawone]<-
-			minode(subincidence,pathcode[longpartition==rawone])
+minode <- function(
+	incidence, pathcode, 
+	maxgens=7, maxempv=0.05,
+	saspars=default_saspars, swappars=default_swappars) {
+
+	incidence <- replicate_incidence(incidence, from=1)
+	incidence <- consolidate_incidence(incidence, from=2)
+
+	bestsplit<-mimax(incidence, saspars=saspars)
+	nullmi<-randomimax(incidence, saspars=saspars, swappars=swappars)
+
+	empv <- (sum(nullmi > bestsplit$mi) + 1) / (length(nullmi) + 2)
+
+	upath <- NULL
+	height <- NULL
+
+	flog.debug("empv=%s; maxempv=%s", empv, maxempv)
+
+	if(empv < maxempv){
+		upath <- c(upath,pathcode[1])
+		height <- c(height,-log(empv))
+		longpartition <- rawToBits(bestsplit$partition)[1: ncol(incidence[[1]])]
+		pathcode <- longpartition & rawShift(pathcode,1)
+		raweighty <- rawShift(rawone, 7)
+
+		if((pathcode[1] & raweighty) == raweighty)
+			break
+
+		subincidence <- list(
+			incidence[[1]][,longpartition==rawone], incidence[[2]])
+		pathcode[longpartition==rawone] <-
+			minode(
+				subincidence, pathcode[longpartition==rawone],
+				saspars=saspars, swappars=swappars)
+
 		subincidence<-list(incidence[[1]][,longpartition==rawzero],incidence[[2]])
-		pathcode[longpartition==rawzero]<-
-			minode(subincidence,pathcode[longpartition==rawzero])
+		pathcode[longpartition==rawzero] <-
+			minode(
+				subincidence, pathcode[longpartition==rawzero], 
+				saspars=saspars, swappars=swappars)
 	}
-	return(pathcode)
+	result<-list(
+		incidence=incidence,
+		pathcode=pathcode,
+		upath=upath,
+		height=height,
+		maxgens=maxgens,
+		call=match.call())
+
+	return(result)
 }
 
 
@@ -460,7 +506,7 @@ mimain<-function(incidence, maxgens=7, maxempv=0.05, saspars=saspars, swappars=s
 	minode<-as.function(alist.minode)
 	pathcode<-minode(incidence,pathcode)
 	result<-list(incidence=incidence,pathcode=pathcode,upath=upath,height=height,
-		maxgens=maxgens,leafnames=leafnames,call=match.call())
+		maxgens=maxgens,call=match.call())
 	class(result)<-"mimosa"
 	result
 }
