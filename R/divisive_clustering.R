@@ -377,7 +377,7 @@ randomimax<-function(incidence, saspars=default_saspars, swappars=default_swappa
 }
 
 
-inititial_pathcode <- function(incidence, maxgens=7) {
+initial_pathcode <- function(incidence, maxgens=7) {
 	if(maxgens > 7){
 		flog.warn("initial_pathcode maxgens (%s) > 7; reseting to 7", maxgens)
 		maxgens <- 7
@@ -454,13 +454,14 @@ minode <- function(
 				subincidence, pathcode[longpartition==rawzero], 
 				saspars=saspars, swappars=swappars)
 	}
-	result<-list(
+	result <- list(
 		incidence=incidence,
 		pathcode=pathcode,
 		upath=upath,
 		height=height,
 		maxgens=maxgens,
 		call=match.call())
+	class(result)<-"mimosa"
 
 	return(result)
 }
@@ -486,27 +487,22 @@ minode <- function(
 #' split); maxgens, the maxgens argument above; leafnames, the column names
 #' of the input incidence matrix; call, the function call giving this value.
 #'  		maxgens=maxgens,leafnames=leafnames,call=match.call())
-mimain<-function(incidence, maxgens=7, maxempv=0.05, saspars=saspars, swappars=swappars){
-    assertthat::assert_that(class(incidence) == "incidence")
+mimain<-function(incidence, 
+	maxgens=7, maxempv=0.05,
+	saspars=default_saspars, swappars=default_swappars){
+    
+	assertthat::assert_that(class(incidence) == "incidencetable")
 
 	if(maxgens>7){
 		warning("Input maxgens > 7, reset to 7")
 		maxgens<-7
 	}
 
-	rawone<-as.raw(T)	#least significant bit set
-	rawzero<-as.raw(F)	#no bits set
-	rawff<-!rawzero	#all bits set
-	raweighty<-rawShift(rawone,7)	#most significant bit set
-	firstpath<-rawzero
-	for(pushme in 0:(7-maxgens))firstpath<-rawShift(firstpath,1)|rawone
-	pathcode<-rep(firstpath,ncol(incidence[[1]]))
-	upath<-NULL
-	height<-NULL
-	minode<-as.function(alist.minode)
-	pathcode<-minode(incidence,pathcode)
-	result<-list(incidence=incidence,pathcode=pathcode,upath=upath,height=height,
-		maxgens=maxgens,call=match.call())
-	class(result)<-"mimosa"
-	result
+	pathcode <- initial_pathcode(incidence, maxgens=maxgens)
+
+	result <- minode(
+		incidence, pathcode,
+		maxgens=maxgens, maxempv=maxempv,
+		saspars=saspars, swappars=swappars)
+	return(result)
 }

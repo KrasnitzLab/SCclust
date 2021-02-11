@@ -440,7 +440,71 @@ test_swappars <- list(
     permeas=50,
     choosemargin=0.5)
 
-p <- inititial_pathcode(i, maxgens=7)
+p <- initial_pathcode(i, maxgens=7)
 r <- minode(i, p, swappars=test_swappars)
+
+})
+
+
+test_that("we can use minode 13x9 again", {
+
+set.seed(1)
+m <- matrix(c(
+    1, 1, 1, 1, 1, 0, 0, 0, 0, 
+    1, 1, 1, 1, 1, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 0, 0, 0, 0,
+    1, 1, 1, 0, 0, 0, 0, 0, 0,
+    1, 1, 1, 0, 0, 0, 0, 0, 0,
+    1, 1, 1, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 1, 1,
+    0, 0, 0, 0, 0, 0, 0, 1, 1,
+    0, 0, 0, 0, 0, 0, 0, 1, 1,
+    0, 0, 0, 0, 0, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 1, 1, 1, 1),
+    ncol=9, byrow=T)
+
+i <- build_incidence_table(m)
+test_swappars <- list(
+    configs=5,
+    burnin=5,
+    permeas=50,
+    choosemargin=0.5)
+
+p <- initial_pathcode(i, maxgens=7)
+r <- minode(i, p, swappars=test_swappars)
+
+})
+
+
+
+test_that("we can use mimain 13x9", {
+
+set.seed(1)
+m <- matrix(c(
+    1, 1, 1, 1, 1, 0, 0, 0, 0, 
+    1, 1, 1, 1, 1, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 1, 1, 1, 1),
+    ncol=9, byrow=T)
+
+i <- build_incidence_table(m)
+test_swappars <- list(
+    configs=5,
+    burnin=5,
+    permeas=50,
+    choosemargin=0.5)
+
+r <- mimain(i, swappars=test_swappars)
 
 })
