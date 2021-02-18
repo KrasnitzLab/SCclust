@@ -1,7 +1,7 @@
-
-#' Pack the elements of a (0,1)-valued integer of (F,T)-valued logical vector 
-#' yesno as bits into a vector of type into. If the length of yesno is not a 
-#' multiple of the number of bits of type into, it is padded by the raw 00 to the 
+#' Pack the elements of a (0,1)-valued integer, numeric, raw or (F,T)-valued 
+#'logical vector 
+#' yesno as bits into a vector of type raw. If the length of yesno is not a 
+#' multiple of 8 bits of type into, it is padded by the raw 00 to the 
 #' nearest such multiple.
 squeeze_vector <- function(v){
     if(!is.raw(v))
@@ -17,7 +17,7 @@ showBits <- function(r) {
 
 
 build_incidence_table <- function(m) {
-    assertthat::assert_that(class(m) == "matrix")
+    assertthat::assert_that(data.class(m) == "matrix")
     
     flog.warn("elements of incidence will be coerced to raw")
     incidence <- list(
@@ -75,6 +75,10 @@ replicate_incidence <- function(incidence, from) {
     if(is.null(dim(incidence[[2]]))) {
         dim(incidence[[2]]) <- c(1, length(incidence[[2]]))
     }
+  	assertthat::assert_that(all(t(apply(incidence[[2]],2,
+			rawToBits))[1:ncol(incicence[[2]]),1:ncol(incidence[[1]])]==
+			apply(incidence[[1]],2,rawToBits)[1:ncol(incicence[[2]]),
+			1:ncol(incidence[[1]])]))
 
     return(incidence)
 }
@@ -134,14 +138,14 @@ contingencies<-function(incidence, partition){
     return(list(contables=contables, pmarginals=pmarginals))
 }
 
-#' conti-contingencies is a list of contingencies and marginals, as defined for the value of
+#' conti is a list of contingencies and marginals, as defined for the value of
 #' function contingencies. It contains contingency tables and their marginals.
 #' Compute mutual information in each contingency table and sum over all tables.
-misum <- function(contingencies) {
-    contribs<-(contingencies$contables!=0)
-    result <- sum(contingencies$contables[contribs]*log(contingencies$contables[contribs]))-
-        nrow(contingencies$contables)*sum(contingencies$pmarginals[contingencies$pmarginals!=0]*
-        log(contingencies$pmarginals[contingencies$pmarginals!=0]))
+misum <- function(conti) {
+    contribs<-(conti$contables!=0)
+    result <- sum(conti$contables[contribs]*log(conti$contables[contribs]))-
+        nrow(conti$contables)*sum(conti$pmarginals[conti$pmarginals!=0]*
+        log(conti$pmarginals[conti$pmarginals!=0]))
     return(result)
 }
 
@@ -353,6 +357,10 @@ mpshuffle<- function(incidence, niter, choosemargin=default_swappars$choosemargi
 		incidence[[3 - mymargin]][urows, weswap]<-
 			xor(incidence[[3 - mymargin]][urows, weswap], swapmask)
 	}
+  assertthat::assert_that(all(t(apply(incidence[[2]],2,
+		rawToBits))[1:ncol(incicence[[2]]),1:ncol(incidence[[1]])]==
+		apply(incidence[[1]],2,rawToBits)[1:ncol(incicence[[2]]),
+		1:ncol(incidence[[1]])]))
     return(incidence)
 }
 
