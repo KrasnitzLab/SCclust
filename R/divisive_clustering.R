@@ -43,6 +43,28 @@ load_incidence_table <- function(filename) {
     return(incidence)
 }
 
+incidence_table2matrix <- function(incidence) {
+	cols <- ncol(incidence[[1]])
+	rows <- ncol(incidence[[2]])
+
+	inblocks  <- ((1 : ncol(incidence[[2]])) - 1) %/% 8 + 1
+	whichbits <- ((1 : ncol(incidence[[2]])) - 1) %% 8 + 1
+
+    rawone <- as.raw(T)
+
+	r <- matrix(rep(0, rows * cols), ncol=cols)
+	indexes <- cbind(inblocks, whichbits)
+
+	for(row in 1:rows) {
+		index <- indexes[row, ]
+		r[row, ] <- as.integer(rawShift(incidence[[1]][index[1],], 1 - index[2]) & rawone)
+	}
+	# assertthat::assert_that(ncol(r) == cols)
+	# assertthat::assert_that(nrow(r) == rows)
+
+	return(r)
+}
+
 
 #' incidence[[1]] is the original (F,T)-valued incidence matrix, packed column by
 #' column into raws. incidence[[2]] is the same matrix, packed row by row (or the 
@@ -303,35 +325,22 @@ mpshuffle<- function(incidence, niter, choosemargin=default_swappars$choosemargi
 	for(iter in 1:niter){
 		rawone <- as.raw(1)
 		mymargin <- 1 + (runif(1) > choosemargin)
-        # flog.debug("mymargin=%s", mymargin)
         assertthat::assert_that(mymargin == 1 | mymargin == 2)
 
 		weswap <- sample(ncol(incidence[[3-mymargin]]), size=2)
-        # flog.debug("weswap=(%s, %s)", weswap[1], weswap[2])
 
 		inblocks <- (weswap - 1) %/% 8 + 1
 		whichbits <- (weswap - 1) %% 8 + 1
-
-        # flog.debug(
-        #     "inblocks=%s; whichbits=%s",
-        #     paste(inblocks, collapse=","), paste(whichbits, collapse=","))
     
 		oneup <- rawone&rawShift(incidence[[mymargin]][inblocks[1],],1-whichbits[1])
 		twoup <- rawone&rawShift(incidence[[mymargin]][inblocks[2],],1-whichbits[2])
-        # flog.debug(
-        #     "oneup=%s; twoup=%s",
-        #     paste(oneup, collapse=","), paste(twoup, collapse=","))
 
 		twonotone <- which((twoup&!oneup)==rawone)
 		onenottwo <- which((oneup&!twoup)==rawone)
-        # flog.debug(
-        #     "twonotone=%s; onenottwo=%s (%s)",
-        #     paste(twonotone, collapse=","), 
-        #     paste(onenottwo, collapse=","), 
-        #     length(onenottwo))
 
-        if(length(onenottwo) == 0 | length(twonotone) == 0)
-            break
+        if(length(onenottwo) == 0 | length(twonotone) == 0) {
+            next
+		}
 
 		nswap <- min(length(onenottwo), length(twonotone))
 		swapus <- sort(
