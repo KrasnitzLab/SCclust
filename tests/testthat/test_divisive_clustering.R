@@ -95,6 +95,52 @@ test_that("we can build incidence table 3x3", {
 })
 
 
+test_that("we can build matrix from incidence table 3x3", {
+    m <- matrix(c(
+        0, 0, 1, 
+        0, 1, 0,
+        1, 0, 0),
+        nrow=3, ncol=3, byrow=T)
+
+    i <- build_incidence_table(m)
+
+    r <- incidence_table2matrix(i)
+
+    expect_equal(ncol(r), 3)
+    expect_equal(nrow(r), 3)
+
+    expect_true( all(m == r))
+})
+
+
+test_that("we can build matrix from incidence table 13x9", {
+    m <- matrix(c(
+        1, 1, 1, 1, 1, 0, 0, 0, 0, 
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1),
+        ncol=9, byrow=T)
+
+    i <- build_incidence_table(m)
+
+    r <- incidence_table2matrix(i)
+
+    expect_equal(ncol(r), 9)
+    expect_equal(nrow(r), 13)
+
+    expect_true( all(m == r))
+})
+
+
 test_that("we can build incidence table 3x4", {
     m <- matrix(c(
         0, 0, 0, 1, 
@@ -381,9 +427,39 @@ test_that("we can use mpshuffle", {
 })
 
 
+test_that("we can use mpshuffle 13x9", {
+
+    m <- matrix(c(
+        1, 1, 1, 1, 1, 0, 0, 0, 0, 
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1),
+        ncol=9, byrow=T)
+
+    i <- build_incidence_table(m)
+    set.seed(1)
+    r <- mpshuffle(i, 1)
+
+    expect_true( all(as.raw(
+        c(0x6f, 0x6f, 0x6f, 0x3f, 0x6f, 0x90, 0x90, 0x90, 0x90)) == r[[1]][1,]) )
+    expect_true( all(as.raw(
+        c(0x00, 0x00, 0x00, 0x00, 0x00, 0x1f, 0x1f, 0x1f, 0x1f)) == r[[1]][2,]) )
+
+})
+
+
+
 test_that("we can use randomimax 13x9", {
 
-    set.seed(1)
     m <- matrix(c(
         1, 1, 1, 1, 1, 0, 0, 0, 0, 
         1, 1, 1, 1, 1, 0, 0, 0, 0,
@@ -406,105 +482,150 @@ test_that("we can use randomimax 13x9", {
         burnin=5,
         permeas=50,
         choosemargin=0.5)
+
+    set.seed(1)
     r <- randomimax(i, swappars=swappars)
-    e <- c(-5.004,  -5.004, -60.904, -61.262, -63.241)
+    e <- c(-9.755377, -57.539480, -63.258377, -62.648536, -57.539480)
 
     expect_true(all(abs(r - e) <= 10e-3))
 
 })
 
 
-test_that("we can use minode 13x9", {
-
-set.seed(1)
-m <- matrix(c(
-    1, 1, 1, 1, 1, 0, 0, 0, 0, 
-    1, 1, 1, 1, 1, 0, 0, 0, 0,
-    1, 1, 1, 1, 1, 0, 0, 0, 0,
-    1, 1, 1, 1, 1, 0, 0, 0, 0,
-    1, 1, 1, 1, 1, 0, 0, 0, 0,
-    1, 1, 1, 1, 1, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 1, 1, 1, 1,
-    0, 0, 0, 0, 0, 1, 1, 1, 1,
-    0, 0, 0, 0, 0, 1, 1, 1, 1,
-    0, 0, 0, 0, 0, 1, 1, 1, 1,
-    0, 0, 0, 0, 0, 1, 1, 1, 1,
-    0, 0, 0, 0, 0, 1, 1, 1, 1,
-    0, 0, 0, 0, 0, 1, 1, 1, 1),
-    ncol=9, byrow=T)
-
-i <- build_incidence_table(m)
-test_swappars <- list(
-    configs=5,
-    burnin=5,
-    permeas=50,
-    choosemargin=0.5)
-
-p <- initial_pathcode(i, maxgens=7)
-r <- minode(i, p, swappars=test_swappars)
-
-})
-
-
 test_that("we can use minode 13x9 again", {
 
-set.seed(1)
-m <- matrix(c(
-    1, 1, 1, 1, 1, 0, 0, 0, 0, 
-    1, 1, 1, 1, 1, 0, 0, 0, 0,
-    1, 1, 1, 1, 1, 0, 0, 0, 0,
-    1, 1, 1, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 1, 1,
-    0, 0, 0, 0, 0, 0, 0, 1, 1,
-    0, 0, 0, 0, 0, 0, 0, 1, 1,
-    0, 0, 0, 0, 0, 1, 1, 1, 1,
-    0, 0, 0, 0, 0, 1, 1, 1, 1,
-    0, 0, 0, 0, 0, 1, 1, 1, 1,
-    0, 0, 0, 0, 0, 1, 1, 1, 1),
-    ncol=9, byrow=T)
+    m <- matrix(c(
+        1, 1, 1, 1, 1, 0, 0, 0, 0, 
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1),
+        ncol=9, byrow=T)
 
-i <- build_incidence_table(m)
-test_swappars <- list(
-    configs=5,
-    burnin=5,
-    permeas=50,
-    choosemargin=0.5)
+    i <- build_incidence_table(m)
+    test_swappars <- list(
+        configs=5,
+        burnin=5,
+        permeas=50,
+        choosemargin=0.5)
 
-p <- initial_pathcode(i, maxgens=7)
-r <- minode(i, p, swappars=test_swappars)
+    test_saspars <- list(
+        restarts=10,
+        cooler=1.12,
+        acceptance=0.234,
+        sweepspercycle=10,
+        maxcycles=20,
+        stopatfreezeout=T,
+        epsilon=0.0001)
+
+    p <- initial_pathcode(i, maxgens=7)
+
+    set.seed(1)
+    r <- minode(i, p, maxempv=0.25, saspars=test_saspars, swappars=test_swappars)
+
+    expect_equal(length(r$pathcode), 9)
+
+})
+
+
+
+test_that("we can use minode 26x9", {
+
+    set.seed(1)
+    m <- matrix(c(
+        1, 1, 1, 1, 1, 0, 0, 0, 0, 
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+
+        0, 0, 1, 1, 1, 0, 0, 0, 0, 
+        0, 0, 1, 1, 1, 0, 0, 0, 0,
+        0, 0, 1, 1, 1, 0, 0, 0, 0,
+        0, 0, 1, 1, 1, 0, 0, 0, 0,
+        0, 0, 1, 1, 1, 0, 0, 0, 0,
+        0, 0, 1, 1, 1, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 1, 1
+        
+        ),
+        ncol=9, byrow=T)
+
+    i <- build_incidence_table(m)
+    test_swappars <- list(
+        configs=5,
+        burnin=5,
+        permeas=50,
+        choosemargin=0.5)
+    test_saspars <- list(
+        restarts=10,
+        cooler=1.12,
+        acceptance=0.234,
+        sweepspercycle=10,
+        maxcycles=20,
+        stopatfreezeout=T,
+        epsilon=0.0001)
+
+    p <- initial_pathcode(i, maxgens=7)
+    set.seed(1)
+    r <- minode(i, p, maxempv=0.25, saspars=test_saspars, swappars=test_swappars)
+
+    expect_equal(length(r$pathcode), 9)
 
 })
 
 
+test_that("we can use minode 5x5", {
 
-test_that("we can use mimain 13x9", {
+    m <- matrix(c(
+        1, 1, 1, 0, 0, 
+        1, 1, 1, 0, 0,
+        1, 0, 0, 0, 0,
+        0, 0, 0, 0, 1,
+        0, 0, 0, 1, 1),
+        ncol=5, byrow=T)
 
-set.seed(1)
-m <- matrix(c(
-    1, 1, 1, 1, 1, 0, 0, 0, 0, 
-    1, 1, 1, 1, 1, 0, 0, 0, 0,
-    1, 1, 1, 1, 1, 0, 0, 0, 0,
-    1, 1, 1, 1, 1, 0, 0, 0, 0,
-    1, 1, 1, 1, 1, 0, 0, 0, 0,
-    1, 1, 1, 1, 1, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 1, 1, 1, 1,
-    0, 0, 0, 0, 0, 1, 1, 1, 1,
-    0, 0, 0, 0, 0, 1, 1, 1, 1,
-    0, 0, 0, 0, 0, 1, 1, 1, 1,
-    0, 0, 0, 0, 0, 1, 1, 1, 1,
-    0, 0, 0, 0, 0, 1, 1, 1, 1,
-    0, 0, 0, 0, 0, 1, 1, 1, 1),
-    ncol=9, byrow=T)
+    i <- build_incidence_table(m)
 
-i <- build_incidence_table(m)
-test_swappars <- list(
-    configs=5,
-    burnin=5,
-    permeas=50,
-    choosemargin=0.5)
+    test_swappars <- list(
+        configs=5,
+        burnin=5,
+        permeas=50,
+        choosemargin=0.5)
+    test_saspars <- list(
+        restarts=10,
+        cooler=1.12,
+        acceptance=0.234,
+        sweepspercycle=10,
+        maxcycles=20,
+        stopatfreezeout=T,
+        epsilon=0.0001)
 
-r <- mimain(i, swappars=test_swappars)
+    p <- initial_pathcode(i, maxgens=7)
+    set.seed(1)
+    r <- minode(i, p, maxempv=0.25, saspars=test_saspars, swappars=test_swappars)
 
+    expect_equal(length(r$pathcode), 5)
 })
+
