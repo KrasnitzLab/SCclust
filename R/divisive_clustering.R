@@ -75,6 +75,10 @@ incidence_table2matrix <- function(incidence) {
 #' than by modifying the rows in the [[3-from]].
 replicate_incidence <- function(incidence, from) {
     assertthat::assert_that(from == 1 | from == 2)
+
+	assertthat::assert_that(!is.null(dim(incidence[[1]])))
+	assertthat::assert_that(!is.null(dim(incidence[[1]])))
+
     if (from == 1) 
         to <- 2
     else {
@@ -327,6 +331,10 @@ mpshuffle<- function(incidence, niter, choosemargin=default_swappars$choosemargi
 		mymargin <- 1 + (runif(1) > choosemargin)
         assertthat::assert_that(mymargin == 1 | mymargin == 2)
 
+		if(ncol(incidence[[3-mymargin]]) < 2) {
+			next
+		}
+
 		weswap <- sample(ncol(incidence[[3-mymargin]]), size=2)
 
 		inblocks <- (weswap - 1) %/% 8 + 1
@@ -440,6 +448,9 @@ minode <- function(
 
 	flog.debug("empv=%s; maxempv=%s", empv, maxempv)
 
+	rawone <- as.raw(T)
+	rawzero <- as.raw(F)
+
 	if(empv < maxempv){
 		upath <- c(upath,pathcode[1])
 		height <- c(height,-log(empv))
@@ -451,13 +462,13 @@ minode <- function(
 			break
 
 		subincidence <- list(
-			incidence[[1]][,longpartition==rawone], incidence[[2]])
+			incidence[[1]][,longpartition==rawone, drop=F], incidence[[2]])
 		pathcode[longpartition==rawone] <-
 			minode(
 				subincidence, pathcode[longpartition==rawone],
 				saspars=saspars, swappars=swappars)
 
-		subincidence<-list(incidence[[1]][,longpartition==rawzero],incidence[[2]])
+		subincidence<-list(incidence[[1]][,longpartition==rawzero, drop=F],incidence[[2]])
 		pathcode[longpartition==rawzero] <-
 			minode(
 				subincidence, pathcode[longpartition==rawzero], 
