@@ -85,6 +85,11 @@ replicate_incidence <- function(incidence, from) {
        to <- 1
     }
 
+		if(ncol(incidence[[from]])==0){
+			incidence[[to]]<-matrix(ncol=ncol(incidence[[to]]),nrow=0)
+			return(incidence)
+		}
+
     rawone <- as.raw(T)
 
 	inblocks  <- ((1 : ncol(incidence[[to]])) - 1) %/% 8 + 1
@@ -257,7 +262,7 @@ alist.miupdate<-alist(updateme=,
 
 
 #' for a given incidence matrix (in the calling environment) find a column
-#' partition maximizing the objective function, defined as the sum of mutual 
+#' partition maximizing the objective function, defined as mutual 
 #' information MI between the partition and each row, summed over all rows
 mimax <- function(incidence, saspars=default_saspars) {
     rawone<-as.raw(T)
@@ -446,6 +451,8 @@ minode <- function(
 	incidence <- replicate_incidence(incidence, from=1)
 	incidence <- consolidate_incidence(incidence, from=2)
 
+	if((ncol(incidence[[1]])*nrow(incidence[[1]])*ncol(incidence[[2]])*
+		nrow(incidence[[2]]))!=0){
 	bestsplit <- mimax(incidence, saspars=saspars)
 	nullmi <- randomimax(incidence, saspars=saspars, swappars=swappars)
 
@@ -481,6 +488,7 @@ minode <- function(
 			minode(
 				subincidence, pathcode[longpartition==rawzero], 
 				saspars=saspars, swappars=swappars)
+	}
 	}
 	result <- list(
 		incidence=incidence,
