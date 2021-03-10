@@ -102,8 +102,8 @@ replicate_incidence <- function(incidence, from) {
         dim(incidence[[2]]) <- c(1, length(incidence[[2]]))
     }
   	assertthat::assert_that(all(t(apply(incidence[[2]],2,
-			rawToBits))[1:ncol(incicence[[2]]),1:ncol(incidence[[1]])]==
-			apply(incidence[[1]],2,rawToBits)[1:ncol(incicence[[2]]),
+			rawToBits))[1:ncol(incidence[[2]]),1:ncol(incidence[[1]])]==
+			apply(incidence[[1]],2,rawToBits)[1:ncol(incidence[[2]]),
 			1:ncol(incidence[[1]])]))
 
     return(incidence)
@@ -375,8 +375,8 @@ mpshuffle<- function(incidence, niter, choosemargin=default_swappars$choosemargi
 			xor(incidence[[3 - mymargin]][urows, weswap], swapmask)
 	}
   assertthat::assert_that(all(t(apply(incidence[[2]],2,
-		rawToBits))[1:ncol(incicence[[2]]),1:ncol(incidence[[1]])]==
-		apply(incidence[[1]],2,rawToBits)[1:ncol(incicence[[2]]),
+		rawToBits))[1:ncol(incidence[[2]]),1:ncol(incidence[[1]])]==
+		apply(incidence[[1]],2,rawToBits)[1:ncol(incidence[[2]]),
 		1:ncol(incidence[[1]])]))
     return(incidence)
 }

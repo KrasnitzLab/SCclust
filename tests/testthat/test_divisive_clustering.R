@@ -492,6 +492,42 @@ test_that("we can use randomimax 13x9", {
 })
 
 
+test_that("we can use minode 13x9", {
+
+    m <- matrix(c(
+        1, 1, 1, 1, 1, 0, 0, 0, 0, 
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1),
+        ncol=9, byrow=T)
+
+    i <- build_incidence_table(m)
+    swappars <- list(
+        configs=5,
+        burnin=5,
+        permeas=50,
+        choosemargin=0.5)
+
+    p <- initial_pathcode(i, maxgens=7)
+
+    set.seed(1)
+    r <- minode(
+        i, p, maxgens=2, maxempv=0.25, saspars=test_saspars, swappars=test_swappars)
+
+    expect_equal(length(r$pathcode), 9)
+
+})
+
+
 test_that("we can use minode 13x9 again", {
 
     m <- matrix(c(
