@@ -492,7 +492,7 @@ test_that("we can use randomimax 13x9", {
 })
 
 
-test_that("we can use minode 13x9", {
+test_that("we can use minode on clean 13x9", {
 
     m <- matrix(c(
         1, 1, 1, 1, 1, 0, 0, 0, 0, 
@@ -518,6 +518,21 @@ test_that("we can use minode 13x9", {
         choosemargin=0.5)
 
     p <- initial_pathcode(i, maxgens=7)
+
+    test_swappars <- list(
+        configs=5,
+        burnin=5,
+        permeas=50,
+        choosemargin=0.5)
+
+    test_saspars <- list(
+        restarts=10,
+        cooler=1.12,
+        acceptance=0.234,
+        sweepspercycle=10,
+        maxcycles=20,
+        stopatfreezeout=T,
+        epsilon=0.0001)
 
     set.seed(1)
     r <- minode(
@@ -665,3 +680,88 @@ test_that("we can use minode 5x5", {
     expect_equal(length(r$pathcode), 5)
 })
 
+
+test_that("we can use minode on simpleIncidenceTable", {
+
+    input_dir <- "fixtures"
+    filename <- "simpleIncidenceTable.txt"
+
+    filename <- file.path(input_dir, filename)
+    expect_true(file.exists((filename)))
+
+    m <- load_matrix(filename)
+
+    i <- build_incidence_table(m)
+    swappars <- list(
+        configs=5,
+        burnin=5,
+        permeas=50,
+        choosemargin=0.5)
+
+    p <- initial_pathcode(i, maxgens=7)
+
+    test_swappars <- list(
+        configs=5,
+        burnin=5,
+        permeas=50,
+        choosemargin=0.5)
+
+    test_saspars <- list(
+        restarts=10,
+        cooler=1.12,
+        acceptance=0.234,
+        sweepspercycle=10,
+        maxcycles=20,
+        stopatfreezeout=T,
+        epsilon=0.0001)
+
+    set.seed(1)
+    r <- minode(
+        i, p, maxgens=2, maxempv=0.25, saspars=test_saspars, swappars=test_swappars)
+
+    expect_equal(length(r$pathcode), 35)
+
+})
+
+
+test_that("we can use minode on navin-T10", {
+
+    input_dir <- "fixtures"
+    filename <- "hg19_navin_T10.featuremat.txt"
+
+    filename <- file.path(input_dir, filename)
+    expect_true(file.exists((filename)))
+
+    m <- load_table(filename)
+
+    i <- build_incidence_table(m)
+    swappars <- list(
+        configs=5,
+        burnin=5,
+        permeas=50,
+        choosemargin=0.5)
+
+    p <- initial_pathcode(i, maxgens=7)
+
+    test_swappars <- list(
+        configs=5,
+        burnin=5,
+        permeas=50,
+        choosemargin=0.5)
+
+    test_saspars <- list(
+        restarts=10,
+        cooler=1.12,
+        acceptance=0.234,
+        sweepspercycle=10,
+        maxcycles=20,
+        stopatfreezeout=T,
+        epsilon=0.0001)
+
+    set.seed(1)
+    r <- minode(
+        i, p, maxgens=2, maxempv=0.25, saspars=test_saspars, swappars=test_swappars)
+
+    expect_equal(length(r$pathcode), 95)
+
+})

@@ -17,6 +17,10 @@ showBits <- function(r) {
 
 
 build_incidence_table <- function(m) {
+	if(data.class(m) == "data.frame") {
+		m <- data.matrix(m);
+	}
+
     assertthat::assert_that(data.class(m) == "matrix")
     
     flog.warn("elements of incidence will be coerced to raw")
@@ -451,44 +455,44 @@ minode <- function(
 	incidence <- replicate_incidence(incidence, from=1)
 	incidence <- consolidate_incidence(incidence, from=2)
 
-	if((ncol(incidence[[1]])*nrow(incidence[[1]])*ncol(incidence[[2]])*
-		nrow(incidence[[2]]))!=0){
-	bestsplit <- mimax(incidence, saspars=saspars)
-	nullmi <- randomimax(incidence, saspars=saspars, swappars=swappars)
-
-	empv <- (sum(nullmi > bestsplit$mi) + 1) / (length(nullmi) + 2)
-
 	upath <- NULL
 	height <- NULL
 
-	flog.debug("empv=%s; maxempv=%s", empv, maxempv)
+	if((ncol(incidence[[1]])*nrow(incidence[[1]])*ncol(incidence[[2]])*nrow(incidence[[2]]))!=0){
+		
+		bestsplit <- mimax(incidence, saspars=saspars)
+		nullmi <- randomimax(incidence, saspars=saspars, swappars=swappars)
 
-	rawone <- as.raw(T)
-	rawzero <- as.raw(F)
+		empv <- (sum(nullmi > bestsplit$mi) + 1) / (length(nullmi) + 2)
 
-	if(empv < maxempv){
-		upath <- c(upath,pathcode[1])
-		height <- c(height,-log(empv))
-		longpartition <- rawToBits(bestsplit$partition)[1: ncol(incidence[[1]])]
-		pathcode <- longpartition & rawShift(pathcode,1)
-		raweighty <- rawShift(rawone, 7)
+		flog.debug("empv=%s; maxempv=%s", empv, maxempv)
 
-		if((pathcode[1] & raweighty) == raweighty)
-			break
+		rawone <- as.raw(T)
+		rawzero <- as.raw(F)
 
-		subincidence <- list(
-			incidence[[1]][,longpartition==rawone, drop=F], incidence[[2]])
-		pathcode[longpartition==rawone] <-
-			minode(
-				subincidence, pathcode[longpartition==rawone],
-				saspars=saspars, swappars=swappars)
+		if(empv < maxempv){
+			upath <- c(upath,pathcode[1])
+			height <- c(height,-log(empv))
+			longpartition <- rawToBits(bestsplit$partition)[1: ncol(incidence[[1]])]
+			pathcode <- longpartition & rawShift(pathcode,1)
+			raweighty <- rawShift(rawone, 7)
 
-		subincidence<-list(incidence[[1]][,longpartition==rawzero, drop=F],incidence[[2]])
-		pathcode[longpartition==rawzero] <-
-			minode(
-				subincidence, pathcode[longpartition==rawzero], 
-				saspars=saspars, swappars=swappars)
-	}
+			if((pathcode[1] & raweighty) == raweighty)
+				break
+
+			subincidence <- list(
+				incidence[[1]][,longpartition==rawone, drop=F], incidence[[2]])
+			pathcode[longpartition==rawone] <-
+				minode(
+					subincidence, pathcode[longpartition==rawone],
+					saspars=saspars, swappars=swappars)
+
+			subincidence<-list(incidence[[1]][,longpartition==rawzero, drop=F],incidence[[2]])
+			pathcode[longpartition==rawzero] <-
+				minode(
+					subincidence, pathcode[longpartition==rawzero], 
+					saspars=saspars, swappars=swappars)
+		}
 	}
 	result <- list(
 		incidence=incidence,
