@@ -9,3 +9,4 @@ out_many
 vignettes/T10data
 *.o
 SCclust.so
+tests/testthat/Rplots.pdf
