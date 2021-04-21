@@ -200,7 +200,7 @@ misum <- function(conti) {
 #' 	 epsilon: ignore relative changes of the objective function smaller than this
 #' swappars
 #' 	 configs: generate this many randomized incidence matrices and, for each,
-#' 	 compute the optimal objection function, to create a sampling from the null
+#' 	 compute the optimal objective function, to create a sampling from the null
 #' 	 distribution
 #' 	 burnin: perform this many swaps to get the 1st randomized incidence matrix
 #' 	 permeas: perform this many swaps between subsequent objective function 
@@ -432,82 +432,6 @@ initial_pathcode <- function(incidence, maxgens=7) {
 }
 
 
-#' Recursively partition items represented as columns of a binary incidence 
-#' table (IT). Thus, each row of the table represents a feature. Find a partition
-#' whose mutual information (MI) with the features is maximal. If the observed
-#' maximal MI is an outlier of a null distribution obtained by sampling from 
-#' randomized ITs, the optimal partition is accepted, and partitioning of each of 
-#' the two parts is attempted by calling this function recursively. 
-#' The items in the IT are interpreted as leaves of a node in a tree. The function
-#' call generates a branch of the tree with the current node as root.
-#' arguments: 
-#' 	incidence, a list with two items, IT packed into raws by the column
-#' 	and by the row, respectively.
-#' 	pathcode, a vector of as many raws as there are columns in the IT, encoding
-#' 	the path from the tree root to the current node.
-#' value: a raw vector, encoding, for each leaf, the path from the root to the 
-#' leaf. In addition, height and upath are updated in the calling environment.
-minode <- function(
-	incidence, pathcode, 
-	maxgens=7, maxempv=0.05,
-	saspars=default_saspars, swappars=default_swappars) {
-
-	incidence <- replicate_incidence(incidence, from=1)
-	incidence <- consolidate_incidence(incidence, from=2)
-
-	upath <- NULL
-	height <- NULL
-
-	if((ncol(incidence[[1]])*nrow(incidence[[1]])*ncol(incidence[[2]])*nrow(incidence[[2]]))!=0){
-		
-		bestsplit <- mimax(incidence, saspars=saspars)
-		nullmi <- randomimax(incidence, saspars=saspars, swappars=swappars)
-
-		empv <- (sum(nullmi > bestsplit$mi) + 1) / (length(nullmi) + 2)
-
-		flog.debug("empv=%s; maxempv=%s", empv, maxempv)
-
-		rawone <- as.raw(T)
-		rawzero <- as.raw(F)
-
-		if(empv < maxempv){
-			upath <- c(upath,pathcode[1])
-			height <- c(height,-log(empv))
-			longpartition <- rawToBits(bestsplit$partition)[1: ncol(incidence[[1]])]
-			pathcode <- longpartition & rawShift(pathcode,1)
-			raweighty <- rawShift(rawone, 7)
-
-			if((pathcode[1] & raweighty) == raweighty)
-				break
-
-			subincidence <- list(
-				incidence[[1]][,longpartition==rawone, drop=F], incidence[[2]])
-			pathcode[longpartition==rawone] <-
-				minode(
-					subincidence, pathcode[longpartition==rawone],
-					saspars=saspars, swappars=swappars)
-
-			subincidence<-list(incidence[[1]][,longpartition==rawzero, drop=F],incidence[[2]])
-			pathcode[longpartition==rawzero] <-
-				minode(
-					subincidence, pathcode[longpartition==rawzero], 
-					saspars=saspars, swappars=swappars)
-		}
-	}
-	result <- list(
-		incidence=incidence,
-		pathcode=pathcode,
-		upath=upath,
-		height=height,
-		maxgens=maxgens,
-		call=match.call())
-	class(result)<-"mimosa"
-
-	return(result)
-}
-
-
-
 #' perform divisive hierarchical clustering (recursive binary partitioning)
 #' of data represented by a binary incidence matrix incidence. The leaves of
 #' the hierarchical tree correspond to the columns of incidence. Other arguments
@@ -521,7 +445,7 @@ minode <- function(
 #' matrix.
 #' The value is an object of class "mimosa", a list with items
 #' incidence, the input incidence matrix as incidencetable; pathcode,a raw 
-#' vector encoding, for leaf, its pathh to the root; upath, a raw vector
+#' vector encoding, for each leaf, its path to the root; upath, a raw vector
 #' encoding, for each node, its path to the root; height, the "height" of each
 #' node above its 2 descendants, as given by -log(empirical p-value for the node
 #' split); maxgens, the maxgens argument above; leafnames, the column names
@@ -530,7 +454,88 @@ minode <- function(
 mimain<-function(incidence, 
 	maxgens=7, maxempv=0.05,
 	saspars=default_saspars, swappars=default_swappars){
-    
+
+	#' Recursively partition items represented as columns of a binary incidence 
+	#' table (IT). Thus, each row of the table represents a feature. Find a partition
+	#' whose mutual information (MI) with the features is maximal. If the observed
+	#' maximal MI is an outlier of a null distribution obtained by sampling from 
+	#' randomized ITs, the optimal partition is accepted, and partitioning of each of 
+	#' the two parts is attempted by calling this function recursively. 
+	#' The items in the IT are interpreted as leaves of a node in a tree. The function
+	#' call generates a branch of the tree with the current node as root.
+	#' arguments: 
+	#' 	incidence, a list with two items, IT packed into raws by the column
+	#' 	and by the row, respectively.
+	#' 	pathcode, a vector of as many raws as there are columns in the IT, encoding
+	#' 	the path from the tree root to the current node.
+	#' value: a raw vector, encoding, for each leaf, the path from the root to the 
+	#' leaf. In addition, height and upath are updated in the calling environment.
+	minode <- function(
+		incidence, pathcode, 
+		maxgens=7, maxempv=0.05,
+		saspars=default_saspars, swappars=default_swappars) {
+
+		incidence <- replicate_incidence(incidence, from=1)
+		incidence <- consolidate_incidence(incidence, from=2)
+
+		upath <- NULL
+		height <- NULL
+
+		if((ncol(incidence[[1]])*nrow(incidence[[1]])*ncol(incidence[[2]])*nrow(incidence[[2]]))!=0){
+
+			bestsplit <- mimax(incidence, saspars=saspars)
+			nullmi <- randomimax(incidence, saspars=saspars, swappars=swappars)
+
+			empv <- (sum(nullmi > bestsplit$mi) + 1) / (length(nullmi) + 2)
+
+			flog.debug("empv=%s; maxempv=%s", empv, maxempv)
+			#cat("empv\t",empv,"\tmaxempv\t",maxempv,"\n")
+
+			rawone <- as.raw(T)
+			rawzero <- as.raw(F)
+
+			if(empv < maxempv){
+				#cat("Looking for upath, pathcode[1]=",pathcode[1],"\n")
+				if(is.null(upath))
+					upath<<-pathcode[1]
+				else
+					upath <<- c(upath,pathcode[1])
+				#cat("upath set\t",upath,"\n")
+				if(is.null(height))
+					height<<-(-log(empv))
+				else
+					height <<- c(height,-log(empv))
+				#cat("height set\t",height,"\n")
+				longpartition <- rawToBits(bestsplit$partition)[1: ncol(incidence[[1]])]
+			#	cat("longpartition\t",longpartition,"\npathcode before update\t",
+			#		pathcode[1],"\t",rawToBits(pathcode[1]),"\n")
+				pathcode <- longpartition | rawShift(pathcode,1)
+			#	cat("pathcode after update \nfirst \t",
+			#		pathcode[1],"\t",rawToBits(pathcode[1]),"\nlast\t",
+			#		pathcode[length(pathcode)],"\t",
+			#		rawToBits(pathcode[length(pathcode)]),"\n")
+				raweighty <- rawShift(rawone, 7)
+
+				if((pathcode[1] & raweighty) == raweighty)
+					break
+
+				subincidence <- list(
+					incidence[[1]][,longpartition==rawone, drop=F], incidence[[2]])
+				pathcode[longpartition==rawone] <-
+					minode(
+						subincidence, pathcode[longpartition==rawone],
+						saspars=saspars, swappars=swappars)
+
+				subincidence<-list(incidence[[1]][,longpartition==rawzero, drop=F],incidence[[2]])
+				pathcode[longpartition==rawzero] <-
+					minode(
+						subincidence, pathcode[longpartition==rawzero], 
+						saspars=saspars, swappars=swappars)
+			}
+		}
+		pathcode
+	}
+
 	assertthat::assert_that(class(incidence) == "incidencetable")
 
 	if(maxgens>7){
@@ -539,10 +544,23 @@ mimain<-function(incidence,
 	}
 
 	pathcode <- initial_pathcode(incidence, maxgens=maxgens)
+	#cat("Initial pathcode [1]\t",rawToBits(pathcode[1]),"\n")
+	upath<-NULL
+	height<-NULL
 
-	result <- minode(
+	pathcode <- minode(
 		incidence, pathcode,
 		maxgens=maxgens, maxempv=maxempv,
 		saspars=saspars, swappars=swappars)
+	
+	result <- list(
+		incidence=incidence,
+		pathcode=pathcode,
+		upath=upath,
+		height=height,
+		maxgens=maxgens,
+		call=match.call())
+	class(result)<-"mimosa"
+
 	return(result)
 }
