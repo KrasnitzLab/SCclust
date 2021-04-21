@@ -383,7 +383,7 @@ mpshuffle<- function(incidence, niter, choosemargin=default_swappars$choosemargi
 		incidence[[3 - mymargin]][urows, weswap]<-
 			xor(incidence[[3 - mymargin]][urows, weswap], swapmask)
 	}
-  assertthat::assert_that(all(t(apply(incidence[[2]],2,
+  	assertthat::assert_that(all(t(apply(incidence[[2]],2,
 		rawToBits))[1:ncol(incidence[[2]]),1:ncol(incidence[[1]])]==
 		apply(incidence[[1]],2,rawToBits)[1:ncol(incidence[[2]]),
 		1:ncol(incidence[[1]])]))
@@ -400,7 +400,7 @@ randomimax<-function(incidence, saspars=default_saspars, swappars=default_swappa
 
 	for(config in 1:swappars$configs){
         niter <- swappars$burnin * (config==1) + swappars$permeas * (config>1)
-
+		flog.debug("randomimax config=%s; niter=%s", config, niter)
 		incidence <- mpshuffle(
             incidence,
             niter,
@@ -455,6 +455,9 @@ mimain<-function(incidence,
 	maxgens=7, maxempv=0.05,
 	saspars=default_saspars, swappars=default_swappars){
 
+	upath <- NULL
+	height <- NULL
+
 	#' Recursively partition items represented as columns of a binary incidence 
 	#' table (IT). Thus, each row of the table represents a feature. Find a partition
 	#' whose mutual information (MI) with the features is maximal. If the observed
@@ -477,9 +480,7 @@ mimain<-function(incidence,
 
 		incidence <- replicate_incidence(incidence, from=1)
 		incidence <- consolidate_incidence(incidence, from=2)
-
-		upath <- NULL
-		height <- NULL
+		flog.debug("minode: incidence dim(%s)", ncol(incidence[[1]]))
 
 		if((ncol(incidence[[1]])*nrow(incidence[[1]])*ncol(incidence[[2]])*nrow(incidence[[2]]))!=0){
 
@@ -488,7 +489,7 @@ mimain<-function(incidence,
 
 			empv <- (sum(nullmi > bestsplit$mi) + 1) / (length(nullmi) + 2)
 
-			flog.debug("empv=%s; maxempv=%s", empv, maxempv)
+			flog.debug("minode: empv=%s; maxempv=%s", empv, maxempv)
 			#cat("empv\t",empv,"\tmaxempv\t",maxempv,"\n")
 
 			rawone <- as.raw(T)
@@ -497,7 +498,7 @@ mimain<-function(incidence,
 			if(empv < maxempv){
 				#cat("Looking for upath, pathcode[1]=",pathcode[1],"\n")
 				if(is.null(upath))
-					upath<<-pathcode[1]
+					upath <<-pathcode[1]
 				else
 					upath <<- c(upath,pathcode[1])
 				#cat("upath set\t",upath,"\n")
@@ -507,13 +508,13 @@ mimain<-function(incidence,
 					height <<- c(height,-log(empv))
 				#cat("height set\t",height,"\n")
 				longpartition <- rawToBits(bestsplit$partition)[1: ncol(incidence[[1]])]
-			#	cat("longpartition\t",longpartition,"\npathcode before update\t",
-			#		pathcode[1],"\t",rawToBits(pathcode[1]),"\n")
+				#	cat("longpartition\t",longpartition,"\npathcode before update\t",
+				#		pathcode[1],"\t",rawToBits(pathcode[1]),"\n")
 				pathcode <- longpartition | rawShift(pathcode,1)
-			#	cat("pathcode after update \nfirst \t",
-			#		pathcode[1],"\t",rawToBits(pathcode[1]),"\nlast\t",
-			#		pathcode[length(pathcode)],"\t",
-			#		rawToBits(pathcode[length(pathcode)]),"\n")
+				#	cat("pathcode after update \nfirst \t",
+				#		pathcode[1],"\t",rawToBits(pathcode[1]),"\nlast\t",
+				#		pathcode[length(pathcode)],"\t",
+				#		rawToBits(pathcode[length(pathcode)]),"\n")
 				raweighty <- rawShift(rawone, 7)
 
 				if((pathcode[1] & raweighty) == raweighty)
@@ -524,12 +525,14 @@ mimain<-function(incidence,
 				pathcode[longpartition==rawone] <-
 					minode(
 						subincidence, pathcode[longpartition==rawone],
+						maxgens=maxgens, maxempv=maxempv,
 						saspars=saspars, swappars=swappars)
 
 				subincidence<-list(incidence[[1]][,longpartition==rawzero, drop=F],incidence[[2]])
 				pathcode[longpartition==rawzero] <-
 					minode(
-						subincidence, pathcode[longpartition==rawzero], 
+						subincidence, pathcode[longpartition==rawzero],
+						maxgens=maxgens, maxempv=maxempv,
 						saspars=saspars, swappars=swappars)
 			}
 		}

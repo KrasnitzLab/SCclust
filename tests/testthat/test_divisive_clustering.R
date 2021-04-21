@@ -477,14 +477,14 @@ test_that("we can use randomimax 13x9", {
         ncol=9, byrow=T)
 
     i <- build_incidence_table(m)
-    swappars <- list(
+    test_swappars <- list(
         configs=5,
         burnin=5,
         permeas=50,
         choosemargin=0.5)
 
     set.seed(1)
-    r <- randomimax(i, swappars=swappars)
+    r <- randomimax(i, swappars=test_swappars)
     e <- c(-9.755377, -57.539480, -63.258377, -62.648536, -57.539480)
 
     expect_true(all(abs(r - e) <= 10e-3))
@@ -511,11 +511,6 @@ test_that("we can use mimain on clean 13x9", {
         ncol=9, byrow=T)
 
     i <- build_incidence_table(m)
-    swappars <- list(
-        configs=5,
-        burnin=5,
-        permeas=50,
-        choosemargin=0.5)
 
     test_swappars <- list(
         configs=5,
@@ -687,11 +682,6 @@ test_that("we can use mimain on simpleIncidenceTable", {
     m <- load_matrix(filename)
 
     i <- build_incidence_table(m)
-    swappars <- list(
-        configs=5,
-        burnin=5,
-        permeas=50,
-        choosemargin=0.5)
 
     test_swappars <- list(
         configs=5,
@@ -737,8 +727,8 @@ test_that("we can use mimos2hc 13x9", {
 
     i <- build_incidence_table(m)
     test_swappars <- list(
-        configs=5,
-        burnin=5,
+        configs=10,
+        burnin=50,
         permeas=50,
         choosemargin=0.5)
 
@@ -752,7 +742,7 @@ test_that("we can use mimos2hc 13x9", {
         epsilon=0.0001)
 
     set.seed(1)
-    r <- mimain(i, maxempv=0.25, saspars=test_saspars, swappars=test_swappars)
+    r <- mimain(i, maxgen=3, maxempv=0.1, saspars=test_saspars, swappars=test_swappars)
 
     expect_equal(length(r$pathcode), 9)
     expect_equal(class(r), "mimosa")
@@ -765,9 +755,47 @@ test_that("we can use mimos2hc 13x9", {
 
 })
 
+test_that("we can use mimain on simpleIncidenceTable", {
 
-test_that("we can use mimain on navin-T10", {
+    input_dir <- "fixtures"
+    filename <- "simpleIncidenceTable.txt"
 
+    filename <- file.path(input_dir, filename)
+    expect_true(file.exists((filename)))
+
+    m <- load_matrix(filename)
+
+    i <- build_incidence_table(m)
+
+    test_swappars <- list(
+        configs=10,
+        burnin=100,
+        permeas=100,
+        choosemargin=0.5)
+
+    test_saspars <- list(
+        restarts=10,
+        cooler=1.12,
+        acceptance=0.234,
+        sweepspercycle=10,
+        maxcycles=20,
+        stopatfreezeout=T,
+        epsilon=0.0001)
+
+    set.seed(1)
+    r <- mimain(
+        i, maxgens=3, maxempv=0.1, saspars=test_saspars, swappars=test_swappars)
+
+    expect_equal(length(r$pathcode), 35)
+    hc<-mimosa2hc(r)
+    plot(hc)
+
+})
+
+
+test_that("we can use mimain on navin T10", {
+
+    flog.debug("testing on navin T10 started")
     input_dir <- "fixtures"
     filename <- "hg19_navin_T10.featuremat.txt"
 
@@ -777,15 +805,10 @@ test_that("we can use mimain on navin-T10", {
     m <- load_table(filename)
 
     i <- build_incidence_table(m)
-    swappars <- list(
-        configs=5,
-        burnin=5,
-        permeas=50,
-        choosemargin=0.5)
 
     test_swappars <- list(
-        configs=5,
-        burnin=5,
+        configs=10,
+        burnin=50,
         permeas=50,
         choosemargin=0.5)
 
@@ -799,10 +822,10 @@ test_that("we can use mimain on navin-T10", {
         epsilon=0.0001)
 
     set.seed(1)
-    # r <- mimain(
-    #     i, maxgens=2, maxempv=0.25, saspars=test_saspars, swappars=test_swappars)
+    r <- mimain(
+        i, maxgens=5, maxempv=0.1, saspars=test_saspars, swappars=test_swappars)
 
-    r <- mimain(i)
+    # r <- mimain(i)
 
     expect_equal(length(r$pathcode), 95)
 
