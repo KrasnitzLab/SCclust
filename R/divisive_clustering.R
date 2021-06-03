@@ -453,7 +453,8 @@ initial_pathcode <- function(incidence, maxgens=7) {
 #'  		maxgens=maxgens,leafnames=leafnames,call=match.call())
 mimain<-function(incidence, 
 	maxgens=7, maxempv=0.05,
-	saspars=default_saspars, swappars=default_swappars){
+	saspars=default_saspars, 
+	swappars=default_swappars){
 
 	upath <- NULL
 	height <- NULL
@@ -518,7 +519,7 @@ mimain<-function(incidence,
 				raweighty <- rawShift(rawone, 7)
 
 				if((pathcode[1] & raweighty) == raweighty)
-					break
+					return(pathcode)
 
 				subincidence <- list(
 					incidence[[1]][,longpartition==rawone, drop=F], incidence[[2]])
@@ -536,7 +537,7 @@ mimain<-function(incidence,
 						saspars=saspars, swappars=swappars)
 			}
 		}
-		pathcode
+		return(pathcode)
 	}
 
 	assertthat::assert_that(class(incidence) == "incidencetable")
