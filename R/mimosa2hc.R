@@ -3,8 +3,17 @@
 #' heights are computed recursively, by taking the maximum of the heights of the
 #' two merging nodes and adding to those the mymi$height of the parent node.
 mimosa2hc<-function(mymi){
+	sortby<-mymi$pathcode
+	rawone<-as.raw(T)
+	raweighty<-rawShift(rawone,7)
+	alldone<-(sortby&raweighty)==raweighty
+	while(!all(alldone)){
+		sortby[!alldone]<-rawShift(sortby[!alldone],1)
+		alldone<-(sortby&raweighty)==raweighty
+	}
+	sortby<-as.integer(sortby)
 	icode<-as.integer(mymi$pathcode)
-	iorder<-order(icode,decreasing=T)
+	iorder<-order(sortby,decreasing=T)
 	isort<-icode[iorder]
 	usort<-unique(isort)
 	mergemat<-matrix(ncol=2,nrow=length(isort)-1)
