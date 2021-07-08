@@ -450,7 +450,6 @@ initial_pathcode <- function(incidence, maxgens=7) {
 #' node above its 2 descendants, as given by -log(empirical p-value for the node
 #' split); maxgens, the maxgens argument above; leafnames, the column names
 #' of the input incidence matrix; call, the function call giving this value.
-#'  		maxgens=maxgens,leafnames=leafnames,call=match.call())
 mimain<-function(incidence, 
 	maxgens=7, maxempv=0.05,
 	saspars=default_saspars, 

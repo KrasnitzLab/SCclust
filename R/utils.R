@@ -177,7 +177,12 @@ tree_clustersize <- function(indextable) {
 #' @export
 tree_py <- function(mdist, method, metric='euclidean'){
   hc<-hclust(as.dist(mdist), method)
-  
+  return(pytree(hc))
+}
+
+
+#' @export
+pytree <- function(hc){
   res <- cbind(hc$merge, hc$height)
   colnames(res) <- c("index1", "index2", "height")
   clustersize <- tree_clustersize(res)
