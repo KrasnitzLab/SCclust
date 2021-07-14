@@ -484,7 +484,7 @@ test_that("we can use randomimax 13x9", {
         choosemargin=0.5)
 
     set.seed(1)
-    r <- randomimax(i, swappars=test_swappars)
+    r <- randomimax(i, swappars=test_swappars, maxempv=0.25, miobserved=11)
     e <- c(-9.755377, -57.539480, -63.258377, -62.648536, -57.539480)
 
     expect_true(all(abs(r - e) <= 10e-3))

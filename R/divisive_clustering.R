@@ -1,5 +1,5 @@
 #' Pack the elements of a (0,1)-valued integer, numeric, raw or (F,T)-valued 
-#'logical vector 
+#' logical vector 
 #' yesno as bits into a vector of type raw. If the length of yesno is not a 
 #' multiple of 8 bits of type into, it is padded by the raw 00 to the 
 #' nearest such multiple.
@@ -395,17 +395,24 @@ mpshuffle<- function(incidence, niter, choosemargin=default_swappars$choosemargi
 #' table, maximize mutual information (MI) over all possible partitions using 
 #' simulated annealing (SA). SA parameters are given by saspars and randomization
 #' parameters by swappars. Return a vector of best MI values.
-randomimax<-function(incidence, saspars=default_saspars, swappars=default_swappars){
-	bestmirand<-rep(NA, swappars$configs)
+randomimax<-function(incidence, saspars=default_saspars, 
+		swappars=default_swappars,
+		miobserved,
+		maxempv){
 
+	bestmirand<-rep(NA, swappars$configs)
+	aboveobs<-0
+	maxabove<-ceiling(maxempv*(swappars$configs+2))-1
 	for(config in 1:swappars$configs){
         niter <- swappars$burnin * (config==1) + swappars$permeas * (config>1)
-		# flog.debug("randomimax config=%s; niter=%s", config, niter)
+		flog.debug("randomimax config=%s; niter=%s", config, niter)
 		incidence <- mpshuffle(
             incidence,
             niter,
             choosemargin=swappars$choosemargin)
 		bestmirand[config] <- mimax(incidence, saspars=saspars)$mi
+		aboveobs<-aboveobs+(bestmirand[config]>miobserved)
+		if(aboveobs>maxabove)return(bestmirand)
 	}
 	return(bestmirand)
 }
@@ -454,7 +461,7 @@ mimain<-function(incidence,
 	maxgens=7, 
 	maxempv=0.05,
 	saspars=default_saspars, 
-	swappars=default_swappars){
+	swappars=default_swappars,pvmethod="empirical"){
 
 	upath <- NULL
 	height <- NULL
@@ -486,9 +493,33 @@ mimain<-function(incidence,
 		if((ncol(incidence[[1]])*nrow(incidence[[1]])*ncol(incidence[[2]])*nrow(incidence[[2]]))!=0){
 
 			bestsplit <- mimax(incidence, saspars=saspars)
-			nullmi <- randomimax(incidence, saspars=saspars, swappars=swappars)
+			# Permutations will stop as soon as empv exceeds maxempv
+			nullmi <- randomimax(incidence, saspars=saspars, swappars=swappars,
+				miobserved=bestsplit$mi,maxempv=maxempv)
 
-			empv <- (sum(nullmi > bestsplit$mi) + 1) / (length(nullmi) + 2)
+			empv <- (sum(nullmi[!is.na(nullmi)] > bestsplit$mi) + 1) / 
+				(length(nullmi[!is.na(nullmi)]) + 2)
+			if(pvmethod=="GPD"){
+				#10 or more null values above the observed mi - use empirical p
+				if(sum(nullmi[!is.na(nullmi)] > bestsplit$mi)>10)break
+				#the null sample is too small - use empirical p
+				if(length(nullmi[!is.na(nullmi)])<5000)break
+				#otherwise use the top 250 null values to compute exceedances
+				exc<-sort(nullmi,decreasing=T)[1:251]
+				#estimate the GPD parameters from the empirical mean and variance
+				GPDpars<-GPDparest(exc[1:250]-0.5*(exc[250]+exc[251]))	
+				#if the shape parameter is close to 0, GPD is exponential
+				if(abs(GPDpars$estk)<epsilon)empv<-
+					exp(-(bestsplit$mi-0.5*(exc[250]+exc[251]))/GPDpars$estalpha)*250/
+						length(nullmi[!is.na(nullmi)])
+				#otherwise GPD is power-law
+				else{
+					GPDbase<-1-GPDpars$estk*(bestsplit$mi-0.5*(exc[250]+exc[251]))/
+						GPDpars$estalpha
+					if(GPDbase>0)empv<-GPDbase^(1/GPDpars$estk)*250/
+						length(nullmi[!is.na(nullmi)])		
+				}
+			}
 
 			flog.debug("minode: empv=%s; maxempv=%s", empv, maxempv)
 			#cat("empv\t",empv,"\tmaxempv\t",maxempv,"\n")
