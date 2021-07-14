@@ -400,7 +400,7 @@ randomimax<-function(incidence, saspars=default_saspars, swappars=default_swappa
 
 	for(config in 1:swappars$configs){
         niter <- swappars$burnin * (config==1) + swappars$permeas * (config>1)
-		flog.debug("randomimax config=%s; niter=%s", config, niter)
+		# flog.debug("randomimax config=%s; niter=%s", config, niter)
 		incidence <- mpshuffle(
             incidence,
             niter,
@@ -451,7 +451,8 @@ initial_pathcode <- function(incidence, maxgens=7) {
 #' split); maxgens, the maxgens argument above; leafnames, the column names
 #' of the input incidence matrix; call, the function call giving this value.
 mimain<-function(incidence, 
-	maxgens=7, maxempv=0.05,
+	maxgens=7, 
+	maxempv=0.05,
 	saspars=default_saspars, 
 	swappars=default_swappars){
 
