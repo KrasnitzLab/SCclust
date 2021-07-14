@@ -14,7 +14,7 @@ Threre are two alternative ways to install SCclust package:
 
 ## Installation from source
 
-* Download `SCclust` package source build from Github:
+* Download `SCclust` source package from Github:
 [https://github.com/KrasnitzLab/SCclust/archive/refs/tags/1.0.7.tar.gz](https://github.com/KrasnitzLab/SCclust/archive/refs/tags/1.0.7.tar.gz)
 into your working directory;
 
