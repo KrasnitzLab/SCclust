@@ -280,6 +280,7 @@ mimax <- function(incidence, saspars=default_saspars) {
 	miupdate<-as.function(alist.miupdate)
 
 	for(newstart in 1 : saspars$restarts){
+		flog.debug("mimax restart: %s", newstart)
 
 		partition <- squeeze_vector(
             sample(as.raw(c(T,F)), size=ncol(incidence[[1]]), replace=T))
@@ -293,6 +294,7 @@ mimax <- function(incidence, saspars=default_saspars) {
 		beta <- log(saspars$acceptance)/mean(-abs(deltami))/saspars$cooler
 
 		for(cycles in 1 : saspars$maxcycles){
+			flog.debug("mimax restart: %s; cycles: %s", newstart, cycles)
 			beta <- beta * saspars$cooler
 			miin <- minow
 			for(sweeps in 1 : saspars$sweepspercycle){
@@ -395,7 +397,8 @@ mpshuffle<- function(incidence, niter, choosemargin=default_swappars$choosemargi
 #' table, maximize mutual information (MI) over all possible partitions using 
 #' simulated annealing (SA). SA parameters are given by saspars and randomization
 #' parameters by swappars. Return a vector of best MI values.
-randomimax<-function(incidence, saspars=default_saspars, 
+randomimax<-function(
+		incidence, saspars=default_saspars, 
 		swappars=default_swappars,
 		miobserved,
 		maxempv){
@@ -488,22 +491,29 @@ mimain<-function(incidence,
 
 		incidence <- replicate_incidence(incidence, from=1)
 		incidence <- consolidate_incidence(incidence, from=2)
-		flog.debug("minode: incidence dim(%s)", ncol(incidence[[1]]))
+		flog.debug(
+			"minode: incidence[[1]] ncol(%s), nrow(%s); incidence[[2]] ncol(%s), nrow(%s)", 
+			ncol(incidence[[1]]), nrow(incidence[[1]]), ncol(incidence[[2]]), nrow(incidence[[2]]))
 
-		if((ncol(incidence[[1]])*nrow(incidence[[1]])*ncol(incidence[[2]])*nrow(incidence[[2]]))!=0){
+		if( ncol(incidence[[1]]) != 0 && nrow(incidence[[1]]) != 0 &&  ncol(incidence[[2]]) != 0  && nrow(incidence[[2]]) != 0){
 
 			bestsplit <- mimax(incidence, saspars=saspars)
 			# Permutations will stop as soon as empv exceeds maxempv
-			nullmi <- randomimax(incidence, saspars=saspars, swappars=swappars,
-				miobserved=bestsplit$mi,maxempv=maxempv)
+			nullmi <- randomimax(
+				incidence, saspars=saspars, swappars=swappars,
+				miobserved=bestsplit$mi, maxempv=maxempv)
 
 			empv <- (sum(nullmi[!is.na(nullmi)] > bestsplit$mi) + 1) / 
 				(length(nullmi[!is.na(nullmi)]) + 2)
 			if(pvmethod=="GPD"){
 				#10 or more null values above the observed mi - use empirical p
-				if(sum(nullmi[!is.na(nullmi)] > bestsplit$mi)>10)break
+				if(sum(nullmi[!is.na(nullmi)] > bestsplit$mi)>10)
+					return(pathcode)
+
 				#the null sample is too small - use empirical p
-				if(length(nullmi[!is.na(nullmi)])<5000)break
+				if(length(nullmi[!is.na(nullmi)])<5000)
+					return(pathcode)
+
 				#otherwise use the top 250 null values to compute exceedances
 				exc<-sort(nullmi,decreasing=T)[1:251]
 				#estimate the GPD parameters from the empirical mean and variance

@@ -996,3 +996,55 @@ test_that("we can use mimos2hc 13x8", {
     }
 
 })
+
+test_that("we can use GDP for 13x8 example", {
+
+    m <- matrix(c(
+        1, 1, 1, 1, 0, 0, 0, 0, 
+        1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 0, 0, 0, 0, 0, 0,
+        1, 1, 0, 0, 0, 0, 0, 0,
+        1, 1, 0, 0, 0, 0, 0, 0,
+        1, 0, 0, 0, 0, 0, 0, 1,
+        1, 0, 0, 0, 0, 0, 0, 1,
+        0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 1, 1, 1, 1),
+        ncol=8, byrow=T)
+
+    i <- build_incidence_table(m)
+    test_swappars <- list(
+        configs=5000,
+        burnin=500,
+        permeas=500,
+        choosemargin=0.5)
+
+    test_saspars <- list(
+        restarts=10,
+        cooler=1.12,
+        acceptance=0.234,
+        sweepspercycle=10,
+        maxcycles=20,
+        stopatfreezeout=T,
+        epsilon=0.0001)
+
+    for(maxgen in c(3, 4, 5, 6, 7)) {
+        set.seed(1)
+        r <- mimain(
+            i, maxgen=7, maxempv=0.25,
+            saspars=test_saspars, swappars=test_swappars)
+
+        expect_equal(length(r$pathcode), 8)
+        expect_equal(class(r), "mimosa")
+
+        hc<-mimosa2hc(r)
+        expect_equal(class(r), "mimosa")
+
+        plot(hc, main=paste("we can use GDP for 13x8 example; maxgen=", maxgen))
+        expect_equal(class(hc), "hclust")
+    }
+
+})
