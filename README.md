@@ -29,5 +29,8 @@ into your working directory;
 * The `SCclust` package can also be installed using KrasnitzLab Anaconda channel:
 
     ```
+    conda create -n scclust
+    conda activate scclust
+    
     conda install -c bioconda -c conda-forge -c krasnitzlab scclust
     ```
