@@ -190,14 +190,20 @@ misum <- function(conti) {
 #' meaning is as follows
 #' saspars
 #' 	 restarts: how many times SA must be restarted from a random partition
+#'	 suddenfreeze: logical; if T, the temperature is set to 0, and 
+#'	 annealing becomes maximization
 #' 	 cooler: reduce the temperature by this factor after every cycle
-#' 	 sweepspercycle: a sweep means that a partition reassgnment is proposed once
-#' 	 for each column in the incidence matrix. Perform this number of sweeps per 
-#' 	 cycle
-#' 	 maxcycles: the maximal number of cycles to execute
-#' 	 stopatfreezeout: stop if the objective function is the same at the end of the
-#' 	 current cycle as it was at the end of the previous one
-#' 	 epsilon: ignore relative changes of the objective function smaller than this
+#'	 acceptance: the desired acceptance rate
+#' 	 sweepspercycle: a sweep means that a partition reassignment is 
+#'	 proposed once for each column in the incidence matrix. Perform 
+#'	 this number of sweeps per cycle
+#' 	 maxcycles: the maximal number of cycles to execute; reset to 1 
+#'	 if suddenfreeeze
+#' 	 stopatfreezeout: stop if the objective function is the same 
+#'	 at the end of the current cycle as it was at the end of the 
+#'	 previous one
+#' 	 epsilon: ignore relative changes of the objective function 
+#'	 smaller than this
 #' swappars
 #' 	 configs: generate this many randomized incidence matrices and, for each,
 #' 	 compute the optimal objective function, to create a sampling from the null
@@ -210,6 +216,7 @@ misum <- function(conti) {
 #' 	 of choosing columns
 default_saspars <- list(
     restarts=10,
+	suddenfreeze=F,
     cooler=1.12,
     acceptance=0.234,
     sweepspercycle=10,
@@ -269,7 +276,7 @@ alist.miupdate<-alist(updateme=,
 #' partition maximizing the objective function, defined as mutual 
 #' information MI between the partition and each row, summed over all rows
 mimax <- function(incidence, saspars=default_saspars) {
-    rawone<-as.raw(T)
+  	rawone<-as.raw(T)
 	
 	partition <- squeeze_vector(
         sample(as.raw(c(T,F)), size=ncol(incidence[[1]]), replace=T))
@@ -280,7 +287,6 @@ mimax <- function(incidence, saspars=default_saspars) {
 	miupdate<-as.function(alist.miupdate)
 
 	for(newstart in 1 : saspars$restarts){
-		flog.debug("mimax restart: %s", newstart)
 
 		partition <- squeeze_vector(
             sample(as.raw(c(T,F)), size=ncol(incidence[[1]]), replace=T))
@@ -290,17 +296,21 @@ mimax <- function(incidence, saspars=default_saspars) {
 		newpmarginals <- allcounts$pmarginals
 		newct <- allcounts$contables
 
-		deltami <- sapply(1:ncol(incidence[[1]]), miupdate) - minow
-		beta <- log(saspars$acceptance)/mean(-abs(deltami))/saspars$cooler
+		if(!saspars$suddenfreeze){
+			deltami <- sapply(1:ncol(incidence[[1]]), miupdate) - minow
+			beta <- log(saspars$acceptance)/mean(-abs(deltami))/saspars$cooler
+		}
+		else beta<-saspars$maxcycles<-1
 
 		for(cycles in 1 : saspars$maxcycles){
-			flog.debug("mimax restart: %s; cycles: %s", newstart, cycles)
 			beta <- beta * saspars$cooler
 			miin <- minow
 			for(sweeps in 1 : saspars$sweepspercycle){
+				movecount<-0
 				for(updateme in 1 : ncol(incidence[[1]])){
 					newmi <- miupdate(updateme)
-    				if((exp(beta*(newmi-minow))) > runif(1)){
+    				if((exp(beta*(newmi-minow))) > max(runif(1),saspars$suddenfreeze)){
+						mivecount<-movecount+1
 						allcounts$contables <- newct
 						allcounts$pmarginals <- newpmarginals
 						inblocks <- (updateme-1)%/%8+1
@@ -314,6 +324,7 @@ mimax <- function(incidence, saspars=default_saspars) {
 						}
 					}
 				}
+				if(saspars$suddenfreeze & movecount==0)break
 			}
 			if(saspars$stopatfreezeout & (abs(minow - miin) < saspars$epsilon))
                 break
@@ -408,7 +419,7 @@ randomimax<-function(
 	maxabove<-ceiling(maxempv*(swappars$configs+2))-1
 	for(config in 1:swappars$configs){
         niter <- swappars$burnin * (config==1) + swappars$permeas * (config>1)
-		flog.debug("randomimax config=%s; niter=%s", config, niter)
+		# flog.debug("randomimax config=%s; niter=%s", config, niter)
 		incidence <- mpshuffle(
             incidence,
             niter,
