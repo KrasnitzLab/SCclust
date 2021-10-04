@@ -26,8 +26,15 @@ into your working directory;
 
 ## Conda installer
 
-* The `SCclust` package can also be installed using KrasnitzLab Anaconda channel:
+* The `SCclust` package can also be installed using KrasnitzLab Anaconda channel. First create a new conda environment:
 
+    ```
+    conda create -n scclust
+    conda activate scclust
+    ```
+    
+    and after that install `SCclust` inside it:
+    
     ```
     conda install -c bioconda -c conda-forge -c krasnitzlab scclust
     ```
