@@ -7,9 +7,14 @@ library("parallel")
 fast_fisher<-function(i,yy,ny,nn){
   ftp <- rep(1,nrow(yy))
   for(j in i:nrow(yy)) {
-    ftp[j]<-fisher.test(
-        matrix(nrow=2,ncol=2,
-               data=c(yy[i,j],ny[i,j],ny[j,i],nn[i,j])),alternative="greater")$p.value
+
+		if(j==i)ftp[j]<-10e-8
+    else{ 
+			ftp[j]<-fisher.test(
+   		matrix(nrow=2,ncol=2,
+    		data=c(yy[i,j],ny[i,j],ny[j,i],nn[i,j])),alternative="greater")$p.value
+			if(ftp[j]==0)print(c(i,j,yy[i,j],ny[i,j],ny[j,i],nn[i,j]))	
+		}
   }
   return(ftp)
 }
@@ -87,6 +92,7 @@ sim_fisher<-function(m, nsim, nsweep, seedme, njobs=1,
   xmat <- matrix(ncol=length(m),nrow=ncol(m[[1]])*(ncol(m[[1]])-1)/2)
 
   for(i in 1:nsim){
+		# print("Simulation number",i,"\n")
     if(length(m)<=1) {
       next
     }
@@ -124,6 +130,7 @@ sim_fisher<-function(m, nsim, nsweep, seedme, njobs=1,
     }
   }
   parallel::stopCluster(cl)
+	tp[tp==0]<-2*.Machine$double.xmin
   return(tp)
 }
 
@@ -150,9 +157,9 @@ sim_fisher_wrapper <- function(pinmat_df, pins_df, njobs=NULL,
 
   len <- length(unique(pins_df[,"sign"]))
   m<-vector(mode="list",length=len)
-  if(len <= 1) {
-    return(NULL)
-  }
+  if(len <= 1) {	#AK: I am not sure what this condition means. 
+    return(NULL)	#AK: If we have only amps ending with the chromosome, there is 
+  }								#AK: only "+".
   for(i in 1:len) {
     m[[i]]<-as.matrix(pinmat_df[pins_df[,"sign"]==unique(pins_df[,"sign"])[i],,drop=F])
   }
