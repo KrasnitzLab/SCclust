@@ -20,6 +20,7 @@ varbin_input_files <- function(input_file_dir, suffix_pattern="") {
 }
 
 
+#' @export
 load_table <- function(filename) {
   assertthat::assert_that(file.exists(filename))
 
@@ -27,6 +28,7 @@ load_table <- function(filename) {
   return(df)
 }
 
+#' @export
 load_cytobands <- function(filename) {
   assertthat::assert_that(file.exists(filename))
   
@@ -43,10 +45,17 @@ save_mat <- function(filename, mat) {
   write(mat, file=filename)
 }
 
+#' @export
 load_mat <- function(filename) {
   return(as.matrix(scan(filename)))
 }
 
+load_matrix <- function(filename) {
+    m <- as.matrix(read.table(filename, sep="\t", header=F))
+    return(m)
+}
+
+#' @export
 load_matrix <- function(filename) {
     m <- as.matrix(read.table(filename, sep="\t", header=F))
     return(m)
@@ -58,6 +67,7 @@ uber_cells <- function(df, skip=3) {
   return(data.frame(cells, stringsAsFactors=F))
 }
 
+#' @export
 cells_filename <- function(output_dir, casename) {
   assertthat::assert_that(file.exists(output_dir))
 
