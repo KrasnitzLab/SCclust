@@ -7,14 +7,10 @@ library("parallel")
 fast_fisher<-function(i,yy,ny,nn){
   ftp <- rep(1,nrow(yy))
   for(j in i:nrow(yy)) {
-
-		if(j==i)ftp[j]<-10e-8
-    else{ 
-			ftp[j]<-fisher.test(
+		ftp[j]<-fisher.test(
    		matrix(nrow=2,ncol=2,
-    		data=c(yy[i,j],ny[i,j],ny[j,i],nn[i,j])),alternative="greater")$p.value
-			if(ftp[j]==0)print(c(i,j,yy[i,j],ny[i,j],ny[j,i],nn[i,j]))	
-		}
+    	data=c(yy[i,j],ny[i,j],ny[j,i],nn[i,j])),alternative="greater")$p.value
+		if(ftp[j]==0)ftp[j]<-2*.Machine$double.xmin
   }
   return(ftp)
 }
@@ -23,7 +19,7 @@ fast_fisher<-function(i,yy,ny,nn){
 # occupancy probabilities, keeping the sum of x fixed. If there are more 0s
 # than 1s in x, a subset of vacant positions is chosen at random, and 1s are
 # moved to these positions with Metropolis transition probability. If there
-# are more 1s than 0s, the roles of 0s and 1s are inetrchanged
+# are more 1s than 0s, the roles of 0s and 1s are interchanged
 metro<-function(x,p,sweeps){
   for(i in 1:sweeps){
     occ<-which(x==1&p<1)
