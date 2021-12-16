@@ -310,7 +310,7 @@ mimax <- function(incidence, saspars=default_saspars) {
 				for(updateme in 1 : ncol(incidence[[1]])){
 					newmi <- miupdate(updateme)
     				if((exp(beta*(newmi-minow))) > max(runif(1),saspars$suddenfreeze)){
-						mivecount<-movecount+1
+						movecount<-movecount+1
 						allcounts$contables <- newct
 						allcounts$pmarginals <- newpmarginals
 						inblocks <- (updateme-1)%/%8+1
