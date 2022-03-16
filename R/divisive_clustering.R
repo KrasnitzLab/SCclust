@@ -227,6 +227,7 @@ default_saspars <- list(
 default_swappars <- list(
     configs=500,
     burnin=1000,
+	niter=1000,
     permeas=500,
     choosemargin=0.5)
 
@@ -271,75 +272,86 @@ alist.miupdate<-alist(updateme=,
 }
 )
 
+SAinstance<-function(dummyarg,saspars,incidence){
+  	rawone<-as.raw(T)
+	miupdate<-as.function(alist.miupdate)
+	best<-vector(mode="list",length=4)
+	names(best)<-c("mi","partition","beta","cycles")
+	partition <- squeeze_vector(
+           sample(as.raw(c(T,F)), size=ncol(incidence[[1]]), replace=T))
+	best$partition<-partition
+
+	allcounts <- contingencies(incidence, partition)
+	minow <- misum(allcounts)
+	best$mi<-minow
+	newpmarginals <- allcounts$pmarginals
+	newct <- allcounts$contables
+
+	if(!saspars$suddenfreeze){
+		deltami <- sapply(1:ncol(incidence[[1]]), miupdate) - minow
+		beta <- log(saspars$acceptance)/mean(-abs(deltami))/saspars$cooler
+	}
+	else beta<-saspars$maxcycles<-1
+
+	for(cycles in 1 : saspars$maxcycles){
+		# flog.debug("SAinstance cycles: %s", cycles)
+		beta <- beta * saspars$cooler
+		miin <- minow
+		for(sweeps in 1 : saspars$sweepspercycle){
+			movecount<-0
+			for(updateme in 1 : ncol(incidence[[1]])){
+				newmi <- miupdate(updateme)
+   			if((exp(beta*(newmi-minow))) > max(runif(1),saspars$suddenfreeze)){
+					movecount<-movecount+1
+					allcounts$contables <- newct
+					allcounts$pmarginals <- newpmarginals
+					inblocks <- (updateme-1)%/%8+1
+					whichbits <- (updateme-1)%%8+1
+					partition[inblocks]<-
+						xor(partition[inblocks], rawShift(rawone,whichbits-1))
+					minow <- newmi
+					if(minow > best$mi){
+						best$mi <- minow
+						best$partition <- partition
+					}
+				}
+			}
+			if(saspars$suddenfreeze & movecount==0)break
+		}
+		if(saspars$stopatfreezeout & (abs(minow - miin) < saspars$epsilon))break
+	}
+	best$beta<-beta
+	best$cycles<-cycles
+	best
+}
 
 #' for a given incidence matrix (in the calling environment) find a column
 #' partition maximizing the objective function, defined as mutual 
 #' information MI between the partition and each row, summed over all rows
-mimax <- function(incidence, saspars=default_saspars) {
-  	rawone<-as.raw(T)
-	
-	partition <- squeeze_vector(
-        sample(as.raw(c(T,F)), size=ncol(incidence[[1]]), replace=T))
+mimax <- function(incidence, saspars=default_saspars,njobs=1,mionly=F) 
+{
+	#Note that with the "mc" a new RNG stream is started for every instance if
+	#the L'Ecuyer RNG is chosen
+	if(njobs==1)
+		instances<-unlist(mapply(FUN=SAinstance,rep(as.raw(0),saspars$restarts),
+		MoreArgs=list(incidence=incidence,saspars=saspars),SIMPLIFY=F),recursive=F)
+	else instances<-unlist(mcmapply(FUN=SAinstance,rep(as.raw(0),saspars$restarts),
+		MoreArgs=list(incidence=incidence,saspars=saspars),
+		mc.cores=min(njobs,saspars$restarts),mc.silent=T,SIMPLIFY=F),recursive=F)
+	allmi<-unlist(instances[(1:length(instances))%%4==1])
+	partition <- unlist(instances[4*which.max(allmi)-2])
+	beta<-unlist(instances[4*which.max(allmi)-1])
+	cycles<-unlist(instances[4*which.max(allmi)])
 	allcounts <- contingencies(incidence, partition)
-	bestmi <- misum(allcounts)
-	bestpartition <- partition
-
-	miupdate<-as.function(alist.miupdate)
-
-	for(newstart in 1 : saspars$restarts){
-
-		partition <- squeeze_vector(
-            sample(as.raw(c(T,F)), size=ncol(incidence[[1]]), replace=T))
-
-	    allcounts <- contingencies(incidence, partition)
-		minow <- misum(allcounts)
-		newpmarginals <- allcounts$pmarginals
-		newct <- allcounts$contables
-
-		if(!saspars$suddenfreeze){
-			deltami <- sapply(1:ncol(incidence[[1]]), miupdate) - minow
-			beta <- log(saspars$acceptance)/mean(-abs(deltami))/saspars$cooler
-		}
-		else beta<-saspars$maxcycles<-1
-
-		for(cycles in 1 : saspars$maxcycles){
-			beta <- beta * saspars$cooler
-			miin <- minow
-			for(sweeps in 1 : saspars$sweepspercycle){
-				movecount<-0
-				for(updateme in 1 : ncol(incidence[[1]])){
-					newmi <- miupdate(updateme)
-    				if((exp(beta*(newmi-minow))) > max(runif(1),saspars$suddenfreeze)){
-						movecount<-movecount+1
-						allcounts$contables <- newct
-						allcounts$pmarginals <- newpmarginals
-						inblocks <- (updateme-1)%/%8+1
-						whichbits <- (updateme-1)%%8+1
-						partition[inblocks]<-
-							xor(partition[inblocks], rawShift(rawone,whichbits-1))
-						minow <- newmi
-						if(minow > bestmi){
-							bestmi <- minow
-							bestpartition <- partition
-						}
-					}
-				}
-				if(saspars$suddenfreeze & movecount==0)break
-			}
-			if(saspars$stopatfreezeout & (abs(minow - miin) < saspars$epsilon))
-                break
-		}
-	}
-	partition <- bestpartition
-	allcounts <- contingencies(incidence, partition)
+	if(mionly)return(max(allmi))
 	result <- list(
         partition=partition,
         contables=allcounts$contables,
 		pmarginals=allcounts$pmarginals,
         beta=beta,
         cycles=cycles,
-        mi=bestmi)
-    return(result)
+        mi=max(allmi))
+  return(result)
 }
 
 
@@ -351,7 +363,9 @@ mimax <- function(incidence, saspars=default_saspars) {
 #' Fs between these two columns. The columns and rows are interchanged if 
 #' mymargin = 2. The argument niter is the total number of swaps to be performed.
 #' The swaps are applied to the incidence matrix in the calling environment.
-mpshuffle<- function(incidence, niter, choosemargin=default_swappars$choosemargin) {
+mpshuffle<- function(dummyarg=1, incidence, niter, 
+	choosemargin=default_swappars$choosemargin) {
+	
 	for(iter in 1:niter){
 		rawone <- as.raw(1)
 		mymargin <- 1 + (runif(1) > choosemargin)
@@ -403,30 +417,76 @@ mpshuffle<- function(incidence, niter, choosemargin=default_swappars$choosemargi
     return(incidence)
 }
 
-
+#Reshuffle the incidence table, then compute and return the the reshuffled 
+#table and the corresponding maximal MI. Please see default_{saspars,swappars} 
+#above for the description of these arguments.
+#shuffleNmimax<-function(incidence,swappars,saspars){
+#	minc<-vector(mode="list",length=2)
+#	names(minc)<-c("incidence","mi")
+#	minc$incidence <- mpshuffle(incidence,swappars$permeas,
+#   choosemargin=swappars$choosemargin)
+#	mimax(minc$incidence, saspars=saspars)$mi
+#}
+	
 #' repeatedly randomize the incidence table (incidence) and, for each randomized
 #' table, maximize mutual information (MI) over all possible partitions using 
 #' simulated annealing (SA). SA parameters are given by saspars and randomization
 #' parameters by swappars. Return a vector of best MI values.
-randomimax<-function(
-		incidence, saspars=default_saspars, 
-		swappars=default_swappars,
-		miobserved,
-		maxempv){
-
+#' Arguments:
+#'	incidence - the observed (0,1)-valued incidence table as a list of 2 raw matrices
+#'	saspars - see definition above
+#'	swappars - see definition above
+#'	miobserved - the observed maximal value of MI
+#'	maxempv - maximal acceptable empirical p-value
+#'	ntraj - the number of configurations evolving in parallel
+#'	distribution. Therefore, since the total number of such values to be sampled
+#'	is swappars$configs, there will be swappars$configs%/%trajectory full "trajectorys" 
+#'	and possibly an additional incomplete "trajectory" of size 
+#'	swappars$configs%%trajectory. Parallel execution "trajectory" by "trajectory" 
+#'	may be useful
+#'	because it allows early termination if the maximal empirical p-value is exceeded
+randomimax<-function(incidence,saspars=default_saspars,swappars=default_swappars,
+	miobserved,maxempv,ntraj=1,njobs=1){
+	#A vector to be filled with the maximal MI values for each random configuration
 	bestmirand<-rep(NA, swappars$configs)
 	aboveobs<-0
 	maxabove<-ceiling(maxempv*(swappars$configs+2))-1
-	for(config in 1:swappars$configs){
-        niter <- swappars$burnin * (config==1) + swappars$permeas * (config>1)
-		# flog.debug("randomimax config=%s; niter=%s", config, niter)
-		incidence <- mpshuffle(
-            incidence,
-            niter,
-            choosemargin=swappars$choosemargin)
-		bestmirand[config] <- mimax(incidence, saspars=saspars)$mi
-		aboveobs<-aboveobs+(bestmirand[config]>miobserved)
-		if(aboveobs>maxabove)return(bestmirand)
+	if(njobs==1|ntraj==1){
+		incidence<-mpshuffle(dummyarg=1,incidence=incidence,niter=swappars$burnin,
+			choosemargin=swappars$choosemargin)
+		for(iconf in 1:swappars$configs){
+			incidence<-mpshuffle(dummyarg=1,incidence=incidence,niter=swappars$niter,
+				choosemargin=swappars$choosemargin)
+
+			bestmirand[iconf]<-mimax(
+				incidence=incidence,saspars=saspars,njobs=njobs,
+				mionly=T)
+			if(sum(bestmirand[1:iconf]>miobserved)>maxabove)return(bestmirand)
+		}
+		return(bestmirand)
+	}
+	allinc<-vector(mode="list")
+	allinc[[1]]<-incidence
+	#This is the warm-up. Note that we are using L'Ecuyer RNG and that mc.set.seed=T 
+	#by default, which guarantees independent RNG streams.
+	allinc <- mcmapply(FUN=mpshuffle,dummyarg=1:ntraj,incidence=allinc,
+		MoreArgs=list(niter=swappars$burnin,choosemargin=swappars$choosemargin),
+		mc.cores=njobs,mc.silent=T,SIMPLIFY=F)
+	lastraj<-swappars$configs%%ntraj
+	nbatches<-swappars$configs%/%ntraj+(lastraj>0)
+	donesofar<-0
+	for(ibatch in 1:nbatches){
+		flog.debug("randomimax config=%s; niter=%s", config, niter)
+		todonow<-ntraj+(lastraj-ntraj)*(ibatch==nbatches)*(lastraj>0)
+		allinc[1:todonow]<-mcmapply(FUN=mpshuffle,dummyarg=1:todonow,
+			incidence=allinc[1:todonow],
+			MoreArgs=list(niter=swappars$permeas,choosemargin=swappars$choosemargin),
+			mc.cores=min(njobs,todonow),mc.silent=T,SIMPLIFY=F)
+		bestmirand[(donesofar+1):(donesofar+todonow)]<-
+			mcmapply(FUN=mimax,incidence=allinc[1:todonow],MoreArgs=list(saspars=saspars,
+			njobs=1,mionly=T),mc.cores=min(njobs,todonow),mc.silent=T,SIMPLIFY=T)
+		donesofar<-donesofar+todonow
+		if(sum(unlist(bestmirand[1:donesofar])>miobserved)>maxabove)return(bestmirand)
 	}
 	return(bestmirand)
 }
@@ -475,11 +535,18 @@ mimain<-function(incidence,
 	maxgens=7, 
 	maxempv=0.05,
 	saspars=default_saspars, 
-	swappars=default_swappars,pvmethod="empirical"){
-
+	swappars=default_swappars,pvmethod="empirical",
+	seedme=123,useCores=1,ntraj=1){
 	upath <- NULL
 	height <- NULL
-
+	require(parallel)
+	set.seed(seedme,kind="L'Ecuyer-CMRG")
+	maxcores<-parallel::detectCores()
+	#njobs is the maximal number of mc.cores we are prepared to use in mc calls
+	if(is.character(useCores))
+		if(useCores=="aggressive")njobs<-max(1,maxcores-2)
+		if(useCores=="moderate")njobs<-max(1,ceiling(maxcores/2))
+	if(is.numeric(useCores))njobs<-min(useCores,maxcores)
 	#' Recursively partition items represented as columns of a binary incidence 
 	#' table (IT). Thus, each row of the table represents a feature. Find a partition
 	#' whose mutual information (MI) with the features is maximal. If the observed
@@ -503,16 +570,20 @@ mimain<-function(incidence,
 		incidence <- replicate_incidence(incidence, from=1)
 		incidence <- consolidate_incidence(incidence, from=2)
 		flog.debug(
-			"minode: incidence[[1]] ncol(%s), nrow(%s); incidence[[2]] ncol(%s), nrow(%s)", 
-			ncol(incidence[[1]]), nrow(incidence[[1]]), ncol(incidence[[2]]), nrow(incidence[[2]]))
+			"minode: incidence[[1]] ncol(%s), nrow(%s); 
+			incidence[[2]] ncol(%s), nrow(%s)", 
+			ncol(incidence[[1]]), nrow(incidence[[1]]), 
+			ncol(incidence[[2]]), nrow(incidence[[2]]))
 
-		if( ncol(incidence[[1]]) != 0 && nrow(incidence[[1]]) != 0 &&  ncol(incidence[[2]]) != 0  && nrow(incidence[[2]]) != 0){
+		if( ncol(incidence[[1]]) != 0 && 
+			nrow(incidence[[1]]) != 0 &&  ncol(incidence[[2]]) != 0  && 
+			nrow(incidence[[2]]) != 0){
 
-			bestsplit <- mimax(incidence, saspars=saspars)
+			bestsplit <- mimax(incidence, saspars=saspars, njobs=njobs)
 			# Permutations will stop as soon as empv exceeds maxempv
 			nullmi <- randomimax(
 				incidence, saspars=saspars, swappars=swappars,
-				miobserved=bestsplit$mi, maxempv=maxempv)
+				miobserved=bestsplit$mi, maxempv=maxempv,ntraj=ntraj,njobs=njobs)
 
 			empv <- (sum(nullmi[!is.na(nullmi)] > bestsplit$mi) + 1) / 
 				(length(nullmi[!is.na(nullmi)]) + 2)
@@ -581,7 +652,8 @@ mimain<-function(incidence,
 						maxgens=maxgens, maxempv=maxempv,
 						saspars=saspars, swappars=swappars)
 
-				subincidence<-list(incidence[[1]][,longpartition==rawzero, drop=F],incidence[[2]])
+				subincidence<-list(incidence[[1]][,longpartition==rawzero, drop=F],
+					incidence[[2]])
 				pathcode[longpartition==rawzero] <-
 					minode(
 						subincidence, pathcode[longpartition==rawzero],
