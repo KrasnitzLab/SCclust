@@ -454,8 +454,16 @@ randomimax<-function(incidence,saspars=default_saspars,swappars=default_swappars
 	if(njobs==1|ntraj==1){
 		incidence<-mpshuffle(dummyarg=1,incidence=incidence,niter=swappars$burnin,
 			choosemargin=swappars$choosemargin)
+
 		for(iconf in 1:swappars$configs){
-			incidence<-mpshuffle(dummyarg=1,incidence=incidence,niter=swappars$niter,
+			# flog.debug(
+			# 	"randomimax (%s): incidence[[1]] ncol(%s), nrow(%s); 
+			# 	incidence[[2]] ncol(%s), nrow(%s)", iconf,
+			# 	ncol(incidence[[1]]), nrow(incidence[[1]]), 
+			# 	ncol(incidence[[2]]), nrow(incidence[[2]]))
+
+			incidence<-mpshuffle(
+				dummyarg=iconf,incidence=incidence,niter=swappars$niter,
 				choosemargin=swappars$choosemargin)
 
 			bestmirand[iconf]<-mimax(
@@ -542,11 +550,16 @@ mimain<-function(incidence,
 	require(parallel)
 	set.seed(seedme,kind="L'Ecuyer-CMRG")
 	maxcores<-parallel::detectCores()
+
 	#njobs is the maximal number of mc.cores we are prepared to use in mc calls
+	njobs <- 1
 	if(is.character(useCores))
 		if(useCores=="aggressive")njobs<-max(1,maxcores-2)
 		if(useCores=="moderate")njobs<-max(1,ceiling(maxcores/2))
-	if(is.numeric(useCores))njobs<-min(useCores,maxcores)
+
+	if(is.numeric(useCores))
+		njobs<-min(useCores,maxcores)
+
 	#' Recursively partition items represented as columns of a binary incidence 
 	#' table (IT). Thus, each row of the table represents a feature. Find a partition
 	#' whose mutual information (MI) with the features is maximal. If the observed

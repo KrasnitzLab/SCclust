@@ -489,578 +489,592 @@ test_that("we can use randomimax 13x9", {
 })
 
 
-# test_that("we can use mimain on clean 13x9", {
+test_that("we can use mimain on clean 13x9", {
 
-#     m <- matrix(c(
-#         1, 1, 1, 1, 1, 0, 0, 0, 0,
-#         1, 1, 1, 1, 1, 0, 0, 0, 0,
-#         1, 1, 1, 1, 1, 0, 0, 0, 0,
-#         1, 1, 1, 1, 1, 0, 0, 0, 0,
-#         1, 1, 1, 1, 1, 0, 0, 0, 0,
-#         1, 1, 1, 1, 1, 0, 0, 0, 0,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1),
-#         ncol=9, byrow=T)
+    m <- matrix(c(
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1),
+        ncol=9, byrow=T)
 
-#     i <- build_incidence_table(m)
+    i <- build_incidence_table(m)
 
-#     test_swappars <- list(
-#         configs=5,
-#         burnin=5,
-#         permeas=50,
-#         choosemargin=0.5)
+    test_swappars <- list(
+        configs=5,
+        burnin=5,
+        niter=5,
+        permeas=50,
+        choosemargin=0.5)
 
-#     test_saspars <- list(
-#         restarts=10,
-#     	suddenfreeze=F,
-#         cooler=1.12,
-#         acceptance=0.234,
-#         sweepspercycle=10,
-#         maxcycles=20,
-#         stopatfreezeout=T,
-#         epsilon=0.0001)
+    test_saspars <- list(
+        restarts=10,
+    	suddenfreeze=F,
+        cooler=1.12,
+        acceptance=0.234,
+        sweepspercycle=10,
+        maxcycles=20,
+        stopatfreezeout=T,
+        epsilon=0.0001)
 
-#     set.seed(1)
+    set.seed(1)
 
-#     r <- mimain(i,
-#         maxgens=2, maxempv=0.25,
-#         saspars=test_saspars, swappars=test_swappars)
+    r <- mimain(i,
+        maxgens=2, maxempv=0.25,
+        saspars=test_saspars, swappars=test_swappars)
 
-#     expect_equal(length(r$pathcode), 9)
+    expect_equal(length(r$pathcode), 9)
 
-# })
-
-
-# test_that("we can use mimain 13x9 again", {
-
-#     m <- matrix(c(
-#         1, 1, 1, 1, 1, 0, 0, 0, 0,
-#         1, 1, 1, 1, 1, 0, 0, 0, 0,
-#         1, 1, 1, 1, 1, 0, 0, 0, 0,
-#         1, 1, 1, 0, 0, 0, 0, 0, 0,
-#         1, 1, 1, 0, 0, 0, 0, 0, 0,
-#         1, 1, 1, 0, 0, 0, 0, 0, 0,
-#         0, 0, 0, 0, 0, 0, 0, 1, 1,
-#         0, 0, 0, 0, 0, 0, 0, 1, 1,
-#         0, 0, 0, 0, 0, 0, 0, 1, 1,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1),
-#         ncol=9, byrow=T)
-
-#     i <- build_incidence_table(m)
-#     test_swappars <- list(
-#         configs=5,
-#         burnin=5,
-#         permeas=50,
-#         choosemargin=0.5)
-
-#     test_saspars <- list(
-#         restarts=10,
-#     	suddenfreeze=F,
-#         cooler=1.12,
-#         acceptance=0.234,
-#         sweepspercycle=10,
-#         maxcycles=20,
-#         stopatfreezeout=T,
-#         epsilon=0.0001)
-
-#     set.seed(1)
-#     r <- mimain(i, maxempv=0.25, saspars=test_saspars, swappars=test_swappars)
-
-#     expect_equal(length(r$pathcode), 9)
-
-# })
+})
 
 
+test_that("we can use mimain 13x9 again", {
 
-# test_that("we can use mimain 26x9", {
+    m <- matrix(c(
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1),
+        ncol=9, byrow=T)
 
-#     set.seed(1)
-#     m <- matrix(c(
-#         1, 1, 1, 1, 1, 0, 0, 0, 0,
-#         1, 1, 1, 1, 1, 0, 0, 0, 0,
-#         1, 1, 1, 1, 1, 0, 0, 0, 0,
-#         1, 1, 1, 1, 1, 0, 0, 0, 0,
-#         1, 1, 1, 1, 1, 0, 0, 0, 0,
-#         1, 1, 1, 1, 1, 0, 0, 0, 0,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1,
+    i <- build_incidence_table(m)
+    test_swappars <- list(
+        configs=5,
+        burnin=5,
+        niter=5,
+        permeas=50,
+        choosemargin=0.5)
 
-#         0, 0, 1, 1, 1, 0, 0, 0, 0,
-#         0, 0, 1, 1, 1, 0, 0, 0, 0,
-#         0, 0, 1, 1, 1, 0, 0, 0, 0,
-#         0, 0, 1, 1, 1, 0, 0, 0, 0,
-#         0, 0, 1, 1, 1, 0, 0, 0, 0,
-#         0, 0, 1, 1, 1, 0, 0, 0, 0,
-#         0, 0, 0, 0, 0, 0, 0, 1, 1,
-#         0, 0, 0, 0, 0, 0, 0, 1, 1,
-#         0, 0, 0, 0, 0, 0, 0, 1, 1,
-#         0, 0, 0, 0, 0, 0, 0, 1, 1,
-#         0, 0, 0, 0, 0, 0, 0, 1, 1,
-#         0, 0, 0, 0, 0, 0, 0, 1, 1,
-#         0, 0, 0, 0, 0, 0, 0, 1, 1
+    test_saspars <- list(
+        restarts=10,
+    	suddenfreeze=F,
+        cooler=1.12,
+        acceptance=0.234,
+        sweepspercycle=10,
+        maxcycles=20,
+        stopatfreezeout=T,
+        epsilon=0.0001)
 
-#         ),
-#         ncol=9, byrow=T)
+    set.seed(1)
+    r <- mimain(i, maxempv=0.25, saspars=test_saspars, swappars=test_swappars)
 
-#     i <- build_incidence_table(m)
-#     test_swappars <- list(
-#         configs=5,
-#         burnin=5,
-#         permeas=50,
-#         choosemargin=0.5)
-#     test_saspars <- list(
-#         restarts=10,
-#     	suddenfreeze=F,
-#         cooler=1.12,
-#         acceptance=0.234,
-#         sweepspercycle=10,
-#         maxcycles=20,
-#         stopatfreezeout=T,
-#         epsilon=0.0001)
+    expect_equal(length(r$pathcode), 9)
 
-#     set.seed(1)
-#     r <- mimain(i, maxempv=0.25, saspars=test_saspars, swappars=test_swappars)
-
-#     expect_equal(length(r$pathcode), 9)
-
-# })
+})
 
 
-# test_that("we can use mimain 5x5", {
 
-#     m <- matrix(c(
-#         1, 1, 1, 0, 0,
-#         1, 1, 1, 0, 0,
-#         1, 0, 0, 0, 0,
-#         0, 0, 0, 0, 1,
-#         0, 0, 0, 1, 1),
-#         ncol=5, byrow=T)
+test_that("we can use mimain 26x9", {
 
-#     i <- build_incidence_table(m)
+    set.seed(1)
+    m <- matrix(c(
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
 
-#     test_swappars <- list(
-#         configs=5,
-#         burnin=5,
-#         permeas=50,
-#         choosemargin=0.5)
-#     test_saspars <- list(
-#         restarts=10,
-#     	suddenfreeze=F,
-#         cooler=1.12,
-#         acceptance=0.234,
-#         sweepspercycle=10,
-#         maxcycles=20,
-#         stopatfreezeout=T,
-#         epsilon=0.0001)
+        0, 0, 1, 1, 1, 0, 0, 0, 0,
+        0, 0, 1, 1, 1, 0, 0, 0, 0,
+        0, 0, 1, 1, 1, 0, 0, 0, 0,
+        0, 0, 1, 1, 1, 0, 0, 0, 0,
+        0, 0, 1, 1, 1, 0, 0, 0, 0,
+        0, 0, 1, 1, 1, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 1, 1
 
-#     set.seed(1)
-#     r <- mimain(i, maxempv=0.25, saspars=test_saspars, swappars=test_swappars)
+        ),
+        ncol=9, byrow=T)
 
-#     expect_equal(length(r$pathcode), 5)
-#     hc <- mimosa2hc(r)
-#     plot(hc)
+    i <- build_incidence_table(m)
+    test_swappars <- list(
+        configs=5,
+        burnin=5,
+        niter=5,
+        permeas=50,
+        choosemargin=0.5)
+    test_saspars <- list(
+        restarts=10,
+    	suddenfreeze=F,
+        cooler=1.12,
+        acceptance=0.234,
+        sweepspercycle=10,
+        maxcycles=20,
+        stopatfreezeout=T,
+        epsilon=0.0001)
 
-# })
+    set.seed(1)
+    r <- mimain(i, maxempv=0.25, saspars=test_saspars, swappars=test_swappars)
+
+    expect_equal(length(r$pathcode), 9)
+
+})
 
 
-# test_that("we can use mimain on simpleIncidenceTable", {
+test_that("we can use mimain 5x5", {
 
+    m <- matrix(c(
+        1, 1, 1, 0, 0,
+        1, 1, 1, 0, 0,
+        1, 0, 0, 0, 0,
+        0, 0, 0, 0, 1,
+        0, 0, 0, 1, 1),
+        ncol=5, byrow=T)
+
+    i <- build_incidence_table(m)
+
+    test_swappars <- list(
+        configs=5,
+        burnin=5,
+        niter=5,
+        permeas=50,
+        choosemargin=0.5)
+    test_saspars <- list(
+        restarts=10,
+    	suddenfreeze=F,
+        cooler=1.12,
+        acceptance=0.234,
+        sweepspercycle=10,
+        maxcycles=20,
+        stopatfreezeout=T,
+        epsilon=0.0001)
+
+    set.seed(1)
+    r <- mimain(i, maxempv=0.25, saspars=test_saspars, swappars=test_swappars)
+
+    expect_equal(length(r$pathcode), 5)
+    hc <- mimosa2hc(r)
+    plot(hc)
+
+})
+
+
+test_that("we can use mimain on simpleIncidenceTable", {
+
+    input_dir <- "fixtures"
+    filename <- "simpleIncidenceTable.txt"
+
+    filename <- file.path(input_dir, filename)
+    expect_true(file.exists((filename)))
+
+    m <- load_matrix(filename)
+
+    i <- build_incidence_table(m)
+
+    test_swappars <- list(
+        configs=5,
+        burnin=5,
+        niter=5,
+        permeas=50,
+        choosemargin=0.5)
+
+    test_saspars <- list(
+        restarts=10,
+    	suddenfreeze=F,
+        cooler=1.12,
+        acceptance=0.234,
+        sweepspercycle=10,
+        maxcycles=20,
+        stopatfreezeout=T,
+        epsilon=0.0001)
+
+    set.seed(1)
+    r <- mimain(
+        i, maxgens=2, maxempv=0.25, saspars=test_saspars, swappars=test_swappars)
+
+    expect_equal(length(r$pathcode), 35)
+
+})
+
+
+test_that("we can use mimos2hc 13x9", {
+
+    m <- matrix(c(
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 1, 1, 1, 1),
+        ncol=9, byrow=T)
+
+    i <- build_incidence_table(m)
+    test_swappars <- list(
+        configs=10,
+        burnin=50,
+        niter=50,
+        permeas=50,
+        choosemargin=0.5)
+
+    test_saspars <- list(
+        restarts=10,
+    	suddenfreeze=F,
+        cooler=1.12,
+        acceptance=0.234,
+        sweepspercycle=10,
+        maxcycles=20,
+        stopatfreezeout=T,
+        epsilon=0.0001)
+
+    set.seed(1)
+    r <- mimain(
+        i, maxgen=5, maxempv=0.25,
+        saspars=test_saspars, swappars=test_swappars)
+
+    expect_equal(length(r$pathcode), 9)
+    expect_equal(class(r), "mimosa")
+
+    hc<-mimosa2hc(r)
+    expect_equal(class(r), "mimosa")
+
+    plot(hc)
+    expect_equal(class(hc), "hclust")
+
+})
+
+test_that("we can use mimain on simpleIncidenceTable", {
+
+    input_dir <- "fixtures"
+    filename <- "simpleIncidenceTable.txt"
+
+    filename <- file.path(input_dir, filename)
+    expect_true(file.exists((filename)))
+
+    m <- load_matrix(filename)
+
+    i <- build_incidence_table(m)
+
+    test_swappars <- list(
+        configs=10,
+        burnin=100,
+        niter=100,
+        permeas=100,
+        choosemargin=0.5)
+
+    test_saspars <- list(
+        restarts=10,
+    	suddenfreeze=F,
+        cooler=1.12,
+        acceptance=0.234,
+        sweepspercycle=10,
+        maxcycles=20,
+        stopatfreezeout=T,
+        epsilon=0.0001)
+
+    set.seed(1)
+    r <- mimain(
+        i, maxgens=3, maxempv=0.1, saspars=test_saspars, swappars=test_swappars)
+
+    expect_equal(length(r$pathcode), 35)
+    hc<-mimosa2hc(r)
+    plot(hc)
+
+})
+
+
+# test_that("we can use mimain on navin T10", {
+
+#     flog.debug("testing on navin T10 started")
 #     input_dir <- "fixtures"
-#     filename <- "simpleIncidenceTable.txt"
+#     filename <- "hg19_navin_T10.featuremat.txt"
 
 #     filename <- file.path(input_dir, filename)
-#     expect_true(file.exists((filename)))
+#     # expect_true(file.exists((filename)))
 
-#     m <- load_matrix(filename)
-
-#     i <- build_incidence_table(m)
-
-#     test_swappars <- list(
-#         configs=5,
-#         burnin=5,
-#         permeas=50,
-#         choosemargin=0.5)
-
-#     test_saspars <- list(
-#         restarts=10,
-#     	suddenfreeze=F,
-#         cooler=1.12,
-#         acceptance=0.234,
-#         sweepspercycle=10,
-#         maxcycles=20,
-#         stopatfreezeout=T,
-#         epsilon=0.0001)
-
-#     set.seed(1)
-#     r <- mimain(
-#         i, maxgens=2, maxempv=0.25, saspars=test_saspars, swappars=test_swappars)
-
-#     expect_equal(length(r$pathcode), 35)
-
-# })
-
-
-# test_that("we can use mimos2hc 13x9", {
-
-#     m <- matrix(c(
-#         1, 1, 1, 1, 1, 0, 0, 0, 0,
-#         1, 1, 1, 1, 1, 0, 0, 0, 0,
-#         1, 1, 1, 1, 1, 0, 0, 0, 0,
-#         1, 1, 1, 0, 0, 0, 0, 0, 0,
-#         1, 1, 1, 0, 0, 0, 0, 0, 0,
-#         1, 1, 1, 0, 0, 0, 0, 0, 0,
-#         0, 0, 0, 0, 0, 0, 0, 1, 1,
-#         0, 0, 0, 0, 0, 0, 0, 1, 1,
-#         0, 0, 0, 0, 0, 0, 0, 1, 1,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 1, 1, 1, 1),
-#         ncol=9, byrow=T)
-
-#     i <- build_incidence_table(m)
-#     test_swappars <- list(
-#         configs=10,
-#         burnin=50,
-#         permeas=50,
-#         choosemargin=0.5)
-
-#     test_saspars <- list(
-#         restarts=10,
-#     	suddenfreeze=F,
-#         cooler=1.12,
-#         acceptance=0.234,
-#         sweepspercycle=10,
-#         maxcycles=20,
-#         stopatfreezeout=T,
-#         epsilon=0.0001)
-
-#     set.seed(1)
-#     r <- mimain(
-#         i, maxgen=5, maxempv=0.25,
-#         saspars=test_saspars, swappars=test_swappars)
-
-#     expect_equal(length(r$pathcode), 9)
-#     expect_equal(class(r), "mimosa")
-
-#     hc<-mimosa2hc(r)
-#     expect_equal(class(r), "mimosa")
-
-#     plot(hc)
-#     expect_equal(class(hc), "hclust")
-
-# })
-
-# test_that("we can use mimain on simpleIncidenceTable", {
-
-#     input_dir <- "fixtures"
-#     filename <- "simpleIncidenceTable.txt"
-
-#     filename <- file.path(input_dir, filename)
-#     expect_true(file.exists((filename)))
-
-#     m <- load_matrix(filename)
+#     m <- load_table(filename)
 
 #     i <- build_incidence_table(m)
 
-#     test_swappars <- list(
-#         configs=10,
-#         burnin=100,
-#         permeas=100,
-#         choosemargin=0.5)
-
-#     test_saspars <- list(
-#         restarts=10,
-#     	suddenfreeze=F,
-#         cooler=1.12,
-#         acceptance=0.234,
-#         sweepspercycle=10,
-#         maxcycles=20,
-#         stopatfreezeout=T,
-#         epsilon=0.0001)
-
-#     set.seed(1)
-#     r <- mimain(
-#         i, maxgens=3, maxempv=0.1, saspars=test_saspars, swappars=test_swappars)
-
-#     expect_equal(length(r$pathcode), 35)
-#     hc<-mimosa2hc(r)
-#     plot(hc)
-
-# })
-
-
-# # test_that("we can use mimain on navin T10", {
-
-# #     flog.debug("testing on navin T10 started")
-# #     input_dir <- "fixtures"
-# #     filename <- "hg19_navin_T10.featuremat.txt"
-
-# #     filename <- file.path(input_dir, filename)
-# #     # expect_true(file.exists((filename)))
-
-# #     m <- load_table(filename)
-
-# #     i <- build_incidence_table(m)
-
-# #     test_swappars <- list(
-# #         configs=50,
-# #         burnin=500,
-# #         permeas=500,
-# #         choosemargin=0.5)
-
-# #     test_saspars <- list(
-# #         restarts=10,
-# #         cooler=1.12,
-# #         acceptance=0.234,
-# #         sweepspercycle=10,
-# #         maxcycles=20,
-# #         stopatfreezeout=T,
-# #         epsilon=0.0001)
-
-# #     for(maxgens in c(3, 4, 5, 6, 7)) {
-# #         set.seed(1)
-# #         r <- mimain(
-# #             i, maxgens=maxgens, maxempv=0.25,
-# #             saspars=test_saspars,
-# #             swappars=test_swappars)
-
-# #         # expect_equal(length(r$pathcode), 95)
-
-# #         hc<-mimosa2hc(r)
-# #         plot(hc, main=paste("we can use mimosa2hc on navin T10; maxgens=", maxgens))
-# #     }
-
-# #     # hcd <- as.dendrogram(hc)
-# #     # plot(
-# #     #     hcd,
-# #     #     main="we can use mimain on navin T10",
-# #     #     horiz=T)
-
-# # })
-
-
-
-# test_that("we can use mimosa2hc 13x15", {
-
-#     m <- matrix(c(
-#         1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-#         1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-#         1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-#         1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-#         1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-#         1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
-#         1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
-#         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1,
-#         0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1),
-#         ncol=15, byrow=T)
-
-#     i <- build_incidence_table(m)
 #     test_swappars <- list(
 #         configs=50,
-#         burnin=500,
-#         permeas=500,
-#         choosemargin=0.5)
-
-#     test_saspars <- list(
-#         restarts=10,
-#     	suddenfreeze=F,
-#         cooler=1.12,
-#         acceptance=0.234,
-#         sweepspercycle=10,
-#         maxcycles=20,
-#         stopatfreezeout=T,
-#         epsilon=0.0001)
-
-#     maxgen <- 3
-#     for(maxgen in c(3, 4, 5, 6, 7)) {
-#         set.seed(1)
-#         r <- mimain(
-#             i,
-#             maxgen=maxgen, maxempv=0.05,
-#             saspars=test_saspars,
-#             swappars=test_swappars)
-
-
-#         hc<-mimosa2hc(r)
-
-#         plot(hc, main=paste("we can use mimosa2hc 13x15; maxgen=", maxgen))
-#     }
-#     expect_equal(class(r), "mimosa")
-
-#     expect_equal(length(r$pathcode), 15)
-#     expect_equal(class(r), "mimosa")
-
-#     expect_equal(class(hc), "hclust")
-
-# })
-
-
-# test_that("we can use mimain 4x4", {
-
-#     m <- matrix(c(
-#         1, 1, 0, 0,
-#         1, 0, 0, 0,
-#         0, 0, 0, 1,
-#         0, 0, 1, 1),
-#         ncol=4, byrow=T)
-
-#     i <- build_incidence_table(m)
-
-#     test_swappars <- list(
-#         configs=5,
-#         burnin=5,
+#         burnin=50,
+#         niter=50,
 #         permeas=50,
 #         choosemargin=0.5)
+
 #     test_saspars <- list(
 #         restarts=10,
-#     	suddenfreeze=F,
 #         cooler=1.12,
 #         acceptance=0.234,
 #         sweepspercycle=10,
 #         maxcycles=20,
 #         stopatfreezeout=T,
+#         suddenfreeze=F,
 #         epsilon=0.0001)
 
+#     # for(maxgens in c(3, 5, 7)) {
 #     set.seed(1)
+#     maxgens <- 7
+
 #     r <- mimain(
-#         i, maxempv=0.25,
+#         i, maxgens=maxgens, maxempv=0.25,
 #         saspars=test_saspars,
-#         swappars=test_swappars)
+#         swappars=test_swappars,
+#         useCores=20)
 
-#     expect_equal(length(r$pathcode), 4)
-#     hc <- mimosa2hc(r)
-#     plot(hc, main="we can use mimain 4x4")
-
-# })
-
-
-# test_that("we can use mimos2hc 13x8", {
-
-#     m <- matrix(c(
-#         1, 1, 1, 1, 0, 0, 0, 0,
-#         1, 1, 1, 1, 0, 0, 0, 0,
-#         1, 1, 0, 0, 0, 0, 0, 0,
-#         1, 1, 0, 0, 0, 0, 0, 0,
-#         1, 1, 0, 0, 0, 0, 0, 0,
-#         1, 0, 0, 0, 0, 0, 0, 1,
-#         1, 0, 0, 0, 0, 0, 0, 1,
-#         0, 0, 0, 0, 0, 0, 1, 1,
-#         0, 0, 0, 0, 0, 0, 1, 1,
-#         0, 0, 0, 0, 0, 0, 1, 1,
-#         0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 1, 1, 1, 1),
-#         ncol=8, byrow=T)
-
-#     i <- build_incidence_table(m)
-#     test_swappars <- list(
-#         configs=50,
-#         burnin=50,
-#         permeas=50,
-#         choosemargin=0.5)
-
-#     test_saspars <- list(
-#         restarts=10,
-#     	suddenfreeze=F,
-#         cooler=1.12,
-#         acceptance=0.234,
-#         sweepspercycle=10,
-#         maxcycles=20,
-#         stopatfreezeout=T,
-#         epsilon=0.0001)
-
-#     set.seed(1)
-
-#     Rprof()
-#     r <- mimain(
-#         i, maxgen=7, maxempv=0.25,
-#         saspars=test_saspars, swappars=test_swappars)
-#     Rprof(NULL)
-#     summaryRprof()
-
-#     expect_equal(length(r$pathcode), 8)
-#     expect_equal(class(r), "mimosa")
+#     # expect_equal(length(r$pathcode), 95)
 
 #     hc<-mimosa2hc(r)
-#     expect_equal(class(r), "mimosa")
+#     plot(hc, main=paste("we can use mimosa2hc on navin T10; maxgens=", maxgens))
+#     # }
 
-#     plot(hc, main=paste("we can use mimos2hc 13x8; maxgen=7"))
-#     expect_equal(class(hc), "hclust")
-
-# })
-
-# test_that("we can use mimos2hc 13x8; suddenfreeze=T", {
-
-#     m <- matrix(c(
-#         1, 1, 1, 1, 0, 0, 0, 0,
-#         1, 1, 1, 1, 0, 0, 0, 0,
-#         1, 1, 0, 0, 0, 0, 0, 0,
-#         1, 1, 0, 0, 0, 0, 0, 0,
-#         1, 1, 0, 0, 0, 0, 0, 0,
-#         1, 0, 0, 0, 0, 0, 0, 1,
-#         1, 0, 0, 0, 0, 0, 0, 1,
-#         0, 0, 0, 0, 0, 0, 1, 1,
-#         0, 0, 0, 0, 0, 0, 1, 1,
-#         0, 0, 0, 0, 0, 0, 1, 1,
-#         0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 1, 1, 1, 1,
-#         0, 0, 0, 0, 1, 1, 1, 1),
-#         ncol=8, byrow=T)
-
-#     i <- build_incidence_table(m)
-#     test_swappars <- list(
-#         configs=50,
-#         burnin=50,
-#         permeas=50,
-#         choosemargin=0.5)
-
-#     test_saspars <- list(
-#         restarts=10,
-#     	suddenfreeze=T,
-#         cooler=1.12,
-#         acceptance=0.234,
-#         sweepspercycle=10,
-#         maxcycles=20,
-#         stopatfreezeout=T,
-#         epsilon=0.0001)
-
-#     set.seed(1)
-
-#     Rprof()
-#     r <- mimain(
-#         i, maxgen=7, maxempv=0.25,
-#         saspars=test_saspars, swappars=test_swappars)
-#     Rprof(NULL)
-#     summaryRprof()
-
-#     expect_equal(length(r$pathcode), 8)
-#     expect_equal(class(r), "mimosa")
-
-#     hc<-mimosa2hc(r)
-#     expect_equal(class(r), "mimosa")
-
-#     plot(hc, main=paste("we can use mimos2hc 13x8; maxgen=7"))
-#     expect_equal(class(hc), "hclust")
+#     # hcd <- as.dendrogram(hc)
+#     # plot(
+#     #     hcd,
+#     #     main="we can use mimain on navin T10",
+#     #     horiz=T)
 
 # })
+
+
+
+test_that("we can use mimosa2hc 13x15", {
+
+    m <- matrix(c(
+        1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+        1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1),
+        ncol=15, byrow=T)
+
+    i <- build_incidence_table(m)
+    test_swappars <- list(
+        configs=50,
+        burnin=10,
+        niter=10,
+        permeas=50,
+        choosemargin=0.5)
+
+    test_saspars <- list(
+        restarts=10,
+    	suddenfreeze=F,
+        cooler=1.12,
+        acceptance=0.234,
+        sweepspercycle=10,
+        maxcycles=20,
+        stopatfreezeout=T,
+        epsilon=0.0001)
+
+    maxgen <- 5
+    set.seed(1)
+    r <- mimain(
+        i,
+        maxgen=maxgen, maxempv=0.05,
+        saspars=test_saspars,
+        swappars=test_swappars, useCores=20)
+
+
+    hc<-mimosa2hc(r)
+
+    plot(hc, main=paste("we can use mimosa2hc 13x15; maxgen=", maxgen))
+    expect_equal(class(r), "mimosa")
+
+    expect_equal(length(r$pathcode), 15)
+    expect_equal(class(r), "mimosa")
+
+    expect_equal(class(hc), "hclust")
+
+})
+
+
+test_that("we can use mimain 4x4", {
+
+    m <- matrix(c(
+        1, 1, 0, 0,
+        1, 0, 0, 0,
+        0, 0, 0, 1,
+        0, 0, 1, 1),
+        ncol=4, byrow=T)
+
+    i <- build_incidence_table(m)
+
+    test_swappars <- list(
+        configs=5,
+        burnin=5,
+        niter=5,
+        permeas=50,
+        choosemargin=0.5)
+    test_saspars <- list(
+        restarts=10,
+    	suddenfreeze=F,
+        cooler=1.12,
+        acceptance=0.234,
+        sweepspercycle=10,
+        maxcycles=20,
+        stopatfreezeout=T,
+        epsilon=0.0001)
+
+    set.seed(1)
+    r <- mimain(
+        i, maxempv=0.25,
+        saspars=test_saspars,
+        swappars=test_swappars, useCores=20)
+
+    expect_equal(length(r$pathcode), 4)
+    hc <- mimosa2hc(r)
+    plot(hc, main="we can use mimain 4x4")
+
+})
+
+
+test_that("we can use mimos2hc 13x8", {
+
+    m <- matrix(c(
+        1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 0, 0, 0, 0, 0, 0,
+        1, 1, 0, 0, 0, 0, 0, 0,
+        1, 1, 0, 0, 0, 0, 0, 0,
+        1, 0, 0, 0, 0, 0, 0, 1,
+        1, 0, 0, 0, 0, 0, 0, 1,
+        0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 1, 1, 1, 1),
+        ncol=8, byrow=T)
+
+    i <- build_incidence_table(m)
+    test_swappars <- list(
+        configs=10,
+        burnin=10,
+        niter=10,
+        permeas=50,
+        choosemargin=0.5)
+
+    test_saspars <- list(
+        restarts=10,
+    	suddenfreeze=F,
+        cooler=1.12,
+        acceptance=0.234,
+        sweepspercycle=10,
+        maxcycles=20,
+        stopatfreezeout=T,
+        epsilon=0.0001)
+
+    set.seed(1)
+
+    Rprof()
+    r <- mimain(
+        i, maxgen=7, maxempv=0.25,
+        saspars=test_saspars, swappars=test_swappars)
+    Rprof(NULL)
+    summaryRprof()
+
+    expect_equal(length(r$pathcode), 8)
+    expect_equal(class(r), "mimosa")
+
+    hc<-mimosa2hc(r)
+    expect_equal(class(r), "mimosa")
+
+    plot(hc, main=paste("we can use mimos2hc 13x8; maxgen=7"))
+    expect_equal(class(hc), "hclust")
+
+})
+
+test_that("we can use mimos2hc 13x8; suddenfreeze=T", {
+
+    m <- matrix(c(
+        1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 1, 1, 0, 0, 0, 0,
+        1, 1, 0, 0, 0, 0, 0, 0,
+        1, 1, 0, 0, 0, 0, 0, 0,
+        1, 1, 0, 0, 0, 0, 0, 0,
+        1, 0, 0, 0, 0, 0, 0, 1,
+        1, 0, 0, 0, 0, 0, 0, 1,
+        0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 1, 1, 1, 1,
+        0, 0, 0, 0, 1, 1, 1, 1),
+        ncol=8, byrow=T)
+
+    i <- build_incidence_table(m)
+    test_swappars <- list(
+        configs=50,
+        burnin=10,
+        niter=10,
+        permeas=50,
+        choosemargin=0.5)
+
+    test_saspars <- list(
+        restarts=10,
+    	suddenfreeze=T,
+        cooler=1.12,
+        acceptance=0.234,
+        sweepspercycle=10,
+        maxcycles=20,
+        stopatfreezeout=T,
+        epsilon=0.0001)
+
+    set.seed(1)
+
+    Rprof()
+    r <- mimain(
+        i, maxgen=7, maxempv=0.25,
+        saspars=test_saspars, swappars=test_swappars)
+    Rprof(NULL)
+    summaryRprof()
+
+    expect_equal(length(r$pathcode), 8)
+    expect_equal(class(r), "mimosa")
+
+    hc<-mimosa2hc(r)
+    expect_equal(class(r), "mimosa")
+
+    plot(hc, main=paste("we can use mimos2hc 13x8; maxgen=7"))
+    expect_equal(class(hc), "hclust")
+
+})
 
 # test_that("we can use GDP for 13x8 example", {
 
