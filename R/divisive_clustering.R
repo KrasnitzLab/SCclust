@@ -142,6 +142,24 @@ consolidate_incidence <- function(incidence, from) {
 	return(replicate_incidence(incidence, from))
 }
 
+#'Truncate incidence table by removing from incidence[[2]] columns where either the 
+#'set bit count or the unset bin count is below minfreq*(incidence[[1]]) 
+#'Return the truncated table
+truncateIncidence<-function(incidence,minfreq){
+	if(minfreq==0)return(incidence)
+	rsi <- colSums(
+        matrix(
+            ncol=ncol(incidence[[2]]),
+		    data=sapply(incidence[[2]], setBits)))
+	target<-minfreq*ncol(incidence[[1]])
+	trinc<-vector(mode="list",length=2)
+	class(trinc)<-"incidencetable"
+	trinc[[2]]<-
+		incidence[[2]][,(rsi>=target)&(rsi<=(ncol(incidence[[1]])-target)),drop=F]
+	trinc[[1]]<-incidence[[1]]
+	replicate_incidence(trinc,2)
+}
+		
 
 #' incidence[[1]] is the original (F,T)-valued incidence matrix, packed column by
 #' column into raws. incidence[[2]] is the same matrix, packed row by row (or the 
@@ -189,6 +207,8 @@ misum <- function(conti) {
 #' simulated annealing schedule and of the incidence matrix randomization. The
 #' meaning is as follows
 #' saspars
+#'	 minfreq: truncate the incidence matrix by removing rows with row
+#'	 sums outside the ( minfreq*ncol, (1-minfreq)*ncol ) range
 #' 	 restarts: how many times SA must be restarted from a random partition
 #'	 suddenfreeze: logical; if T, the temperature is set to 0, and 
 #'	 annealing becomes maximization
@@ -215,6 +235,7 @@ misum <- function(conti) {
 #' 	 choice between columns and rows is made at random, and this is the probability
 #' 	 of choosing columns
 default_saspars <- list(
+	minfreq=0,
     restarts=10,
 	suddenfreeze=F,
     cooler=1.12,
@@ -332,11 +353,12 @@ mimax <- function(incidence, saspars=default_saspars,njobs=1,mionly=F)
 {
 	#Note that with the "mc" a new RNG stream is started for every instance if
 	#the L'Ecuyer RNG is chosen
+	trinc<-truncateIncidence(incidence,saspars$minfreq)
 	if(njobs==1)
 		instances<-unlist(mapply(FUN=SAinstance,rep(as.raw(0),saspars$restarts),
-		MoreArgs=list(incidence=incidence,saspars=saspars),SIMPLIFY=F),recursive=F)
+		MoreArgs=list(incidence=trinc,saspars=saspars),SIMPLIFY=F),recursive=F)
 	else instances<-unlist(mcmapply(FUN=SAinstance,rep(as.raw(0),saspars$restarts),
-		MoreArgs=list(incidence=incidence,saspars=saspars),
+		MoreArgs=list(incidence=trinc,saspars=saspars),
 		mc.cores=min(njobs,saspars$restarts),mc.silent=T,SIMPLIFY=F),recursive=F)
 	allmi<-unlist(instances[(1:length(instances))%%4==1])
 	partition <- unlist(instances[4*which.max(allmi)-2])
@@ -553,13 +575,18 @@ mimain<-function(incidence,
 
 	#njobs is the maximal number of mc.cores we are prepared to use in mc calls
 	njobs <- 1
-	if(is.character(useCores))
+	if(is.character(useCores)){
 		if(useCores=="aggressive")njobs<-max(1,maxcores-2)
 		if(useCores=="moderate")njobs<-max(1,ceiling(maxcores/2))
+	}
 
 	if(is.numeric(useCores))
 		njobs<-min(useCores,maxcores)
 
+	if(!(is.matrix(incidence)|is.data.frame(incidence)|
+		class(incidence)=="incidencetable"))stop("Invalid class of incidence table\n")
+	if(is.matrix(incidence)|is.data.frame(incidence))
+		incidence <- build_incidence_table(incidence)
 	#' Recursively partition items represented as columns of a binary incidence 
 	#' table (IT). Thus, each row of the table represents a feature. Find a partition
 	#' whose mutual information (MI) with the features is maximal. If the observed
@@ -592,7 +619,8 @@ mimain<-function(incidence,
 			nrow(incidence[[1]]) != 0 &&  ncol(incidence[[2]]) != 0  && 
 			nrow(incidence[[2]]) != 0){
 
-			bestsplit <- mimax(incidence, saspars=saspars, njobs=njobs)
+			bestsplit <- mimax(incidence, 
+				saspars=saspars, njobs=njobs)
 			# Permutations will stop as soon as empv exceeds maxempv
 			nullmi <- randomimax(
 				incidence, saspars=saspars, swappars=swappars,

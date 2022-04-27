@@ -10,3 +10,4 @@ vignettes/T10data
 *.o
 SCclust.so
 tests/testthat/Rplots.pdf
+tests/testthat/Rprof.out

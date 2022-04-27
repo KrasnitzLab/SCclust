@@ -517,6 +517,7 @@ test_that("we can use mimain on clean 13x9", {
         choosemargin=0.5)
 
     test_saspars <- list(
+    	minfreq=0,
         restarts=10,
     	suddenfreeze=F,
         cooler=1.12,
@@ -564,6 +565,7 @@ test_that("we can use mimain 13x9 again", {
         choosemargin=0.5)
 
     test_saspars <- list(
+    	minfreq=0,
         restarts=10,
     	suddenfreeze=F,
         cooler=1.12,
@@ -625,6 +627,7 @@ test_that("we can use mimain 26x9", {
         permeas=50,
         choosemargin=0.5)
     test_saspars <- list(
+    	minfreq=0,
         restarts=10,
     	suddenfreeze=F,
         cooler=1.12,
@@ -661,6 +664,7 @@ test_that("we can use mimain 5x5", {
         permeas=50,
         choosemargin=0.5)
     test_saspars <- list(
+    	minfreq=0,
         restarts=10,
     	suddenfreeze=F,
         cooler=1.12,
@@ -700,6 +704,7 @@ test_that("we can use mimain on simpleIncidenceTable", {
         choosemargin=0.5)
 
     test_saspars <- list(
+    	minfreq=0,
         restarts=10,
     	suddenfreeze=F,
         cooler=1.12,
@@ -745,6 +750,7 @@ test_that("we can use mimos2hc 13x9", {
         choosemargin=0.5)
 
     test_saspars <- list(
+    	minfreq=0,
         restarts=10,
     	suddenfreeze=F,
         cooler=1.12,
@@ -790,6 +796,7 @@ test_that("we can use mimain on simpleIncidenceTable", {
         choosemargin=0.5)
 
     test_saspars <- list(
+    	minfreq=0,
         restarts=10,
     	suddenfreeze=F,
         cooler=1.12,
@@ -810,59 +817,60 @@ test_that("we can use mimain on simpleIncidenceTable", {
 })
 
 
-# test_that("we can use mimain on navin T10", {
+test_that("we can use mimain on navin T10", {
 
-#     flog.debug("testing on navin T10 started")
-#     input_dir <- "fixtures"
-#     filename <- "hg19_navin_T10.featuremat.txt"
+    flog.debug("testing on navin T10 started")
+    input_dir <- "fixtures"
+    filename <- "hg19_navin_T10.featuremat.txt"
 
-#     filename <- file.path(input_dir, filename)
-#     # expect_true(file.exists((filename)))
+    filename <- file.path(input_dir, filename)
+    # expect_true(file.exists((filename)))
 
-#     m <- load_table(filename)
+    m <- load_table(filename)
 
-#     i <- build_incidence_table(m)
+    i <- build_incidence_table(m)
 
-#     test_swappars <- list(
-#         configs=50,
-#         burnin=50,
-#         niter=50,
-#         permeas=50,
-#         choosemargin=0.5)
+    test_swappars <- list(
+        configs=50,
+        burnin=50,
+        niter=50,
+        permeas=50,
+        choosemargin=0.5)
 
-#     test_saspars <- list(
-#         restarts=10,
-#         cooler=1.12,
-#         acceptance=0.234,
-#         sweepspercycle=10,
-#         maxcycles=20,
-#         stopatfreezeout=T,
-#         suddenfreeze=F,
-#         epsilon=0.0001)
+    test_saspars <- list(
+    	minfreq=0.0265,
+        restarts=10,
+        cooler=1.12,
+        acceptance=0.234,
+        sweepspercycle=10,
+        maxcycles=20,
+        stopatfreezeout=T,
+        suddenfreeze=F,
+        epsilon=0.0001)
 
-#     # for(maxgens in c(3, 5, 7)) {
-#     set.seed(1)
-#     maxgens <- 7
+    # for(maxgens in c(3, 5, 7)) {
+    set.seed(1)
+    maxgens <- 7
 
-#     r <- mimain(
-#         i, maxgens=maxgens, maxempv=0.25,
-#         saspars=test_saspars,
-#         swappars=test_swappars,
-#         useCores=20)
+    r <- mimain(
+        i, maxgens=maxgens, maxempv=0.25,
+        saspars=test_saspars,
+        swappars=test_swappars,
+        useCores=20)
 
-#     # expect_equal(length(r$pathcode), 95)
+    # expect_equal(length(r$pathcode), 95)
 
-#     hc<-mimosa2hc(r)
-#     plot(hc, main=paste("we can use mimosa2hc on navin T10; maxgens=", maxgens))
-#     # }
+    hc<-mimosa2hc(r)
+    plot(hc, main=paste("we can use mimosa2hc on navin T10; maxgens=", maxgens))
+    # }
 
-#     # hcd <- as.dendrogram(hc)
-#     # plot(
-#     #     hcd,
-#     #     main="we can use mimain on navin T10",
-#     #     horiz=T)
+    # hcd <- as.dendrogram(hc)
+    # plot(
+    #     hcd,
+    #     main="we can use mimain on navin T10",
+    #     horiz=T)
 
-# })
+})
 
 
 
@@ -893,6 +901,7 @@ test_that("we can use mimosa2hc 13x15", {
         choosemargin=0.5)
 
     test_saspars <- list(
+    	minfreq=0,
         restarts=10,
     	suddenfreeze=F,
         cooler=1.12,
@@ -942,6 +951,7 @@ test_that("we can use mimain 4x4", {
         permeas=50,
         choosemargin=0.5)
     test_saspars <- list(
+    	minfreq=0,
         restarts=10,
     	suddenfreeze=F,
         cooler=1.12,
@@ -991,6 +1001,7 @@ test_that("we can use mimos2hc 13x8", {
         choosemargin=0.5)
 
     test_saspars <- list(
+    	minfreq=0,
         restarts=10,
     	suddenfreeze=F,
         cooler=1.12,
@@ -1047,6 +1058,7 @@ test_that("we can use mimos2hc 13x8; suddenfreeze=T", {
         choosemargin=0.5)
 
     test_saspars <- list(
+    	minfreq=0,
         restarts=10,
     	suddenfreeze=T,
         cooler=1.12,
