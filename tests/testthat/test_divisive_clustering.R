@@ -480,9 +480,10 @@ test_that("we can use randomimax 13x9", {
 
     set.seed(1)
     r <- randomimax(i, swappars=test_swappars, maxempv=0.25, miobserved=11)
-    e <- c(-22.62314, -28.76079, -32.12585, -42.40447, -46.90315)
-    flog.debug("expected: %s", print(e))
-    flog.debug("actual  : %s", print(r))
+    # e <- c(-22.62314, -28.76079, -32.12585, -42.40447, -46.90315)
+    e <- c(-22.62314, -27.37449, -33.51214, -38.01082, -42.76217)
+    flog.info("expected: %s", print(e))
+    flog.info("actual  : %s", print(r))
 
     expect_true(all(abs(r - e) <= 10e-3))
 
@@ -525,7 +526,9 @@ test_that("we can use mimain on clean 13x9", {
         sweepspercycle=10,
         maxcycles=20,
         stopatfreezeout=T,
-        epsilon=0.0001)
+    	stopifnoprogress=2,
+        epsilon=0.0001,
+        betafudge=1.0)
 
     set.seed(1)
 
@@ -573,7 +576,9 @@ test_that("we can use mimain 13x9 again", {
         sweepspercycle=10,
         maxcycles=20,
         stopatfreezeout=T,
-        epsilon=0.0001)
+    	stopifnoprogress=2,
+        epsilon=0.0001,
+        betafudge=1.0)
 
     set.seed(1)
     r <- mimain(i, maxempv=0.25, saspars=test_saspars, swappars=test_swappars)
@@ -635,7 +640,9 @@ test_that("we can use mimain 26x9", {
         sweepspercycle=10,
         maxcycles=20,
         stopatfreezeout=T,
-        epsilon=0.0001)
+    	stopifnoprogress=2,
+        epsilon=0.0001,
+        betafudge=1.0)
 
     set.seed(1)
     r <- mimain(i, maxempv=0.25, saspars=test_saspars, swappars=test_swappars)
@@ -672,7 +679,9 @@ test_that("we can use mimain 5x5", {
         sweepspercycle=10,
         maxcycles=20,
         stopatfreezeout=T,
-        epsilon=0.0001)
+    	stopifnoprogress=2,
+        epsilon=0.0001,
+        betafudge=1.0)
 
     set.seed(1)
     r <- mimain(i, maxempv=0.25, saspars=test_saspars, swappars=test_swappars)
@@ -712,7 +721,9 @@ test_that("we can use mimain on simpleIncidenceTable", {
         sweepspercycle=10,
         maxcycles=20,
         stopatfreezeout=T,
-        epsilon=0.0001)
+    	stopifnoprogress=2,
+        epsilon=0.0001,
+        betafudge=1.0)
 
     set.seed(1)
     r <- mimain(
@@ -758,7 +769,9 @@ test_that("we can use mimos2hc 13x9", {
         sweepspercycle=10,
         maxcycles=20,
         stopatfreezeout=T,
-        epsilon=0.0001)
+    	stopifnoprogress=2,
+        epsilon=0.0001,
+        betafudge=1.0)
 
     set.seed(1)
     r <- mimain(
@@ -804,7 +817,9 @@ test_that("we can use mimain on simpleIncidenceTable", {
         sweepspercycle=10,
         maxcycles=20,
         stopatfreezeout=T,
-        epsilon=0.0001)
+    	stopifnoprogress=2,
+        epsilon=0.0001,
+        betafudge=1.0)
 
     set.seed(1)
     r <- mimain(
@@ -846,7 +861,9 @@ test_that("we can use mimain on simpleIncidenceTable", {
 #         maxcycles=20,
 #         stopatfreezeout=T,
 #         suddenfreeze=F,
-#         epsilon=0.0001)
+#     	stopifnoprogress=2,
+#         epsilon=0.0001,
+#         betafudge=1.0)
 
 #     # for(maxgens in c(3, 5, 7)) {
 #     set.seed(1)
@@ -909,7 +926,9 @@ test_that("we can use mimosa2hc 13x15", {
         sweepspercycle=10,
         maxcycles=20,
         stopatfreezeout=T,
-        epsilon=0.0001)
+    	stopifnoprogress=2,
+        epsilon=0.0001,
+        betafudge=1.0)
 
     maxgen <- 5
     set.seed(1)
@@ -959,7 +978,9 @@ test_that("we can use mimain 4x4", {
         sweepspercycle=10,
         maxcycles=20,
         stopatfreezeout=T,
-        epsilon=0.0001)
+    	stopifnoprogress=2,
+        epsilon=0.0001,
+        betafudge=1.0)
 
     set.seed(1)
     r <- mimain(
@@ -1009,7 +1030,9 @@ test_that("we can use mimos2hc 13x8", {
         sweepspercycle=10,
         maxcycles=20,
         stopatfreezeout=T,
-        epsilon=0.0001)
+    	stopifnoprogress=2,
+        epsilon=0.0001,
+        betafudge=1.0)
 
     set.seed(1)
 
@@ -1066,7 +1089,9 @@ test_that("we can use mimos2hc 13x8; suddenfreeze=T", {
         sweepspercycle=10,
         maxcycles=20,
         stopatfreezeout=T,
-        epsilon=0.0001)
+    	stopifnoprogress=2,
+        epsilon=0.0001,
+        betafudge=1.0)
 
     set.seed(1)
 
@@ -1120,7 +1145,9 @@ test_that("we can use mimos2hc 13x8; suddenfreeze=T", {
 #         sweepspercycle=10,
 #         maxcycles=20,
 #         stopatfreezeout=T,
-#         epsilon=0.0001)
+#     	stopifnoprogress=2,
+#         epsilon=0.0001,
+#         betafudge=1.0)
 
 #     for(maxgen in c(3, 4, 5, 6, 7)) {
 #         set.seed(1)

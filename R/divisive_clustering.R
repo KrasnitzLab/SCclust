@@ -222,8 +222,10 @@ misum <- function(conti) {
 #' 	 stopatfreezeout: stop if the objective function is the same 
 #'	 at the end of the current cycle as it was at the end of the 
 #'	 previous one
+#'	 stopifnoprogress: stop after this many cycles if the highest MI observed in the #'		cycle does not improve
 #' 	 epsilon: ignore relative changes of the objective function 
 #'	 smaller than this
+#'	 betafudge: a "fudge factor" for the initial value of beta 
 #' swappars
 #' 	 configs: generate this many randomized incidence matrices and, for each,
 #' 	 compute the optimal objective function, to create a sampling from the null
@@ -236,14 +238,16 @@ misum <- function(conti) {
 #' 	 of choosing columns
 default_saspars <- list(
 	minfreq=0,
-    restarts=10,
+	restarts=10,
 	suddenfreeze=F,
-    cooler=1.12,
-    acceptance=0.234,
-    sweepspercycle=10,
+	cooler=1.12,
+	acceptance=0.234,
+	sweepspercycle=10,
 	maxcycles=20,
-    stopatfreezeout=T,
-    epsilon=0.0001)
+	stopatfreezeout=T,
+	stopifnoprogress=2,
+	epsilon=0.0001,
+	betafudge=1.0)
 
 default_swappars <- list(
     configs=500,
@@ -294,7 +298,7 @@ alist.miupdate<-alist(updateme=,
 )
 
 SAinstance<-function(dummyarg,saspars,incidence){
-  	rawone<-as.raw(T)
+ 	rawone<-as.raw(T)
 	miupdate<-as.function(alist.miupdate)
 	best<-vector(mode="list",length=4)
 	names(best)<-c("mi","partition","beta","cycles")
@@ -310,16 +314,21 @@ SAinstance<-function(dummyarg,saspars,incidence){
 
 	if(!saspars$suddenfreeze){
 		deltami <- sapply(1:ncol(incidence[[1]]), miupdate) - minow
-		beta <- log(saspars$acceptance)/mean(-abs(deltami))/saspars$cooler
+		beta <- saspars$betafudge*
+			log(saspars$acceptance)/mean(-abs(deltami))/saspars$cooler
 	}
 	else beta<-saspars$maxcycles<-1
 
+	noprogress<-0
 	for(cycles in 1 : saspars$maxcycles){
 		# flog.debug("SAinstance cycles: %s", cycles)
 		beta <- beta * saspars$cooler
 		miin <- minow
+		oldbest<-best$mi
+		mivec<-rep(NA,saspars$sweepspercycle)
 		for(sweeps in 1 : saspars$sweepspercycle){
 			movecount<-0
+			bestinsweep<-minow
 			for(updateme in 1 : ncol(incidence[[1]])){
 				newmi <- miupdate(updateme)
    			if((exp(beta*(newmi-minow))) > max(runif(1),saspars$suddenfreeze)){
@@ -335,11 +344,16 @@ SAinstance<-function(dummyarg,saspars,incidence){
 						best$mi <- minow
 						best$partition <- partition
 					}
+					if(minow>bestinsweep)bestinsweep<-minow
 				}
 			}
+			mivec[sweeps]<-bestinsweep
 			if(saspars$suddenfreeze & movecount==0)break
 		}
 		if(saspars$stopatfreezeout & (abs(minow - miin) < saspars$epsilon))break
+		if((best$mi-oldbest)<saspars$epsilon)noprogress<-noprogress+1
+		else noprogress<-0
+		if(noprogress==saspars$stopifnoprogress)break
 	}
 	best$beta<-beta
 	best$cycles<-cycles
